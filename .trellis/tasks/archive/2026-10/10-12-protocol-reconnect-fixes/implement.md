@@ -9,7 +9,7 @@
 - [x] Correct validation/expiry and operation text; run targeted tests and shell syntax.
 - [x] Dispatch independent `trellis-check`; complete lint/types/full tests/build/local HTTP checks.
 - [x] Main updates executable specs and validates links/indexes.
-- [ ] Commit repair, archive task and record journal.
+- [x] Commit repair, archive task and record journal.
 
 Commands: `npm run lint`, `npm run typecheck`, targeted Vitest parser/service cases, `npm test`, `npm run build`, `bash -n scripts/publish.sh scripts/rollback.sh`. HTTP/WS tests use ephemeral loopback ports; optionally check built HTML/assets via local Vite preview. Never launch a browser. Repeat green checks only after relevant changes/findings.
 

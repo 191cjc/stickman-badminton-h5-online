@@ -1,6 +1,6 @@
 {
   "verified_at": "2026-10-12T08:56:18.484336+00:00",
-  "status": "verified_ready_to_commit",
+  "status": "completed",
   "baseline_commit": "a7a314b",
   "baseline_regressions": {
     "failed": 13,
@@ -73,5 +73,12 @@
     "Two-computer browser rendering and physical key response",
     "Mobile controls and browser compatibility",
     "Weak-network behavior and latency measurements"
-  ]
+  ],
+  "completion": {
+    "work_commit": "8edc0746603541313ae58752e64680d5f4caf5a7",
+    "archive_commit": "c9ad2f12af8abbdfbc78d52b8b0a465831daac68",
+    "journal_session": 2,
+    "journal_file": ".trellis/workspace/chenjiachun/journal-1.md",
+    "completed_at": "2026-10-12T09:00:31.635672+00:00"
+  }
 }

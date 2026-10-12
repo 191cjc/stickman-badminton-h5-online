@@ -6,7 +6,7 @@ Reject malformed logical commands and make reconnect-expiry results consistent, 
 
 ## Background
 
-The game and static Trellis tooling are tracked in baseline `a7a314b`. The [bootstrap review](../archive/2026-10/00-bootstrap-guidelines/review.md) identified these four defects. Existing deployment documentation already states that an expired disconnected player's connected opponent wins, and neither player wins when both are disconnected. This task restores that contract.
+The game and static Trellis tooling are tracked in baseline `a7a314b`. The [bootstrap review](../00-bootstrap-guidelines/review.md) identified these four defects. Existing deployment documentation already states that an expired disconnected player's connected opponent wins, and neither player wins when both are disconnected. This task restores that contract.
 
 ## Requirements
 
@@ -37,4 +37,4 @@ The original development instruction and explicit four-fix selection authorize t
 
 ## Evidence
 
-See [implementation report](implementation-report.md), [independent review](review.md), and [final validation](final-validation.json). All acceptance criteria pass; work commit and task/journal bookkeeping follow.
+See [implementation report](implementation-report.md), [independent review](review.md), and [final validation](final-validation.json). All acceptance criteria pass. Repair commit `8edc074`, archive metadata and [session 2](../../../../workspace/chenjiachun/journal-1.md) record completion.

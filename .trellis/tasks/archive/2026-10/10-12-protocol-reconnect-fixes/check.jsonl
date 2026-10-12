@@ -6,5 +6,5 @@
 {"file": ".trellis/spec/deployment/operations.md", "reason": "Independent publisher order and safe recovery"}
 {"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Owner-first minimal helper reuse"}
 {"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Parser/dispatch/lifecycle compatibility"}
-{"file": ".trellis/tasks/10-12-protocol-reconnect-fixes/research/source-findings.md", "reason": "Source defects and deterministic real-network regression boundary"}
+{"file": ".trellis/tasks/archive/2026-10/10-12-protocol-reconnect-fixes/research/source-findings.md", "reason": "Source defects and deterministic real-network regression boundary"}
 {"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Appropriate checks and no automatic browser acceptance"}
