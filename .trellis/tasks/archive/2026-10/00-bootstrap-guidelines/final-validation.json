@@ -40,20 +40,17 @@
     "changed_product_files": [],
     "baseline_path": "artifacts/trellis-bootstrap-before.json",
     "baseline_sha256": "3f18c37150b9fcd1e9eacc76a26d27911454a0c64b7057d9034b7d9f4c871ead",
-    "rechecked_at": "2026-10-12T08:16:56.649637+00:00"
+    "rechecked_at": "2026-10-12T08:20:10.738156+00:00"
   },
   "not_performed": [
     "Product tests/build rerun",
     "Browser tests",
     "Publication",
-    "Service restart",
-    "Git commit",
-    "Task archive",
-    "Journal recording"
+    "Service restart"
   ],
   "notes": [
-    "The recorded main branch warning is caused by the repository having no initial commit.",
-    "All specification work is complete. The user approved the commit plan with \u7ee7\u7eed; Git resolves the effective host author identity. Work/archive/journal commits follow.",
+    "The recorded main branch warning during initial validation was caused by the repository having no initial commit; the approved work commit now exists.",
+    "The user approved the commit plan with \u7ee7\u7eed. Work commit and archive succeeded, and session 1 was recorded; journal bookkeeping follows the archive commit.",
     "Deferred product observations are documented in review.md and have not changed product files."
   ],
   "approval": {
@@ -61,5 +58,13 @@
     "user_reply": "\u7ee7\u7eed",
     "date": "2026-10-12",
     "effective_git_author": "Ubuntu <ubuntu@localhost.localdomain>"
+  },
+  "completion": {
+    "status": "completed",
+    "work_commit": "3b6881b84174e9a7d3e01db732b06d4152c0e11e",
+    "archive_commit": "509c07c553696118f7bb3bcef10d20dcb167547b",
+    "journal_session": 1,
+    "journal_file": ".trellis/workspace/chenjiachun/journal-1.md",
+    "completed_at": "2026-10-12T08:20:10.738177+00:00"
   }
 }

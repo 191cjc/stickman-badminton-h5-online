@@ -71,3 +71,11 @@ In particular, linked game source, tests, and deployment documents remain existi
 After the work commit, run `task.py archive 00-bootstrap-guidelines` and `add_session.py` with the work-commit hash. Their archive and journal commits follow the work commit. No push or amend is planned.
 
 If the user chooses manual submission, keep the task active until they confirm the work commit so archive and journal can follow it.
+
+## Execution result
+
+- Work commit: `3b6881b` (`docs: bootstrap project-specific Trellis guidelines`), exactly the 29 approved files.
+- Archive commit: `509c07c` (`chore(task): archive 00-bootstrap-guidelines`).
+- [Session 1](../../../../workspace/chenjiachun/journal-1.md) records the work-commit hash. Its journal commit also records the archived task's completed checklist and metadata, after archive and journal creation succeeded.
+
+Paths in the original work-commit list above describe the plan at approval; the task files now live in `archive/2026-10/00-bootstrap-guidelines/`.

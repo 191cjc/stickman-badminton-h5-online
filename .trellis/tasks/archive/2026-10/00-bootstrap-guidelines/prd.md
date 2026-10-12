@@ -25,8 +25,8 @@ Product source, gameplay behavior, dependency changes, production publishing, se
 - [x] No unfilled template text or broken local navigation remains in `.trellis/spec/`.
 - [x] Guidance distinguishes observed implementation, conventions, and known limitations.
 - [x] Documentation checks pass and independent review finds no unresolved scope defects.
-- [ ] The task is archived and a developer journal records the result.
+- [x] The task is archived and a developer journal records the result.
 
 ## Completion evidence
 
-See [independent review](review.md) and [final validation](final-validation.json). All specification work is complete. The user approved the [commit plan](commit-plan.md) with "继续"; the effective Git host identity is available. The work commit, archive, and journal are the remaining execution steps.
+See [independent review](review.md) and [final validation](final-validation.json). The user approved the [commit plan](commit-plan.md) with "继续". The work was committed as `3b6881b`, the task was archived, and [session 1](../../../../workspace/chenjiachun/journal-1.md) records the result and follow-up boundaries.
