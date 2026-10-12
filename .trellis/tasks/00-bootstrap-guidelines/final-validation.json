@@ -1,0 +1,65 @@
+{
+  "verified_at": "2026-10-12T07:16:22.082553+00:00",
+  "scope": "Documentation and current Trellis task bookkeeping only",
+  "documentation": {
+    "documents": 20,
+    "indexes": 6,
+    "relative_links": 163,
+    "link_targets": "pass",
+    "index_coverage": "pass",
+    "template_scan": "pass",
+    "english_spec_language": "pass",
+    "independent_review": "pass"
+  },
+  "project_checks": {
+    "lint": {
+      "result": "pass",
+      "exit_code": 0,
+      "verified_by": "bootstrap_spec_review"
+    },
+    "typecheck": {
+      "result": "pass",
+      "exit_code": 0,
+      "verified_by": "bootstrap_spec_review"
+    },
+    "task_context": {
+      "result": "pass",
+      "exit_code": 0,
+      "implement_entries": 3,
+      "check_entries": 10
+    },
+    "layer_discovery": [
+      "backend",
+      "deployment",
+      "frontend",
+      "shared"
+    ]
+  },
+  "scope_check": {
+    "product_files_compared": 69,
+    "changed_product_files": [],
+    "baseline_path": "artifacts/trellis-bootstrap-before.json",
+    "baseline_sha256": "3f18c37150b9fcd1e9eacc76a26d27911454a0c64b7057d9034b7d9f4c871ead",
+    "rechecked_at": "2026-10-12T08:16:56.649637+00:00"
+  },
+  "not_performed": [
+    "Product tests/build rerun",
+    "Browser tests",
+    "Publication",
+    "Service restart",
+    "Git commit",
+    "Task archive",
+    "Journal recording"
+  ],
+  "notes": [
+    "The recorded main branch warning is caused by the repository having no initial commit.",
+    "All specification work is complete. The user approved the commit plan with \u7ee7\u7eed; Git resolves the effective host author identity. Work/archive/journal commits follow.",
+    "Deferred product observations are documented in review.md and have not changed product files."
+  ],
+  "approval": {
+    "received": true,
+    "user_reply": "\u7ee7\u7eed",
+    "date": "2026-10-12",
+    "effective_git_author": "Ubuntu <ubuntu@localhost.localdomain>"
+  }
+}

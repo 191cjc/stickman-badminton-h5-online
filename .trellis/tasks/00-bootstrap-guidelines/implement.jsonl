@@ -1,0 +1,3 @@
+{"file": "docs/design.md", "reason": "Verified architecture, upstream provenance and authoritative multiplayer contracts"}
+{"file": "docs/deployment.md", "reason": "Independent entry, session rules and release/rollback ownership"}
+{"file": "docs/validation.md", "reason": "Verification evidence and protocol versus browser acceptance limits"}

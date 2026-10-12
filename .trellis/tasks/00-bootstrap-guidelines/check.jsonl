@@ -1,0 +1,10 @@
+{"file": "docs/design.md", "reason": "Verified architecture, upstream provenance and authoritative multiplayer contracts"}
+{"file": "docs/deployment.md", "reason": "Independent entry, session rules and release/rollback ownership"}
+{"file": "docs/validation.md", "reason": "Verification evidence and protocol versus browser acceptance limits"}
+{"file": ".trellis/spec/index.md", "reason": "Full-scope review of new source-backed specs and their quality/navigation contracts"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Full-scope review of new source-backed specs and their quality/navigation contracts"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Full-scope review of new source-backed specs and their quality/navigation contracts"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Full-scope review of new source-backed specs and their quality/navigation contracts"}
+{"file": ".trellis/spec/shared/index.md", "reason": "Full-scope review of new source-backed specs and their quality/navigation contracts"}
+{"file": ".trellis/spec/deployment/index.md", "reason": "Full-scope review of new source-backed specs and their quality/navigation contracts"}
+{"file": ".trellis/spec/guides/index.md", "reason": "Full-scope review of new source-backed specs and their quality/navigation contracts"}

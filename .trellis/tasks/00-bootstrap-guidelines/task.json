@@ -1,0 +1,28 @@
+{
+  "id": "00-bootstrap-guidelines",
+  "name": "00-bootstrap-guidelines",
+  "title": "Bootstrap Guidelines",
+  "description": "Document actual frontend, backend, shared simulation/protocol and independent deployment conventions",
+  "status": "in_progress",
+  "dev_type": "docs",
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "chenjiachun",
+  "assignee": "chenjiachun",
+  "createdAt": "2026-10-12",
+  "completedAt": null,
+  "branch": "main",
+  "base_branch": null,
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    ".trellis/spec/"
+  ],
+  "notes": "First-time setup task created by trellis init (frontend project)",
+  "meta": {}
+}
