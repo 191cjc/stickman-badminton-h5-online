@@ -1,0 +1,36 @@
+{
+  "repository": "https://github.com/LoveSeele-max/stickman_badminton_h5",
+  "commit": "1a8799e65a39f7dafab2075c9297d8e4965f1ecb",
+  "tree": "67ee7c9356875ae9b672a23db31d12684993aa6e",
+  "retrieval": "GitHub API; every source file verified against its upstream Git blob SHA before copying",
+  "local_changes": [
+    "vite.config.ts: add base /badminton/ for subpath deployment"
+  ],
+  "files": {
+    ".gitignore": "c493601d1a3c0a6fb4a891cc8f83fecc0afe64a3",
+    ".prettierignore": "e848f859bd044c3b181554999382b90faecf9c53",
+    "README.md": "4c7ae173a21f8776f637f07fe4db0eec3320a90c",
+    "eslint.config.js": "537b224c890cd7cfec04cfb887aea3ce5394f2cb",
+    "index.html": "b0264b81e616c3bd5c404ca2438327a6c2be7bb9",
+    "package-lock.json": "5789be0181561d8562b1777ee0bed0c67dbc4af1",
+    "package.json": "8c60fb171bd70c582f4d12e3a6360310c7d9a295",
+    "src/game/ai-controller.test.ts": "97a29799eb5bfef2cf7c7fdeb5dda68c8e9241fa",
+    "src/game/ai-controller.ts": "d4981a6fd2c2de34f6533ef45bae2d7d4d3b9a05",
+    "src/game/badminton-game.ts": "02737c5c40f52008fda3423f7c7bcb08e23fb4fa",
+    "src/game/canvas-runtime.ts": "8e1f2c30fcf22cc53f405f8707dbf9b75178fa31",
+    "src/game/config.ts": "0b65b9aab72a44c1375d72cb942af27afb282932",
+    "src/game/entities.ts": "318d41ccc83bc10017e1da3bf9e90553e640f0bc",
+    "src/game/flight.test.ts": "641033d850c5c547d54a1f37e3753ad9f53a89af",
+    "src/game/flight.ts": "9c98c31a020b5a40b97d7af00f4d2c32d9721e6e",
+    "src/game/input-system.ts": "7c2173f4f209fbec3511a4f8c47bf17fa19cd86d",
+    "src/game/math.test.ts": "aee6a316f4b681e25461dda2f046477ba1266e3b",
+    "src/game/math.ts": "fc1caa245ef1ae80692e948ae77f02675358efaf",
+    "src/game/types.ts": "5f687249e07db4a8561cdc993b88ce5c630d7b47",
+    "src/main.ts": "96afdf56de602656670974043c46647c76e22bd3",
+    "src/style.css": "90692d3382ef56c5a3890a5af303ce673b92802c",
+    "src/vite-env.d.ts": "11f02fe2a0061d6e6e1f271b21da95423b448b32",
+    "stickman_badminton_h5_project_doc.md": "abbe42d55c807f8010b74d8f014037f54ed6c543",
+    "tsconfig.json": "7bdff9a6eb8da06c198cfa501bcbab6dbc534693",
+    "vite.config.ts": "3f380a0ba8d875492fef3560b65caed1e8e4956c"
+  }
+}

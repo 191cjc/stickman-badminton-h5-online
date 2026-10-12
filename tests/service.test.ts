@@ -1,0 +1,307 @@
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { WebSocket } from "ws";
+import type { AddressInfo } from "node:net";
+import { createGameService } from "../src/server/service";
+import { BASE_PATH, parseClientMessage } from "../src/shared/protocol";
+import type {
+  ClientMessage,
+  ServerMessage,
+  Snapshot,
+} from "../src/shared/protocol";
+
+class Peer {
+  messages: ServerMessage[] = [];
+  seq = 0;
+  constructor(readonly ws: WebSocket) {
+    ws.on("message", (raw) =>
+      this.messages.push(JSON.parse(raw.toString()) as ServerMessage),
+    );
+  }
+  send(message: ClientMessage): void {
+    this.ws.send(JSON.stringify(message));
+  }
+  input(move: -1 | 0 | 1, hitPressed = false): void {
+    this.send({
+      type: "input",
+      seq: ++this.seq,
+      move,
+      jump: false,
+      jumpPressed: false,
+      hitHeld: hitPressed,
+      hitPressed,
+    });
+  }
+  async wait<T extends ServerMessage["type"]>(
+    type: T,
+    predicate: (message: Extract<ServerMessage, { type: T }>) => boolean = () =>
+      true,
+    timeout = 5000,
+  ): Promise<Extract<ServerMessage, { type: T }>> {
+    const end = Date.now() + timeout;
+    while (Date.now() < end) {
+      const index = this.messages.findIndex(
+        (message) =>
+          message.type === type &&
+          predicate(message as Extract<ServerMessage, { type: T }>),
+      );
+      if (index >= 0)
+        return this.messages.splice(index, 1)[0] as Extract<
+          ServerMessage,
+          { type: T }
+        >;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    throw new Error(`Timeout waiting for ${type}`);
+  }
+}
+describe("real HTTP / WebSocket rooms", () => {
+  let service: ReturnType<typeof createGameService>;
+  let base: string;
+  const peers: Peer[] = [];
+  beforeEach(async () => {
+    service = createGameService({
+      origins: ["http://test.local"],
+      secret: "test-secret-kept-out-of-protocol",
+      reconnectMs: 700,
+      resultMs: 700,
+      inputTimeoutMs: 120,
+    });
+    await new Promise<void>((resolve) =>
+      service.http.listen(0, "127.0.0.1", resolve),
+    );
+    base = `http://127.0.0.1:${(service.http.address() as AddressInfo).port}`;
+  });
+  afterEach(async () => {
+    peers.splice(0).forEach((peer) => peer.ws.terminate());
+    await service.close();
+  });
+  async function cookie(existing?: string): Promise<string> {
+    const res = await fetch(`${base}${BASE_PATH}api/session`, {
+      headers: existing ? { Cookie: existing } : {},
+    });
+    expect(res.status).toBe(200);
+    return res.headers.get("set-cookie")!.split(";")[0];
+  }
+  function rawConnect(
+    identity?: string,
+    origin = "http://test.local",
+  ): WebSocket {
+    return new WebSocket(
+      `${base.replace("http:", "ws:")}${BASE_PATH}ws`,
+      "badminton-v1",
+      {
+        headers: { Origin: origin, ...(identity ? { Cookie: identity } : {}) },
+      },
+    );
+  }
+  async function connect(identity: string): Promise<Peer> {
+    const peer = new Peer(rawConnect(identity));
+    peers.push(peer);
+    await peer.wait("hello");
+    return peer;
+  }
+  async function rejected(
+    identity: string | undefined,
+    code: number,
+    origin?: string,
+  ): Promise<void> {
+    const ws = rawConnect(identity, origin);
+    ws.on("error", () => {});
+    const status = await new Promise<number>((resolve) =>
+      ws.once("unexpected-response", (_request, response) => {
+        response.resume();
+        ws.terminate();
+        resolve(response.statusCode!);
+      }),
+    );
+    expect(status).toBe(code);
+  }
+  async function pair(): Promise<[Peer, Peer, string]> {
+    const identity = await cookie();
+    const left = await connect(identity);
+    const right = await connect(await cookie());
+    left.send({ type: "queue" });
+    right.send({ type: "queue" });
+    const l = await left.wait("matched");
+    const r = await right.wait("matched");
+    expect(l.side).toBe("left");
+    expect(r.side).toBe("right");
+    expect(r.room).toBe(l.room);
+    return [left, right, identity];
+  }
+  it("issues a persistent signed HttpOnly cookie and rejects forged, foreign-origin and duplicate connections", async () => {
+    const res = await fetch(`${base}${BASE_PATH}api/session`);
+    const header = res.headers.get("set-cookie")!;
+    expect(header).toContain("HttpOnly");
+    expect(header).toContain("SameSite=Lax");
+    expect(header).toContain(`Path=${BASE_PATH}`);
+    const identity = header.split(";")[0];
+    expect(await cookie(identity)).toBe(identity);
+    await rejected(undefined, 401);
+    await rejected(identity.replace(/.$/, "x"), 401);
+    await rejected(identity, 403, "https://foreign.example");
+    await connect(identity);
+    await rejected(identity, 409);
+    expect((await fetch(`${base}${BASE_PATH}api/health`)).status).toBe(200);
+  });
+  it("matches two guests, binds inputs to their own sides, clears stale input and refuses third-party seat fields", async () => {
+    const [left, right] = await pair();
+    left.input(1);
+    right.input(-1);
+    const l = await left.wait("snapshot", (message) => message.ack >= 1);
+    const r = await right.wait("snapshot", (message) => message.ack >= 1);
+    expect(l.state.players.left.x).toBeGreaterThan(320);
+    expect(r.state.players.right.x).toBeLessThan(1280);
+    const stopped = await left.wait(
+      "snapshot",
+      (message) =>
+        message.state.players.left.vx === 0 && message.tick > l.tick + 20,
+    );
+    expect(stopped.state.players.left.x).toBeLessThan(420);
+    const outsider = await connect(await cookie());
+    outsider.input(1);
+    expect((await outsider.wait("error")).code).toBe("not_in_match");
+    outsider.ws.send(
+      JSON.stringify({
+        type: "input",
+        seq: 2,
+        move: 1,
+        jump: false,
+        jumpPressed: false,
+        hitHeld: false,
+        hitPressed: false,
+        side: "left",
+      }),
+    );
+    expect(
+      await new Promise<number>((resolve) =>
+        outsider.ws.once("close", (code) => resolve(code)),
+      ),
+    ).toBe(1008);
+    left.send({ type: "release" });
+    left.send({ type: "leave" });
+    const result = await right.wait("result");
+    expect(result.reason).toBe("leave");
+    expect(result.winner).toBe("right");
+    left.send({ type: "queue" });
+    right.send({ type: "queue" });
+    expect((await left.wait("matched")).room).not.toBe(l.room);
+  });
+  it("uses the newest state after a packet burst while preserving jump and shot direction", async () => {
+    const [left] = await pair();
+    for (let seq = 1; seq <= 30; seq++) {
+      left.send({
+        type: "input",
+        seq,
+        move: seq === 30 ? 0 : seq === 2 ? -1 : 1,
+        jump: seq === 1,
+        jumpPressed: seq === 1,
+        hitHeld: seq === 2,
+        hitPressed: seq === 2,
+      });
+    }
+    const state = await left.wait("snapshot", (s) => s.ack === 30);
+    expect(state.state.players.left.x).toBeLessThan(330);
+    expect(state.state.players.left.y).toBeLessThan(780);
+    expect(state.state.players.left.hitIntentMove).toBe(-1);
+    expect(state.state.players.left.hitIntentJump).toBe(true);
+  });
+  it("cancels queued guests and removes them when their connection closes", async () => {
+    const peer = await connect(await cookie());
+    peer.send({ type: "queue" });
+    await peer.wait("queued");
+    expect(service.stats().queued).toBe(1);
+    peer.send({ type: "cancel" });
+    await peer.wait("idle", (s) => s.reason === "cancelled");
+    expect(service.stats().queued).toBe(0);
+    peer.send({ type: "queue" });
+    await peer.wait("queued");
+    await new Promise<void>((resolve) => {
+      peer.ws.once("close", () => resolve());
+      peer.ws.close();
+    });
+    expect(service.stats().queued).toBe(0);
+  });
+  it("pauses, resumes with the same cookie and reclaims expired disconnected rooms", async () => {
+    const [left, right, identity] = await pair();
+    left.input(1);
+    await left.wait("snapshot", (s) => s.ack === 1);
+    left.ws.close();
+    const paused = await right.wait(
+      "snapshot",
+      (s) => s.status === "reconnecting",
+    );
+    const resumed = await connect(identity);
+    expect((await resumed.wait("matched")).resumed).toBe(true);
+    const state = await resumed.wait("snapshot", (s) => s.status === "playing");
+    resumed.seq = state.ack;
+    resumed.input(0);
+    const stopped = await resumed.wait(
+      "snapshot",
+      (s) => s.ack >= resumed.seq && s.state.players.left.vx === 0,
+    );
+    expect(stopped.state.score).toEqual(paused.state.score);
+    resumed.ws.close();
+    const result = await right.wait("result");
+    expect(result.reason).toBe("disconnect");
+    expect(result.winner).toBe("right");
+    await right.wait("idle", (s) => s.reason === "disconnect");
+    expect(service.stats().rooms).toBe(0);
+  });
+  it("finishes an authoritative seven-point match with identical results on both connections", async () => {
+    const [left, right] = await pair();
+    let latest: Snapshot | undefined;
+    left.ws.on("message", (raw) => {
+      const message = JSON.parse(raw.toString()) as ServerMessage;
+      if (message.type === "snapshot") latest = message;
+    });
+    const timer = setInterval(() => {
+      if (!latest || latest.status !== "playing") return;
+      for (const [peer, side] of [
+        [left, "left"],
+        [right, "right"],
+      ] as const)
+        peer.input(
+          0,
+          latest.state.shuttle.state === "attached" &&
+            latest.state.server === side &&
+            latest.state.players[side].swingType === null,
+        );
+    }, 1000 / 60);
+    try {
+      const a = await left.wait("result", () => true, 35_000);
+      const b = await right.wait("result", () => true, 2000);
+      expect(a).toEqual(b);
+      expect(a.reason).toBe("score");
+      expect(Math.max(a.score.left, a.score.right)).toBe(7);
+    } finally {
+      clearInterval(timer);
+    }
+  }, 40_000);
+});
+it("validates every field and rejects non-finite numbers, oversized directions and untrusted state", () => {
+  const valid = {
+    type: "input",
+    seq: 1,
+    move: 0,
+    jump: false,
+    jumpPressed: false,
+    hitHeld: false,
+    hitPressed: false,
+  };
+  expect(parseClientMessage(JSON.stringify(valid))).toEqual(valid);
+  for (const changed of [
+    { move: 2 },
+    { seq: -1 },
+    { seq: 1.5 },
+    { jump: "yes" },
+    { position: 999 },
+    { room: "stolen" },
+    { score: 7 },
+  ])
+    expect(
+      parseClientMessage(JSON.stringify({ ...valid, ...changed })),
+    ).toBeNull();
+  expect(parseClientMessage('{"type":"ping","time":1e999}')).toBeNull();
+  expect(parseClientMessage("null")).toBeNull();
+});

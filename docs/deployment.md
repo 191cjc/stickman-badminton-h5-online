@@ -1,0 +1,61 @@
+# 开发、发布、日志与回滚
+
+## 独立资源
+
+- 入口 `/badminton-h5-online/`；同源 `/badminton-h5-online/api/` 和 `/badminton-h5-online/ws`。
+- Node 监听 `127.0.0.1:8794`；systemd 名 `badminton-h5-online.service`。
+- 版本目录 `/opt/stickman-badminton-h5-online/releases/`，`current` 原子符号链接指向当前版本，`previous` 记录前一版本。
+- 配置 `/etc/badminton-h5-online.env`（root 0600），服务 `/etc/systemd/system/badminton-h5-online.service`。
+- Nginx snippet `/etc/nginx/snippets/badminton-h5-online.conf`，仅在 www.firesoul.cn 的现有 HTTPS server 中新增 include。不改社区试玩、原版验证、云游戏代码/服务/路由。现有 HTTPS 由 TCP443 转发到 Nginx 8443 的设置继续沿用。
+
+## 启动与构建
+
+本地 `npm ci && npm run dev`，访问 `http://127.0.0.1:5184/badminton-h5-online/`。生产 `npm run build` 输出 `dist/client` 和 `dist/server/index.js`。运行时仅依赖 ws；Nginx 提供静态文件，Node 不提供前端页面。
+
+生产 env 示例见 `ops/production.env.example`。Cookie 密钥生成一次并跨版本保留；生产没有有效密钥则拒绝启动。重启清空房间/队列；已签名 Cookie 可经 session 接口继续识别游客。游客无需新建账号。
+
+## 发布
+
+```bash
+cd /home/ubuntu/stickman-badminton-h5-online
+bash scripts/publish.sh
+# 或 bash scripts/publish.sh release-20261012-a
+```
+
+脚本先完成安装、类型检查、lint、测试、构建，再准备新版本目录和生产依赖，切换 current，安装独立 unit/snippet；第一次生成密钥，并新增本项目 include。`nginx -t` 通过后启动本服务、检查本地健康、reload Nginx，最后进行公网 HTTP 与 WebSocket 检查。发布会清空本项目内存比赛；现有云游戏不重启。
+
+首次共享 Nginx 文件的副本保存在 `/etc/nginx/sites-available/flash-global-data.before-badminton-h5-online`。若配置校验失败，Nginx 不 reload，先检查新 snippet/include；不要直接恢复旧备份覆盖他人后续配置。只撤销本次新增 include，重新 `sudo nginx -t`。
+
+## 日志和健康
+
+```bash
+sudo systemctl status badminton-h5-online.service --no-pager
+sudo journalctl -u badminton-h5-online.service -n 100 --no-pager
+sudo journalctl -u badminton-h5-online.service -f
+curl -fsS http://127.0.0.1:8794/badminton-h5-online/api/health
+node scripts/http-check.mjs https://www.firesoul.cn
+# 需要完整协议对战检查时，确认没有真实玩家排队后执行：
+node scripts/public-match-check.mjs https://www.firesoul.cn
+sudo nginx -t
+```
+
+日志记录房间创建、断线、结束和回收，不输出游客 Cookie/密钥。HTTP 检查验证网页、构建资源、Secure/HttpOnly/SameSite Cookie、WS 同源握手，并检查三条现有游戏入口返回 200；没有浏览器自动化。
+
+## 回滚
+
+```bash
+bash scripts/rollback.sh
+# 或 bash scripts/rollback.sh release-20261012-a
+node scripts/http-check.mjs https://www.firesoul.cn
+```
+
+回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
+
+## 断线与资源规则
+
+- 活动 Cookie 只绑定一个 WS 连接；重复标签页拒绝（HTTP 409），不能抢占席位。
+- 失焦、隐藏或 pagehide 清空按键并发送 release。即使 release 丢失，750 ms 没有新输入也会清键；关闭 WS 清双方输入并暂停比赛。
+- 断线席位保留 15 秒，原 Cookie 重连后恢复；超时判对方胜，双方都离线则无获胜方，并释放房间。心跳每 5 秒检查，静默网络故障通常需要一个至两个心跳周期才被识别；断线保留计时从服务器确认断开开始。
+- 正常结束的结算保留 30 秒，可提前再次匹配释放旧席位；主动结束视为弃权。队列 120 秒未匹配移除；单场最长 20 分钟。
+- 会话最多 5000，房间最多 100；HTTP 初始化按真实 IP 每分钟 120 次；WS 最多 1024 字节、每秒 180 消息，输入积压最多 120 帧。序号必须连续，移动仅 -1/0/1，状态/席位字段禁止。以上是资源限制，不代表已完成 100 房间并发压测。
+- Cookie 为 30 天、HttpOnly、SameSite=Lax、生产 Secure、Path 限定本入口。空闲内存会话 24 小时回收，下一次 HTTP 初始化可用签名 Cookie 重新建立会话。没有数据库或 Redis。

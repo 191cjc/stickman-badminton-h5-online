@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="火柴人羽毛球在线对战。无需账号，点击开始匹配，与另一名玩家实时比赛。"
+    />
+    <title>火柴人羽毛球 · 在线对战</title>
+  </head>
+  <body>
+    <main id="app">
+      <header>
+        <a class="brand" href="/badminton-h5-online/"
+          >火柴人羽毛球 <span>ONLINE</span></a
+        >
+        <div class="connection">
+          <i id="connection-dot"></i><span id="connection">正在连接</span
+          ><span id="rtt"></span>
+        </div>
+      </header>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">一场球，认识一个对手</p>
+          <h1>准备好上场了吗？</h1>
+          <p>无需账号。点击开始，匹配另一位玩家。</p>
+        </div>
+        <div class="actions">
+          <button id="start" class="primary" disabled>开始匹配</button
+          ><button id="cancel" hidden>取消匹配</button
+          ><button id="leave" hidden>结束比赛</button
+          ><button id="practice">AI 练习</button>
+        </div>
+      </section>
+      <section class="court" aria-label="羽毛球场">
+        <div class="scoreboard">
+          <div><b class="white"></b><span id="left-label">左侧</span></div>
+          <strong
+            ><span id="score-left">0</span><em>:</em
+            ><span id="score-right">0</span></strong
+          >
+          <div><span id="right-label">右侧</span><b class="yellow"></b></div>
+        </div>
+        <canvas
+          id="game"
+          aria-label="火柴人羽毛球比赛画面"
+          tabindex="0"
+        ></canvas>
+        <div id="overlay" class="overlay">
+          <div>
+            <span id="overlay-tag">即刻开打</span>
+            <h2 id="overlay-title">球场正在等你</h2>
+            <p id="overlay-detail">
+              点击「开始匹配」进入在线对战，也可以先练习。
+            </p>
+          </div>
+        </div>
+        <div
+          id="match-status"
+          class="match-status"
+          role="status"
+          aria-live="polite"
+        >
+          先到 7 分获胜
+        </div>
+      </section>
+      <section class="controls">
+        <p>
+          <kbd>A</kbd><kbd>D</kbd> 移动 <kbd>W</kbd> 跳跃 <kbd>S</kbd> 挥拍 /
+          发球 <span>也支持方向键，空格跳跃</span>
+        </p>
+        <p id="hint">两位玩家使用相同按键，匹配后显示你的场地位置。</p>
+      </section>
+      <div class="touch-controls" aria-label="触屏操作">
+        <button data-control="KeyA" aria-label="向左移动">←</button
+        ><button data-control="KeyD" aria-label="向右移动">→</button
+        ><button data-control="KeyW">跳跃</button
+        ><button data-control="KeyS">挥拍</button>
+      </div>
+      <footer>
+        <span>游客自动识别 · 失焦时清除按键 · 断线保留席位 15 秒</span
+        ><a
+          href="https://github.com/LoveSeele-max/stickman_badminton_h5"
+          target="_blank"
+          rel="noopener noreferrer"
+          >社区源码来源 ↗</a
+        >
+      </footer>
+    </main>
+    <script type="module" src="/src/client/main.ts"></script>
+  </body>
+</html>

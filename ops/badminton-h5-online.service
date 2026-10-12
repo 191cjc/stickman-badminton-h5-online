@@ -1,0 +1,25 @@
+[Unit]
+Description=Stickman badminton H5 authoritative online service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/stickman-badminton-h5-online/current
+EnvironmentFile=/etc/badminton-h5-online.env
+ExecStart=/home/ubuntu/.nvm/versions/node/v24.19.0/bin/node /opt/stickman-badminton-h5-online/current/dist/server/index.js
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=256M
+TasksMax=64
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

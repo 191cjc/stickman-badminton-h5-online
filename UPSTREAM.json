@@ -1,0 +1,193 @@
+{
+  "repository": "https://github.com/LoveSeele-max/stickman_badminton_h5",
+  "commit": "1a8799e65a39f7dafab2075c9297d8e4965f1ecb",
+  "tree": "67ee7c9356875ae9b672a23db31d12684993aa6e",
+  "retrieval": "GitHub API; every source file verified against its upstream Git blob SHA before copying",
+  "inherited_demo_changes": [
+    "vite.config.ts: add base /badminton/ for subpath deployment"
+  ],
+  "files": {
+    ".gitignore": "c493601d1a3c0a6fb4a891cc8f83fecc0afe64a3",
+    ".prettierignore": "e848f859bd044c3b181554999382b90faecf9c53",
+    "README.md": "4c7ae173a21f8776f637f07fe4db0eec3320a90c",
+    "eslint.config.js": "537b224c890cd7cfec04cfb887aea3ce5394f2cb",
+    "index.html": "b0264b81e616c3bd5c404ca2438327a6c2be7bb9",
+    "package-lock.json": "5789be0181561d8562b1777ee0bed0c67dbc4af1",
+    "package.json": "8c60fb171bd70c582f4d12e3a6360310c7d9a295",
+    "src/game/ai-controller.test.ts": "97a29799eb5bfef2cf7c7fdeb5dda68c8e9241fa",
+    "src/game/ai-controller.ts": "d4981a6fd2c2de34f6533ef45bae2d7d4d3b9a05",
+    "src/game/badminton-game.ts": "02737c5c40f52008fda3423f7c7bcb08e23fb4fa",
+    "src/game/canvas-runtime.ts": "8e1f2c30fcf22cc53f405f8707dbf9b75178fa31",
+    "src/game/config.ts": "0b65b9aab72a44c1375d72cb942af27afb282932",
+    "src/game/entities.ts": "318d41ccc83bc10017e1da3bf9e90553e640f0bc",
+    "src/game/flight.test.ts": "641033d850c5c547d54a1f37e3753ad9f53a89af",
+    "src/game/flight.ts": "9c98c31a020b5a40b97d7af00f4d2c32d9721e6e",
+    "src/game/input-system.ts": "7c2173f4f209fbec3511a4f8c47bf17fa19cd86d",
+    "src/game/math.test.ts": "aee6a316f4b681e25461dda2f046477ba1266e3b",
+    "src/game/math.ts": "fc1caa245ef1ae80692e948ae77f02675358efaf",
+    "src/game/types.ts": "5f687249e07db4a8561cdc993b88ce5c630d7b47",
+    "src/main.ts": "96afdf56de602656670974043c46647c76e22bd3",
+    "src/style.css": "90692d3382ef56c5a3890a5af303ce673b92802c",
+    "src/vite-env.d.ts": "11f02fe2a0061d6e6e1f271b21da95423b448b32",
+    "stickman_badminton_h5_project_doc.md": "abbe42d55c807f8010b74d8f014037f54ed6c543",
+    "tsconfig.json": "7bdff9a6eb8da06c198cfa501bcbab6dbc534693",
+    "vite.config.ts": "3f380a0ba8d875492fef3560b65caed1e8e4956c"
+  },
+  "online_project": {
+    "source_directory": "/home/ubuntu/stickman-badminton-online/demo",
+    "license_status": "No license file in the verified commit root; no MIT license asserted.",
+    "verification": [
+      {
+        "path": ".gitignore",
+        "expected": "c493601d1a3c0a6fb4a891cc8f83fecc0afe64a3",
+        "actual": "c493601d1a3c0a6fb4a891cc8f83fecc0afe64a3",
+        "match": true
+      },
+      {
+        "path": ".prettierignore",
+        "expected": "e848f859bd044c3b181554999382b90faecf9c53",
+        "actual": "e848f859bd044c3b181554999382b90faecf9c53",
+        "match": true
+      },
+      {
+        "path": "README.md",
+        "expected": "4c7ae173a21f8776f637f07fe4db0eec3320a90c",
+        "actual": "4c7ae173a21f8776f637f07fe4db0eec3320a90c",
+        "match": true
+      },
+      {
+        "path": "eslint.config.js",
+        "expected": "537b224c890cd7cfec04cfb887aea3ce5394f2cb",
+        "actual": "537b224c890cd7cfec04cfb887aea3ce5394f2cb",
+        "match": true
+      },
+      {
+        "path": "index.html",
+        "expected": "b0264b81e616c3bd5c404ca2438327a6c2be7bb9",
+        "actual": "b0264b81e616c3bd5c404ca2438327a6c2be7bb9",
+        "match": true
+      },
+      {
+        "path": "package-lock.json",
+        "expected": "5789be0181561d8562b1777ee0bed0c67dbc4af1",
+        "actual": "5789be0181561d8562b1777ee0bed0c67dbc4af1",
+        "match": true
+      },
+      {
+        "path": "package.json",
+        "expected": "8c60fb171bd70c582f4d12e3a6360310c7d9a295",
+        "actual": "8c60fb171bd70c582f4d12e3a6360310c7d9a295",
+        "match": true
+      },
+      {
+        "path": "src/game/ai-controller.test.ts",
+        "expected": "97a29799eb5bfef2cf7c7fdeb5dda68c8e9241fa",
+        "actual": "97a29799eb5bfef2cf7c7fdeb5dda68c8e9241fa",
+        "match": true
+      },
+      {
+        "path": "src/game/ai-controller.ts",
+        "expected": "d4981a6fd2c2de34f6533ef45bae2d7d4d3b9a05",
+        "actual": "d4981a6fd2c2de34f6533ef45bae2d7d4d3b9a05",
+        "match": true
+      },
+      {
+        "path": "src/game/badminton-game.ts",
+        "expected": "02737c5c40f52008fda3423f7c7bcb08e23fb4fa",
+        "actual": "02737c5c40f52008fda3423f7c7bcb08e23fb4fa",
+        "match": true
+      },
+      {
+        "path": "src/game/canvas-runtime.ts",
+        "expected": "8e1f2c30fcf22cc53f405f8707dbf9b75178fa31",
+        "actual": "8e1f2c30fcf22cc53f405f8707dbf9b75178fa31",
+        "match": true
+      },
+      {
+        "path": "src/game/config.ts",
+        "expected": "0b65b9aab72a44c1375d72cb942af27afb282932",
+        "actual": "0b65b9aab72a44c1375d72cb942af27afb282932",
+        "match": true
+      },
+      {
+        "path": "src/game/entities.ts",
+        "expected": "318d41ccc83bc10017e1da3bf9e90553e640f0bc",
+        "actual": "318d41ccc83bc10017e1da3bf9e90553e640f0bc",
+        "match": true
+      },
+      {
+        "path": "src/game/flight.test.ts",
+        "expected": "641033d850c5c547d54a1f37e3753ad9f53a89af",
+        "actual": "641033d850c5c547d54a1f37e3753ad9f53a89af",
+        "match": true
+      },
+      {
+        "path": "src/game/flight.ts",
+        "expected": "9c98c31a020b5a40b97d7af00f4d2c32d9721e6e",
+        "actual": "9c98c31a020b5a40b97d7af00f4d2c32d9721e6e",
+        "match": true
+      },
+      {
+        "path": "src/game/input-system.ts",
+        "expected": "7c2173f4f209fbec3511a4f8c47bf17fa19cd86d",
+        "actual": "7c2173f4f209fbec3511a4f8c47bf17fa19cd86d",
+        "match": true
+      },
+      {
+        "path": "src/game/math.test.ts",
+        "expected": "aee6a316f4b681e25461dda2f046477ba1266e3b",
+        "actual": "aee6a316f4b681e25461dda2f046477ba1266e3b",
+        "match": true
+      },
+      {
+        "path": "src/game/math.ts",
+        "expected": "fc1caa245ef1ae80692e948ae77f02675358efaf",
+        "actual": "fc1caa245ef1ae80692e948ae77f02675358efaf",
+        "match": true
+      },
+      {
+        "path": "src/game/types.ts",
+        "expected": "5f687249e07db4a8561cdc993b88ce5c630d7b47",
+        "actual": "5f687249e07db4a8561cdc993b88ce5c630d7b47",
+        "match": true
+      },
+      {
+        "path": "src/main.ts",
+        "expected": "96afdf56de602656670974043c46647c76e22bd3",
+        "actual": "96afdf56de602656670974043c46647c76e22bd3",
+        "match": true
+      },
+      {
+        "path": "src/style.css",
+        "expected": "90692d3382ef56c5a3890a5af303ce673b92802c",
+        "actual": "90692d3382ef56c5a3890a5af303ce673b92802c",
+        "match": true
+      },
+      {
+        "path": "src/vite-env.d.ts",
+        "expected": "11f02fe2a0061d6e6e1f271b21da95423b448b32",
+        "actual": "11f02fe2a0061d6e6e1f271b21da95423b448b32",
+        "match": true
+      },
+      {
+        "path": "stickman_badminton_h5_project_doc.md",
+        "expected": "abbe42d55c807f8010b74d8f014037f54ed6c543",
+        "actual": "abbe42d55c807f8010b74d8f014037f54ed6c543",
+        "match": true
+      },
+      {
+        "path": "tsconfig.json",
+        "expected": "7bdff9a6eb8da06c198cfa501bcbab6dbc534693",
+        "actual": "7bdff9a6eb8da06c198cfa501bcbab6dbc534693",
+        "match": true
+      },
+      {
+        "path": "vite.config.ts",
+        "expected": "3f380a0ba8d875492fef3560b65caed1e8e4956c",
+        "actual": "5d9e5107ae4c5eb0ee27d7e756a4391da733ac4a",
+        "match": false
+      }
+    ],
+    "original_manifest": "upstream/UPSTREAM.json"
+  }
+}
