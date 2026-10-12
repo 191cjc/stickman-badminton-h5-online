@@ -18,7 +18,7 @@ Guest.socket is assigned on successful upgrade. New connections do not replace a
 
 Use [parseClientMessage](../../../src/shared/protocol.ts) before dispatch. It rejects malformed/non-object JSON, missing/extra fields, non-integer/out-of-range sequences, move outside -1/0/1, non-boolean action flags, and invalid ping time. A type assertion by itself is not validation.
 
-Known command-validation exception: membership uses `String(v.type)`, so an array-wrapped command such as `{ "type": ["queue"] }` passes the parser. The service's strict comparisons ignore it instead of executing it or closing the socket as invalid. Requiring a string command type needs a separate protocol fix; this coercion is not part of the intended accepted message contract.
+The discriminator must be an actual string before command membership is checked. Array/nested-array command types and other non-string values return null; an authenticated socket then closes with 1008/`invalid_message`. Do not coerce untrusted command types with `String`. [Parser regressions](../../../tests/protocol.test.ts) and [real WS regressions](../../../tests/service.test.ts) verify the two boundaries; see the [executable contract](../shared/protocol.md#boundary-regression-contract).
 
 The only input payload is logical direction, jump/hit held/edge flags, and sequence. Internal `hitMove`/`hitJump` locks are server-created, not wire fields. Position, ball, score, room, side, and match results cannot be submitted as input.
 

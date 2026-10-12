@@ -232,6 +232,11 @@ export function createGameService(options: ServiceOptions) {
     snapshot(room);
     log({ event: "match_finished", room: room.id, winner, reason });
   }
+  function expireReconnect(room: Room, expired: Side): void {
+    const other = expired === "left" ? "right" : "left";
+    finish(room, room.seats[other].guest.socket ? other : null, "disconnect");
+    reclaim(room, "disconnect");
+  }
   function detachFinished(guest: Guest): void {
     if (!guest.room) return;
     const room = rooms.get(guest.room);
@@ -383,8 +388,7 @@ export function createGameService(options: ServiceOptions) {
           Date.now() >= seat.reconnectUntil &&
           room.status !== "finished"
         ) {
-          finish(room, side === "left" ? "right" : "left", "disconnect");
-          reclaim(room, "disconnect");
+          expireReconnect(room, side);
         } else {
           seat.reconnectUntil = undefined;
           clearSeat(seat);
@@ -536,15 +540,7 @@ export function createGameService(options: ServiceOptions) {
             room.seats[s].reconnectUntil !== undefined &&
             room.seats[s].reconnectUntil! <= now,
         );
-        if (expired) {
-          const other = expired === "left" ? "right" : "left";
-          finish(
-            room,
-            room.seats[other].guest.socket ? other : null,
-            "disconnect",
-          );
-          reclaim(room, "disconnect");
-        }
+        if (expired) expireReconnect(room, expired);
       } else if (now - room.created > 20 * 60_000) {
         finish(room, null, "timeout");
         reclaim(room, "timeout");

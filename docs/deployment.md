@@ -22,7 +22,7 @@ bash scripts/publish.sh
 # 或 bash scripts/publish.sh release-20261012-a
 ```
 
-脚本先完成安装、类型检查、lint、测试、构建，再准备新版本目录和生产依赖，切换 current，安装独立 unit/snippet；第一次生成密钥，并新增本项目 include。`nginx -t` 通过后启动本服务、检查本地健康、reload Nginx，最后进行公网 HTTP 与 WebSocket 检查。发布会清空本项目内存比赛；现有云游戏不重启。
+脚本先完成安装、类型检查、lint、测试、构建，再准备新版本目录和生产依赖，安装独立 unit/snippet；仅在 env 不存在时生成密钥，仅在 include 缺失时新增本项目 include。`nginx -t` 通过后才切换 current、更新 previous，随后刷新 systemd 配置、启用并重启本服务、检查本地健康、reload Nginx，最后进行公网 HTTP 与 WebSocket 检查。发布会清空本项目内存比赛；现有云游戏不重启。
 
 首次共享 Nginx 文件的副本保存在 `/etc/nginx/sites-available/flash-global-data.before-badminton-h5-online`。若配置校验失败，Nginx 不 reload，先检查新 snippet/include；不要直接恢复旧备份覆盖他人后续配置。只撤销本次新增 include，重新 `sudo nginx -t`。
 

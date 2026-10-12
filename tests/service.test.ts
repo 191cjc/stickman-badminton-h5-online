@@ -1,6 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import type { AddressInfo } from "node:net";
+import { performance } from "node:perf_hooks";
 import { createGameService } from "../src/server/service";
 import { BASE_PATH, parseClientMessage } from "../src/shared/protocol";
 import type {
@@ -37,8 +38,8 @@ class Peer {
       true,
     timeout = 5000,
   ): Promise<Extract<ServerMessage, { type: T }>> {
-    const end = Date.now() + timeout;
-    while (Date.now() < end) {
+    const end = performance.now() + timeout;
+    while (performance.now() < end) {
       const index = this.messages.findIndex(
         (message) =>
           message.type === type &&
@@ -58,22 +59,30 @@ describe("real HTTP / WebSocket rooms", () => {
   let service: ReturnType<typeof createGameService>;
   let base: string;
   const peers: Peer[] = [];
-  beforeEach(async () => {
+  const events: Record<string, unknown>[] = [];
+  async function startService(): Promise<void> {
+    events.length = 0;
     service = createGameService({
       origins: ["http://test.local"],
       secret: "test-secret-kept-out-of-protocol",
       reconnectMs: 700,
       resultMs: 700,
       inputTimeoutMs: 120,
+      logger: (event) => events.push(event),
     });
     await new Promise<void>((resolve) =>
       service.http.listen(0, "127.0.0.1", resolve),
     );
     base = `http://127.0.0.1:${(service.http.address() as AddressInfo).port}`;
-  });
+  }
+  beforeEach(startService);
   afterEach(async () => {
-    peers.splice(0).forEach((peer) => peer.ws.terminate());
-    await service.close();
+    try {
+      peers.splice(0).forEach((peer) => peer.ws.terminate());
+      await service.close();
+    } finally {
+      vi.useRealTimers();
+    }
   });
   async function cookie(existing?: string): Promise<string> {
     const res = await fetch(`${base}${BASE_PATH}api/session`, {
@@ -144,6 +153,39 @@ describe("real HTTP / WebSocket rooms", () => {
     await rejected(identity, 409);
     expect((await fetch(`${base}${BASE_PATH}api/health`)).status).toBe(200);
   });
+  it.each([
+    { type: ["queue"] },
+    { type: ["cancel"] },
+    { type: ["leave"] },
+    { type: ["release"] },
+    { type: [["queue"]] },
+    { type: [["cancel"]] },
+    { type: [["leave"]] },
+    { type: [["release"]] },
+    { type: null },
+    { type: 1 },
+    { type: true },
+    { type: {} },
+  ])(
+    "closes authenticated malformed commands with invalid_message: %j",
+    async (message) => {
+      const peer = await connect(await cookie());
+      const closed = new Promise<{ code: number; reason: string }>(
+        (resolve, reject) => {
+          const timeout = setTimeout(
+            () => reject(new Error("Malformed command was not closed")),
+            1000,
+          );
+          peer.ws.once("close", (code, reason) => {
+            clearTimeout(timeout);
+            resolve({ code, reason: reason.toString() });
+          });
+        },
+      );
+      peer.ws.send(JSON.stringify(message));
+      expect(await closed).toEqual({ code: 1008, reason: "invalid_message" });
+    },
+  );
   it("matches two guests, binds inputs to their own sides, clears stale input and refuses third-party seat fields", async () => {
     const [left, right] = await pair();
     left.input(1);
@@ -248,6 +290,67 @@ describe("real HTTP / WebSocket rooms", () => {
     await right.wait("idle", (s) => s.reason === "disconnect");
     expect(service.stats().rooms).toBe(0);
   });
+  it.each([true, false])(
+    "expires reconnect during upgrade before collector (opponent online: %s)",
+    async (opponentOnline) => {
+      await service.close();
+      // Freeze service intervals without mocking network events or polling timeouts.
+      // Moving Date past the deadline then cannot let the collector mask upgrade.
+      vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] });
+      await startService();
+      const [left, right, identity] = await pair();
+      left.ws.close();
+      const paused = await right.wait(
+        "snapshot",
+        (s) => s.status === "reconnecting",
+      );
+      if (!opponentOnline) {
+        await new Promise<void>((resolve) => {
+          right.ws.once("close", () => resolve());
+          right.ws.close();
+        });
+        const end = performance.now() + 1000;
+        while (
+          !events.some(
+            (event) =>
+              event.event === "match_disconnected" && event.side === "right",
+          )
+        ) {
+          if (performance.now() >= end)
+            throw new Error("Server did not observe opponent disconnect");
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+      }
+      vi.setSystemTime(Date.now() + 701);
+      expect(service.stats().rooms).toBe(1);
+      expect(events.some((event) => event.event === "room_reclaimed")).toBe(
+        false,
+      );
+      const resumed = await connect(identity);
+      const result = await resumed.wait("result");
+      expect(result).toEqual({
+        type: "result",
+        reason: "disconnect",
+        winner: opponentOnline ? "right" : null,
+        score: paused.state.score,
+      });
+      await resumed.wait("idle", (s) => s.reason === "disconnect");
+      expect(service.stats().rooms).toBe(0);
+      expect(
+        resumed.messages.some(
+          (message) =>
+            message.type === "matched" && message.room === paused.room,
+        ),
+      ).toBe(false);
+      if (opponentOnline) {
+        expect(await right.wait("result")).toEqual(result);
+        await right.wait("idle", (s) => s.reason === "disconnect");
+      }
+      resumed.send({ type: "queue" });
+      await resumed.wait("queued");
+      expect(service.stats()).toMatchObject({ rooms: 0, queued: 1 });
+    },
+  );
   it("finishes an authoritative seven-point match with identical results on both connections", async () => {
     const [left, right] = await pair();
     let latest: Snapshot | undefined;

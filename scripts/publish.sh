@@ -37,7 +37,7 @@ if include not in text:
     config.write_text(text.replace(anchor,anchor+include,1))
 PY
 if ! sudo nginx -t; then
-    echo 'Nginx validation failed; restore shared config backup and inspect the new snippet.' >&2
+    echo 'Nginx validation failed; inspect this project snippet/include. If necessary, remove only the include newly added by this release, then rerun nginx -t. Do not overwrite the shared config with an old backup.' >&2
     exit 1
 fi
 sudo ln -s "$release_dir" "$deploy_root/current.next"

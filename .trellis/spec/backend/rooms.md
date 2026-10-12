@@ -20,7 +20,9 @@ Socket close clears both seats' logical input and sets room status `reconnecting
 
 The server sends WS ping every five seconds and terminates a socket that has not answered the previous heartbeat. Silent transport failure therefore is not detected instantly; retention time starts from confirmed server-side close. State this distinction in user-facing operational explanations.
 
-Expired disconnect in the collector awards a connected opponent a forfeit win; when neither seat is connected, winner is null. The collector publishes result then reclaims the room. Known branch difference: the upgrade deadline check always awards the opposite side when an already-expired seat reconnects, without checking that opponent's connection. This describes current code, not the intended both-absent rule. Aligning these branches requires a separate behavior decision and regression test.
+Expired upgrade and collector expiry share `expireReconnect(room, expired)`: the opposite guest's bound socket selects that side as winner, otherwise winner is null. Both paths publish a `disconnect` result and reclaim the room. The returning socket belongs to the expired side; its presence must not award an absent opponent. An expired upgrade sends result/idle without a resumed `matched`, then permits independent queue reuse.
+
+For upgrade regressions, control Date and intervals while retaining real HTTP/WS events, setTimeout and monotonic polling. Advance wall-clock expiry without running the collector; assert the room still exists and no reclaim event has occurred immediately before reconnect. [Service tests](../../../tests/service.test.ts) cover online/absent opponents, equal result messages, no stale match, reclamation and queue reuse. Ordinary resume and collector expiry remain separately covered.
 
 ## Results and reclamation
 

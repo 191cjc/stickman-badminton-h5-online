@@ -58,11 +58,12 @@ export function parseClientMessage(raw: string): ClientMessage | null {
   }
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const v = value as Record<string, unknown>;
+  if (typeof v.type !== "string") return null;
   const exactKeys = (keys: string[]) =>
     Object.keys(v).length === keys.length &&
     keys.every((k) => Object.hasOwn(v, k));
   if (
-    ["queue", "cancel", "leave", "release"].includes(String(v.type)) &&
+    ["queue", "cancel", "leave", "release"].includes(v.type) &&
     exactKeys(["type"])
   )
     return v as ClientMessage;

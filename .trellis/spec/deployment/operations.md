@@ -31,7 +31,7 @@ The release files are owned root:root after installation. Static hashed assets g
 
 [rollback.sh](../../../scripts/rollback.sh) points current at the previous/selected existing release, restarts this service, and checks local health. It does not regenerate the Cookie secret. First release has no previous version; withdrawal and safe Nginx include removal are documented separately. Do not restore an old shared-vhost backup over subsequent unrelated edits.
 
-Known mismatch: the publish script's Nginx-validation failure diagnostic recommends restoring the shared backup. Follow the safe include-removal procedure in [deployment documentation](../../../docs/deployment.md); the script diagnostic needs a separate correction.
+Nginx-validation failure exits before current switches, this service restarts or Nginx reloads. The diagnostic directs inspection of this project's snippet/include and removal only of an include newly added by that release, if necessary. Follow the matching recovery/order in [deployment documentation](../../../docs/deployment.md), preserving subsequent unrelated shared-vhost edits.
 
 ## Logging and verification
 

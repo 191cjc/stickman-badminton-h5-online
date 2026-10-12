@@ -1,0 +1,77 @@
+{
+  "verified_at": "2026-10-12T08:56:18.484336+00:00",
+  "status": "verified_ready_to_commit",
+  "baseline_commit": "a7a314b",
+  "baseline_regressions": {
+    "failed": 13,
+    "passed": 17,
+    "skipped": 7
+  },
+  "targeted_after_fix": {
+    "passed": 31,
+    "skipped": 6
+  },
+  "independent_quality_gate": {
+    "lint": "pass",
+    "typecheck": "pass",
+    "tests": {
+      "passed": 50,
+      "files": 7
+    },
+    "build": "pass",
+    "shell_syntax": "pass",
+    "diff_whitespace": "pass"
+  },
+  "documentation": {
+    "documents": 20,
+    "relative_links": 169,
+    "links_indexes_templates_language": "pass",
+    "obsolete_limits_removed": true
+  },
+  "local_http": {
+    "local_preview": "http://127.0.0.1:5194/badminton-h5-online/",
+    "html_status": 200,
+    "assets": [
+      {
+        "path": "/badminton-h5-online/assets/index-B3Cjp565.js",
+        "status": 200,
+        "bytes": 48184,
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/badminton-h5-online/assets/index-Bn9Wd5Uq.css",
+        "status": 200,
+        "bytes": 4219,
+        "content_type": "text/css"
+      }
+    ],
+    "browser_started": false,
+    "backend_http_ws": "Covered by the independently passing real HTTP/WS regression suite"
+  },
+  "temporary_preview_stopped": true,
+  "scope": {
+    "product_files": [
+      "src/shared/protocol.ts",
+      "src/server/service.ts",
+      "tests/service.test.ts",
+      "tests/protocol.test.ts",
+      "scripts/publish.sh",
+      "docs/deployment.md"
+    ],
+    "spec_files": [
+      ".trellis/spec/backend/identity-and-input.md",
+      ".trellis/spec/backend/rooms.md",
+      ".trellis/spec/shared/protocol.md",
+      ".trellis/spec/deployment/operations.md"
+    ],
+    "frozen_upstream": "unchanged",
+    "dependencies_routes_services": "unchanged"
+  },
+  "production_release_updated": false,
+  "browser_started": false,
+  "external_acceptance_pending": [
+    "Two-computer browser rendering and physical key response",
+    "Mobile controls and browser compatibility",
+    "Weak-network behavior and latency measurements"
+  ]
+}

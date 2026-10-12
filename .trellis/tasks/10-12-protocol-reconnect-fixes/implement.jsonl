@@ -1,0 +1,9 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Service ownership and relevant layer checks"}
+{"file": ".trellis/spec/backend/architecture.md", "reason": "Real HTTP/WS service testing, timers and teardown"}
+{"file": ".trellis/spec/backend/identity-and-input.md", "reason": "Strict parser and authenticated seat contracts"}
+{"file": ".trellis/spec/backend/rooms.md", "reason": "Intended reconnect verdict and room reclamation"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Wire compatibility, discriminator and policy closes"}
+{"file": ".trellis/spec/deployment/operations.md", "reason": "Independent publisher order and safe recovery"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Owner-first minimal helper reuse"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Parser/dispatch/lifecycle compatibility"}
+{"file": ".trellis/tasks/10-12-protocol-reconnect-fixes/research/source-findings.md", "reason": "Source defects and deterministic real-network regression boundary"}

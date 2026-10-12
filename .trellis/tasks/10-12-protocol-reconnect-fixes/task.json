@@ -1,0 +1,38 @@
+{
+  "id": "protocol-reconnect-fixes",
+  "name": "protocol-reconnect-fixes",
+  "title": "Fix protocol validation and reconnect cleanup",
+  "description": "Fix four bootstrap review findings: command discriminator, expired reconnect outcome, publish diagnostic, and deployment ordering",
+  "status": "in_progress",
+  "dev_type": "backend",
+  "scope": "protocol-room-lifecycle",
+  "package": null,
+  "priority": "P1",
+  "creator": "chenjiachun",
+  "assignee": "chenjiachun",
+  "createdAt": "2026-10-12",
+  "completedAt": null,
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "src/shared/protocol.ts",
+    "src/server/service.ts",
+    "tests/service.test.ts",
+    "scripts/publish.sh",
+    "docs/deployment.md",
+    ".trellis/spec/backend/",
+    ".trellis/spec/shared/protocol.md",
+    ".trellis/spec/deployment/operations.md"
+  ],
+  "notes": "",
+  "meta": {
+    "baseline_commit": "a7a314b",
+    "authorization": "User requested integrating Git and continuing development, then explicitly selected creating the task and continuing the four scoped fixes."
+  }
+}
