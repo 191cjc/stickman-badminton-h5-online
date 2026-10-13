@@ -12,13 +12,13 @@
 
 ## Topics
 
-| Document | Concern |
-| --- | --- |
+| Document                    | Concern                                                    |
+| --------------------------- | ---------------------------------------------------------- |
 | [Simulation](simulation.md) | Physics, player step, AI, state serialization, regressions |
-| [Protocol](protocol.md) | Wire messages, input bounds, cadence, consistency |
+| [Protocol](protocol.md)     | Wire messages, input bounds, cadence, consistency          |
 
 Shared code must not import DOM runtime modules or Node server APIs. Inspect [state.ts](../../../src/shared/state.ts) for type-only dependencies that avoid an executable import cycle.
 
 ## Quality check
 
-Check DOM/Node independence, serialization, input/ack/tick meanings, and shared movement/flight reuse. Mechanics changes need [upstream regression](../../../tests/simulation.test.ts) and applicable flight/math/AI/prediction tests. For spec-only changes, verify references and consistency with both client and server consumers.
+Check DOM/Node independence, serialization, input/ack/tick meanings, and shared movement/flight reuse. Mechanics changes need [Flash core tests](../../../tests/classic/core.test.ts), [source/asset tests](../../../tests/classic/assets.test.ts), and applicable prediction/service tests. For spec-only changes, verify references and consistency with both client and server consumers.

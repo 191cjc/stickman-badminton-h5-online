@@ -4,23 +4,23 @@
 
 Before introducing a helper or changing tuning, search with `rg` and identify the source that owns the behavior:
 
-| Concern | Existing owner |
-| --- | --- |
-| Shared movement/jump/swing buffering | [stepPlayer](../../../src/shared/player-step.ts) |
-| Shuttle drag/flight | [flight.ts](../../../src/shared/flight.ts) |
-| Geometry and common math | [entities.ts](../../../src/shared/entities.ts), [math.ts](../../../src/shared/math.ts) |
-| Gameplay tuning | [config.ts](../../../src/shared/config.ts) |
-| Wire types/input validation | [protocol.ts](../../../src/shared/protocol.ts) |
-| Serializable player and snapshot types | [state.ts](../../../src/shared/state.ts) |
-| Identity/room orchestration | [service.ts](../../../src/server/service.ts) |
+| Concern                                | Existing owner                                             |
+| -------------------------------------- | ---------------------------------------------------------- |
+| Shared movement/jump/swing latches     | [stepClassicPlayer](../../../src/shared/classic/player.ts) |
+| Shuttle drag/flight                    | [birdie.ts](../../../src/shared/classic/birdie.ts)         |
+| Geometry and common math               | [assets.ts](../../../src/shared/classic/assets.ts)         |
+| Gameplay tuning                        | [CLASSIC_WORLD](../../../src/shared/classic/types.ts)      |
+| Wire types/input validation            | [protocol.ts](../../../src/shared/protocol.ts)             |
+| Serializable player and snapshot types | [state.ts](../../../src/shared/state.ts)                   |
+| Identity/room orchestration            | [service.ts](../../../src/server/service.ts)               |
 
-Reuse player stepping in Prediction and Simulation. Reuse flight stepping in authority, AI, and trajectory calculations. Fixing one independent copy of these mechanics would otherwise make local motion or AI disagree with authority.
+Reuse player stepping in Prediction and Simulation. Keep original live flight and AI landing preview in birdie.ts: the source preview always applies gravity and omits net-top bounce, while live flight has different rules. Preserve these source differences instead of forcing both through one identical step. Changes to either model must update the corresponding authority/AI evidence.
 
 ## Preserve boundaries while extracting
 
 Shared gameplay must remain independent of DOM and Node service APIs. Canvas drawing consumes state and entity geometry; server sockets own authentication and seats. A helper extracted to shared must not bring browser event listeners or server room mutation with it.
 
-The frozen `upstream` copy is deliberate provenance and comparison data, not another live implementation to keep synchronized. Modify the derived `src/shared` code and compare mechanics using [simulation.test.ts](../../../tests/simulation.test.ts); do not silently edit the comparison reference to make a test pass.
+The frozen `reference/flash-90302` and historical `upstream` copies are deliberate provenance data, not another live implementation to keep synchronized. Modify the derived `src/shared` code and validate source-value behavior with [core.test.ts](../../../tests/classic/core.test.ts) and frozen Flash references; do not silently edit the comparison reference to make a test pass.
 
 ## Constants and payloads
 

@@ -1,0 +1,16 @@
+{
+  "activeGame": "4399 Flash 火柴人打羽毛球2 / Stick Figure Badminton 2",
+  "sourcePage": "https://www.4399.com/flash/90302.htm",
+  "swfUrl": "https://sda.4399.com/4399swf/upload_swf/ftp8/caoxinxin/20120530/3.swf",
+  "swfSha256": "cab8a824c54af3a0b9454ef30fcbcabc532931f2a96717239fabd58f57e59912",
+  "reference": "reference/flash-90302/SOURCE.json",
+  "method": "Recovered ActionScript and SWF timeline/shape data migrated to shared TypeScript and Canvas SVG layers; not an original editable Flash project.",
+  "firstVersionScope": "Average Joe, online versus and local AI practice; other characters and campaign deferred.",
+  "copyright": "Original game artwork and recovered scripts retain original rights and markings. No open-source license verified; no MIT claim.",
+  "historicalCommunitySource": {
+    "record": "UPSTREAM.json",
+    "repository": "https://github.com/LoveSeele-max/stickman_badminton_h5",
+    "commit": "1a8799e65a39f7dafab2075c9297d8e4965f1ecb",
+    "status": "Frozen historical reference; inactive gameplay kernel."
+  }
+}

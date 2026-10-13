@@ -1,0 +1,35 @@
+{
+  "id": "serve-trajectory-fix",
+  "name": "serve-trajectory-fix",
+  "title": "修复 AI 对练发球向地面的问题",
+  "description": "浏览器复现 AI 对练发球异常，对照上游查明原因，修复共享发球逻辑并验证练习及双人模式。",
+  "status": "in_progress",
+  "dev_type": "shared",
+  "scope": "shared",
+  "package": null,
+  "priority": "P2",
+  "creator": "chenjiachun",
+  "assignee": "chenjiachun",
+  "createdAt": "2026-10-13",
+  "completedAt": null,
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "src/shared/ai-controller.ts",
+    "src/shared/simulation.ts",
+    "src/shared/ai-controller.test.ts",
+    "tests/simulation.test.ts",
+    "docs/validation.md"
+  ],
+  "notes": "User requested attribution first on 2026-10-13; implementation/publication paused. Identical AI self-hit reproduced in unchanged upstream and derived simulation. Browser testing remains authorized.",
+  "meta": {
+    "implementation_paused_by_user": true,
+    "attribution": "inherited from verified upstream commit"
+  }
+}

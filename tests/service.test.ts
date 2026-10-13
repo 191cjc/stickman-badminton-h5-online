@@ -3,7 +3,14 @@ import { WebSocket } from "ws";
 import type { AddressInfo } from "node:net";
 import { performance } from "node:perf_hooks";
 import { createGameService } from "../src/server/service";
-import { BASE_PATH, parseClientMessage } from "../src/shared/protocol";
+import {
+  BASE_PATH,
+  PROTOCOL,
+  SIM_HZ,
+  SUBPROTOCOL,
+  parseClientMessage,
+} from "../src/shared/protocol";
+import { CLASSIC_WORLD } from "../src/shared/classic/types";
 import type {
   ClientMessage,
   ServerMessage,
@@ -94,10 +101,11 @@ describe("real HTTP / WebSocket rooms", () => {
   function rawConnect(
     identity?: string,
     origin = "http://test.local",
+    protocol = SUBPROTOCOL,
   ): WebSocket {
     return new WebSocket(
       `${base.replace("http:", "ws:")}${BASE_PATH}ws`,
-      "badminton-v1",
+      protocol,
       {
         headers: { Origin: origin, ...(identity ? { Cookie: identity } : {}) },
       },
@@ -153,6 +161,42 @@ describe("real HTTP / WebSocket rooms", () => {
     await rejected(identity, 409);
     expect((await fetch(`${base}${BASE_PATH}api/health`)).status).toBe(200);
   });
+  it("negotiates the new cadence and closes a legacy page before it can claim a connection or match", async () => {
+    const identity = await cookie();
+    const legacy = rawConnect(identity, "http://test.local", "badminton-v1");
+    const messages: ServerMessage[] = [];
+    legacy.on("message", (raw) =>
+      messages.push(JSON.parse(raw.toString()) as ServerMessage),
+    );
+    const closed = new Promise<{ code: number; reason: string }>((resolve) => {
+      legacy.once("close", (code, reason) =>
+        resolve({ code, reason: reason.toString() }),
+      );
+    });
+    legacy.once("open", () => legacy.send(JSON.stringify({ type: "queue" })));
+    expect(await closed).toEqual({ code: 1008, reason: "protocol_mismatch" });
+    expect(messages).toEqual([{ type: "error", code: "protocol_mismatch" }]);
+    expect(service.stats()).toMatchObject({ rooms: 0, queued: 0 });
+    const current = await connect(identity);
+    current.send({ type: "queue" });
+    await current.wait("queued");
+    const health = await (await fetch(`${base}${BASE_PATH}api/health`)).json();
+    expect(health).toMatchObject({
+      protocol: PROTOCOL,
+      simulationHz: 60,
+      snapshotHz: 30,
+    });
+  });
+  it("sends exactly the same original ball and score to both seats at the same authoritative tick", async () => {
+    const [left, right] = await pair();
+    left.input(0, true);
+    const a = await left.wait("snapshot", (s) => s.tick >= 10 && s.ack === 1);
+    const b = await right.wait("snapshot", (s) => s.tick === a.tick);
+    expect(a.state.version).toBe("flash-90302-v1");
+    expect(a.state.shuttle.state).toBe("flying");
+    expect(a.state).toEqual(b.state);
+    expect(b.ack).toBe(0);
+  });
   it.each([
     { type: ["queue"] },
     { type: ["cancel"] },
@@ -192,14 +236,15 @@ describe("real HTTP / WebSocket rooms", () => {
     right.input(-1);
     const l = await left.wait("snapshot", (message) => message.ack >= 1);
     const r = await right.wait("snapshot", (message) => message.ack >= 1);
-    expect(l.state.players.left.x).toBeGreaterThan(320);
-    expect(r.state.players.right.x).toBeLessThan(1280);
+    expect(l.state.players.left.x).toBeGreaterThan(150);
+    expect(r.state.players.right.x).toBeLessThan(500);
     const stopped = await left.wait(
       "snapshot",
       (message) =>
-        message.state.players.left.vx === 0 && message.tick > l.tick + 20,
+        message.state.players.left.vx === 0 &&
+        message.tick > l.tick + SIM_HZ / 3,
     );
-    expect(stopped.state.players.left.x).toBeLessThan(420);
+    expect(stopped.state.players.left.x).toBeLessThan(190);
     const outsider = await connect(await cookie());
     outsider.input(1);
     expect((await outsider.wait("error")).code).toBe("not_in_match");
@@ -229,7 +274,7 @@ describe("real HTTP / WebSocket rooms", () => {
     right.send({ type: "queue" });
     expect((await left.wait("matched")).room).not.toBe(l.room);
   });
-  it("uses the newest state after a packet burst while preserving jump and shot direction", async () => {
+  it("samples packet bursts once using the latest held motion and preserving action edges", async () => {
     const [left] = await pair();
     for (let seq = 1; seq <= 30; seq++) {
       left.send({
@@ -243,10 +288,18 @@ describe("real HTTP / WebSocket rooms", () => {
       });
     }
     const state = await left.wait("snapshot", (s) => s.ack === 30);
-    expect(state.state.players.left.x).toBeLessThan(330);
-    expect(state.state.players.left.y).toBeLessThan(780);
-    expect(state.state.players.left.hitIntentMove).toBe(-1);
-    expect(state.state.players.left.hitIntentJump).toBe(true);
+    expect(state.state.players.left.x).toBe(150);
+    expect(state.state.players.left.y).toBeLessThan(CLASSIC_WORLD.groundY);
+    expect(state.state.players.left.swingKind).toBe("serve");
+    expect(state.state.players.left.swinging).toBe(true);
+    const next = await left.wait("snapshot", (s) => s.tick > state.tick);
+    // Thirty packets do not advance thirty input frames; one press starts one
+    // original timeline, and its held latch clears on the newest released state.
+    expect(next.state.players.left.x).toBe(150);
+    expect(next.state.players.left.hitLatched).toBe(false);
+    expect(next.state.players.left.swingFrame).toBeGreaterThan(
+      state.state.players.left.swingFrame,
+    );
   });
   it("cancels queued guests and removes them when their connection closes", async () => {
     const peer = await connect(await cookie());
@@ -368,7 +421,7 @@ describe("real HTTP / WebSocket rooms", () => {
           0,
           latest.state.shuttle.state === "attached" &&
             latest.state.server === side &&
-            latest.state.players[side].swingType === null,
+            !latest.state.players[side].swinging,
         );
     }, 1000 / 60);
     try {

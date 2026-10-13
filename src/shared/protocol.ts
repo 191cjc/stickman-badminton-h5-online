@@ -2,8 +2,9 @@ import type { GameState } from "./state";
 import type { Side } from "./types";
 
 export const BASE_PATH = "/badminton-h5-online/";
-export const PROTOCOL = 1;
-export const SIM_HZ = 120;
+export const PROTOCOL = 2;
+export const SUBPROTOCOL = `badminton-v${PROTOCOL}`;
+export const SIM_HZ = 60;
 export const INPUT_HZ = 60;
 export const SNAPSHOT_HZ = 30;
 export const RECONNECT_MS = 15_000;

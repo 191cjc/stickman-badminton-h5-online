@@ -1,0 +1,10 @@
+{"file": ".trellis/spec/shared/index.md", "reason": "Shared-layer checklist and quality scope"}
+{"file": ".trellis/spec/shared/simulation.md", "reason": "Authority, reuse, source comparison and flight invariants"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Preserve local practice vs online authority and prediction"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Project check commands and evidence limits; latest browser authorization applies"}
+{"file": ".trellis/spec/backend/rooms.md", "reason": "Server uses shared authoritative Simulation and input sampling"}
+{"file": ".trellis/spec/deployment/operations.md", "reason": "Independent publication, restart and existing entrance isolation"}
+{"file": ".trellis/spec/guides/index.md", "reason": "Shared guides entry"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Fix shared owner rather than duplicating physics"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Browser/server state authority and publication consistency"}
+{"file": ".trellis/tasks/10-13-serve-trajectory-fix/research/root-cause.md", "reason": "Confirmed browser and upstream reproduction and minimum fix boundary"}

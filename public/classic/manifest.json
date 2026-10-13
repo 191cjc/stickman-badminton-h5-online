@@ -1,0 +1,1074 @@
+{
+  "schema": 1,
+  "fps": 60,
+  "coordinateSystem": {
+    "width": 640,
+    "height": 426
+  },
+  "source": {
+    "url": "https://www.4399.com/flash/90302.htm",
+    "swfSha256": "cab8a824c54af3a0b9454ef30fcbcabc532931f2a96717239fabd58f57e59912",
+    "license": "No open-source license verified; original artwork and copyright retained"
+  },
+  "body": {
+    "normal": [
+      {
+        "path": "body/normal-01.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      }
+    ],
+    "backward": [
+      {
+        "path": "body/backward-01.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-02.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-03.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-04.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-05.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-06.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-07.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-08.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-09.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-10.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-11.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-12.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-13.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-14.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-15.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/backward-16.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      }
+    ],
+    "forward": [
+      {
+        "path": "body/forward-01.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-02.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-03.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-04.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-05.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-06.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-07.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-08.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-09.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-10.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-11.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-12.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-13.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-14.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-15.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      },
+      {
+        "path": "body/forward-16.svg",
+        "x": -11.7,
+        "y": -72.45,
+        "width": 32.55,
+        "height": 75.65
+      }
+    ],
+    "jump": [
+      {
+        "path": "body/jump-01.svg",
+        "x": -6.6,
+        "y": -72.45,
+        "width": 23.2,
+        "height": 70.2
+      }
+    ]
+  },
+  "swings": {
+    "serve": [
+      {
+        "path": "swings/serve-01.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-02.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-03.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-04.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-05.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-06.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-07.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-08.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-09.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-10.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-11.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-12.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-13.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-14.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-15.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-16.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-17.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-18.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-19.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-20.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-21.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-22.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      },
+      {
+        "path": "swings/serve-23.svg",
+        "x": -53.55,
+        "y": -128.5,
+        "width": 136.25,
+        "height": 150.25
+      }
+    ],
+    "underhand": [
+      {
+        "path": "swings/underhand-01.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-02.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-03.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-04.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-05.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-06.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-07.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-08.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-09.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-10.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-11.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-12.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-13.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-14.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-15.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-16.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-17.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-18.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      },
+      {
+        "path": "swings/underhand-19.svg",
+        "x": -67.75,
+        "y": -128.85,
+        "width": 149.9,
+        "height": 151.15
+      }
+    ],
+    "overhead": [
+      {
+        "path": "swings/overhead-01.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-02.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-03.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-04.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-05.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-06.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-07.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-08.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-09.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-10.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-11.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-12.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-13.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-14.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-15.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-16.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-17.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-18.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-19.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-20.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-21.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-22.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-23.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-24.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-25.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-26.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      },
+      {
+        "path": "swings/overhead-27.svg",
+        "x": -41.4,
+        "y": -126.8,
+        "width": 124.35,
+        "height": 132.8
+      }
+    ]
+  },
+  "background": {
+    "path": "background/background-01.svg",
+    "x": -93.25,
+    "y": -37.5,
+    "width": 826.6,
+    "height": 536.95
+  },
+  "net": {
+    "path": "net/net-01.svg",
+    "x": 306.6,
+    "y": 318.25,
+    "width": 20.55,
+    "height": 103.75
+  },
+  "netFrames": [
+    {
+      "path": "net/net-01.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-02.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-03.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-04.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-05.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-06.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-07.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-08.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-09.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-10.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-11.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-12.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-13.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-14.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-15.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-16.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-17.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-18.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-19.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-20.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-21.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-22.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-23.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    },
+    {
+      "path": "net/net-24.svg",
+      "x": 306.6,
+      "y": 318.25,
+      "width": 20.55,
+      "height": 103.75
+    }
+  ],
+  "shuttle": {
+    "path": "shuttle/shuttle-01.svg",
+    "x": -6.15,
+    "y": -2.55,
+    "width": 12.2,
+    "height": 15.45
+  },
+  "files": {
+    "background/background-01.svg": "ee88c22beaeefb64a65fbbffa9bb3c35acfd78fdb8525c57f7b7a47323a98958",
+    "body/backward-01.svg": "0be68173dc7d9c8aa326a4b2c06429ffca69a2c1f60d2470f0ce5891f9f21839",
+    "body/backward-02.svg": "0be68173dc7d9c8aa326a4b2c06429ffca69a2c1f60d2470f0ce5891f9f21839",
+    "body/backward-03.svg": "dea2097de4e2d060f58115e3e3d0b8934c83c293fc09f6a63900472a9c4c8ed9",
+    "body/backward-04.svg": "dea2097de4e2d060f58115e3e3d0b8934c83c293fc09f6a63900472a9c4c8ed9",
+    "body/backward-05.svg": "376d436468d7dc1a27467eb6fd924faaf087b7235d758679d128e8f091e44733",
+    "body/backward-06.svg": "376d436468d7dc1a27467eb6fd924faaf087b7235d758679d128e8f091e44733",
+    "body/backward-07.svg": "f2ab2caef2389e98fc0a8d09aa1915f4c4cb0bcb10e6f4ac3f9c7ee7f4682276",
+    "body/backward-08.svg": "f2ab2caef2389e98fc0a8d09aa1915f4c4cb0bcb10e6f4ac3f9c7ee7f4682276",
+    "body/backward-09.svg": "b30dead1ed64d5d25edaf13e8cc3c29cde6a12cd7cd519ec6d49569a3200600f",
+    "body/backward-10.svg": "b30dead1ed64d5d25edaf13e8cc3c29cde6a12cd7cd519ec6d49569a3200600f",
+    "body/backward-11.svg": "411b7eeca4d46a31c59078d0f5083f1c1c694a9da842b268f1a7ff786e078076",
+    "body/backward-12.svg": "411b7eeca4d46a31c59078d0f5083f1c1c694a9da842b268f1a7ff786e078076",
+    "body/backward-13.svg": "7d46fb40dc68c292448074d060bfc0328eddc79aa22ae334091cf0d98d5bd000",
+    "body/backward-14.svg": "7d46fb40dc68c292448074d060bfc0328eddc79aa22ae334091cf0d98d5bd000",
+    "body/backward-15.svg": "8620b714edebf34e5af970794a759833a14e76e957f90f8fa3a3f0cef0f2297f",
+    "body/backward-16.svg": "8620b714edebf34e5af970794a759833a14e76e957f90f8fa3a3f0cef0f2297f",
+    "body/forward-01.svg": "31775cae2ef4bf72473fad8abcf362735700896e36180239c678827a7816de3d",
+    "body/forward-02.svg": "31775cae2ef4bf72473fad8abcf362735700896e36180239c678827a7816de3d",
+    "body/forward-03.svg": "129cbb986906b089a77ff4b5bef6811fd35b1d739db68e32f00d45f4187cc6fa",
+    "body/forward-04.svg": "129cbb986906b089a77ff4b5bef6811fd35b1d739db68e32f00d45f4187cc6fa",
+    "body/forward-05.svg": "003a8dcd38f4ea23cda233c8d997597749193d881393827181492cb617bbae3e",
+    "body/forward-06.svg": "003a8dcd38f4ea23cda233c8d997597749193d881393827181492cb617bbae3e",
+    "body/forward-07.svg": "f7031d098726bf2905ca886ca037d332fd7f5e9e14621e6c933b5a477fbee752",
+    "body/forward-08.svg": "f7031d098726bf2905ca886ca037d332fd7f5e9e14621e6c933b5a477fbee752",
+    "body/forward-09.svg": "c3c2a8a538da2aaab36fefe4082eaaedccdd5bd9c347616279181aa179f345e0",
+    "body/forward-10.svg": "c3c2a8a538da2aaab36fefe4082eaaedccdd5bd9c347616279181aa179f345e0",
+    "body/forward-11.svg": "ddac0a079febb83a9f2518ebf2b83b92a85998ab2bb7f4791b6978dedc378b7a",
+    "body/forward-12.svg": "ddac0a079febb83a9f2518ebf2b83b92a85998ab2bb7f4791b6978dedc378b7a",
+    "body/forward-13.svg": "60a4b6b8811fd0632fd79385bb284c4440af412c0d4e2254ad048c8758bfe8eb",
+    "body/forward-14.svg": "60a4b6b8811fd0632fd79385bb284c4440af412c0d4e2254ad048c8758bfe8eb",
+    "body/forward-15.svg": "231eaa39eb941ca842833a1795962b60c201cf71bd4f65f56a36ea2164ac3342",
+    "body/forward-16.svg": "231eaa39eb941ca842833a1795962b60c201cf71bd4f65f56a36ea2164ac3342",
+    "body/jump-01.svg": "52c11201e676d66dc0ed6b1ed0457db49b9205cf8a66e299f39b0bdcf589b484",
+    "body/normal-01.svg": "9cf28a719debc885a9a72308451b8d09fa1f020dd2db05b750abd4e1bc7b8898",
+    "net/net-01.svg": "c562825d8bf1ea7c36cc716d01bb1ff6db576fe5583897f1f070aae83a701b1e",
+    "net/net-02.svg": "c562825d8bf1ea7c36cc716d01bb1ff6db576fe5583897f1f070aae83a701b1e",
+    "net/net-03.svg": "1c2c238b742563c90ae78f53a206b4b2495eeb0571e6deab0237cdd647a5e873",
+    "net/net-04.svg": "1c2c238b742563c90ae78f53a206b4b2495eeb0571e6deab0237cdd647a5e873",
+    "net/net-05.svg": "1c2c238b742563c90ae78f53a206b4b2495eeb0571e6deab0237cdd647a5e873",
+    "net/net-06.svg": "1c2c238b742563c90ae78f53a206b4b2495eeb0571e6deab0237cdd647a5e873",
+    "net/net-07.svg": "e255d295769cb256dc64246ada00241257b7fe94a8831fe078aef3d4574b5f6d",
+    "net/net-08.svg": "e255d295769cb256dc64246ada00241257b7fe94a8831fe078aef3d4574b5f6d",
+    "net/net-09.svg": "e255d295769cb256dc64246ada00241257b7fe94a8831fe078aef3d4574b5f6d",
+    "net/net-10.svg": "e255d295769cb256dc64246ada00241257b7fe94a8831fe078aef3d4574b5f6d",
+    "net/net-11.svg": "b2d3fc10e9de03c5f9adcfffa240bc01b5f8196578f209fbb1048e9210ffdb6f",
+    "net/net-12.svg": "b2d3fc10e9de03c5f9adcfffa240bc01b5f8196578f209fbb1048e9210ffdb6f",
+    "net/net-13.svg": "b2d3fc10e9de03c5f9adcfffa240bc01b5f8196578f209fbb1048e9210ffdb6f",
+    "net/net-14.svg": "b2d3fc10e9de03c5f9adcfffa240bc01b5f8196578f209fbb1048e9210ffdb6f",
+    "net/net-15.svg": "c6fe54ef3267d9c6d098088e343be377f0135626e9a34c347443d238e8ea877a",
+    "net/net-16.svg": "c6fe54ef3267d9c6d098088e343be377f0135626e9a34c347443d238e8ea877a",
+    "net/net-17.svg": "c6fe54ef3267d9c6d098088e343be377f0135626e9a34c347443d238e8ea877a",
+    "net/net-18.svg": "c6fe54ef3267d9c6d098088e343be377f0135626e9a34c347443d238e8ea877a",
+    "net/net-19.svg": "58ecca47d782f09b2758ea4f449e2fcf241a8532d478e6bf2712239520edf51a",
+    "net/net-20.svg": "58ecca47d782f09b2758ea4f449e2fcf241a8532d478e6bf2712239520edf51a",
+    "net/net-21.svg": "58ecca47d782f09b2758ea4f449e2fcf241a8532d478e6bf2712239520edf51a",
+    "net/net-22.svg": "58ecca47d782f09b2758ea4f449e2fcf241a8532d478e6bf2712239520edf51a",
+    "net/net-23.svg": "a78f13537d95fd7d67f1e4a4fc38f794f3850fa4992086e41c5f8cf674933ac3",
+    "net/net-24.svg": "a78f13537d95fd7d67f1e4a4fc38f794f3850fa4992086e41c5f8cf674933ac3",
+    "shuttle/shuttle-01.svg": "5b00d4ad078a6290640e7e87cb5d9596f2cb16b87a8f11c28af6031b1aca074a",
+    "swings/overhead-01.svg": "05ddfc98093412a830a40722fa44253393bf8ad716bf8edf62a4b2a9cfff71f4",
+    "swings/overhead-02.svg": "6f111277b5c9e72c6b96bd2aa0d70f5e8509fdb14fefaf0c7228d28c33e17030",
+    "swings/overhead-03.svg": "8aaf589bd3ad4fabfc05a7d23bc429cc2a9d3b5b6e06816af7e0b0f5d733f89d",
+    "swings/overhead-04.svg": "02b2c82bbfc0eb3e796572e4317faf707d3700fcf7d75d3b144c628c80d8e650",
+    "swings/overhead-05.svg": "45a0576aea42f7af5d4e22ae002544b7e3b7fd56664cb070a65deb291fed8fd8",
+    "swings/overhead-06.svg": "b8e24e3f4a23121880fc5d1c3957e83c609e04b93b95a3ad86f60465feea2c93",
+    "swings/overhead-07.svg": "02795d3b87d0174a33069d002ca3bad5cb70d80ff7dd1a58178f528fa0ba4b55",
+    "swings/overhead-08.svg": "47075e0477bdffeec4283104264db96b0801c21b1d841934023ca7190e44ac02",
+    "swings/overhead-09.svg": "927a0781fa389d7b6103c3a10a30cb983259458d18e966c18ba821fe3136877c",
+    "swings/overhead-10.svg": "989e5da31f05efdabfa566b57057aae78cf0220ecfc5c0fd4fdcd4dc5271130e",
+    "swings/overhead-11.svg": "b13378256a504943c2cee6d559070dbec70c15ead7fd986e64b1bc2603d2094c",
+    "swings/overhead-12.svg": "8aac785b75a3147ed83463ac52cdf76f0ffe8d22369425d92fdae01e0f68f38e",
+    "swings/overhead-13.svg": "be2deff2ceb407a910ed182222f00ea6d57a67f6e174166ac34e50c5b48af8d4",
+    "swings/overhead-14.svg": "221a0f555160be8baa062030442d8eb4cd3d0b124c5f253b68855057d5e70875",
+    "swings/overhead-15.svg": "c4963cda15d42bed5bbae9656aa67b0da81dea5334d0ac7235ab44dd47bf3001",
+    "swings/overhead-16.svg": "3b1caa30f50c5a075aa7ded30d8ef56a3db1f3c317a73ccf77c354ca1a797432",
+    "swings/overhead-17.svg": "097bc245298ffe735d63ee18a94c3aaee548dd7a386dad542b5d0bd5281a15e9",
+    "swings/overhead-18.svg": "dd795bac832ed87839d442ce5c033ed0bee79f1450ce2ac323d658ac2e188806",
+    "swings/overhead-19.svg": "af70557350595982430d592639c3a4296de3f11be8006f504063fc5883c190a2",
+    "swings/overhead-20.svg": "c77d3a70b4a16e1d3c8a1bbd446dac0afeb7d1ab91f575e059f1c542d9a5777e",
+    "swings/overhead-21.svg": "d39fff21f6d15c10c5698afd292be0cc93e148b2c0b8f702b7cafa27f9938778",
+    "swings/overhead-22.svg": "d39796f1791a2a3cb993832a621ea7e2b2b5a2d8dc676b859702fee5f93ecdbc",
+    "swings/overhead-23.svg": "12bff7d2e36232cf7f956bf1dfec96129939eff9315d3e6a7ea8518e2a3ad439",
+    "swings/overhead-24.svg": "5c49883c77492e6b31e8672c6794ff1e73c29314cee105b935028d711fcba1b1",
+    "swings/overhead-25.svg": "75b6d27799fd07cbdb6cf5eed21451621c596ffb32d0dd69f1d7c38431c355ba",
+    "swings/overhead-26.svg": "a25050f74b915ad5f12ce746e4f2de990865f037ac9ef5c40c1e8af3a0b7eead",
+    "swings/overhead-27.svg": "05ddfc98093412a830a40722fa44253393bf8ad716bf8edf62a4b2a9cfff71f4",
+    "swings/serve-01.svg": "ede32f46a4cf6cd8aafd17f63fd8a502b29799b23ae0185435f368759f0f7eb0",
+    "swings/serve-02.svg": "9c33ad36877bcfe7ffbba5d8ddeeddbef0a44f9d31ab1feffb09ae9786a16a59",
+    "swings/serve-03.svg": "b3541d63792dc320b8e376f0414ed63d8d25fbaa7701cd970efea854391b5b36",
+    "swings/serve-04.svg": "8b72cbbe639bad0820e58d9f8228b78a03fa1483462b886fe48565513618497a",
+    "swings/serve-05.svg": "9e63ce041d9c3bca2616284035e45656dcc42af24390db6f0f6e52a4df03b127",
+    "swings/serve-06.svg": "fcd3b69945771d8387b5cc99347486019898b7a1d0ed622216c6c86835a96abb",
+    "swings/serve-07.svg": "c13a8f8996557157775822de6df343a2f9c1bb71d12249ab3a4cd21c3e8ba0d5",
+    "swings/serve-08.svg": "b43a699e8d10a89b2a57aa922c852fe8adbb8ded75f94148f0c27d9350b0aca2",
+    "swings/serve-09.svg": "f58cbf66c8d854b6296013754babd9be144d70c7ff6f5c7b8ae7fc9396b2f837",
+    "swings/serve-10.svg": "ad08a025baab74c7ba68e29c5e5bef343e570d7eae8a822bffa3222d6e81dc6d",
+    "swings/serve-11.svg": "90357b79a7f669857d053146ae2bbbf2ae9e5c2f20fc995e5ea6c5621ea2b514",
+    "swings/serve-12.svg": "81efe2f5bcfa84b79d3743f073c2568f4a5908fcba0acc0d62543dfd870ef6fa",
+    "swings/serve-13.svg": "49b06abb711bf1e58a07792d322b3b37e2f9258f921805b98ef008cff061aee2",
+    "swings/serve-14.svg": "998ec412be1b3343b127305d9c4ec402543266d6ab648f768ac4237cd31287b2",
+    "swings/serve-15.svg": "522d6d9ec1767eac20208b8b3f792bc01d05d10184e1f6e88b143c1db429968d",
+    "swings/serve-16.svg": "80b60895c8d7ff1dcba3b6ffb6f925b0a51782179b346c14ea77390d704680ca",
+    "swings/serve-17.svg": "5da678861f91f70620ddd6ba8528a1c9ef605c13fec4d0df74afbf4b86117035",
+    "swings/serve-18.svg": "849898ad624ab02e3d0f093c2e04a6c97c99f313be3582497a26f4954eb6403d",
+    "swings/serve-19.svg": "3f6cc3fe9ddd25f049165348c9e93a567732a4c9cec5647ad5a0f2d372ae26c3",
+    "swings/serve-20.svg": "7b07a16aa8d8b34be4d2092b98bdc079bd69c9a4c624530638914575e1f601d6",
+    "swings/serve-21.svg": "45892430f0a66d37015a13c9cef1aaecbc266d6540c49e497750122c3a42960f",
+    "swings/serve-22.svg": "06a63674a31004946c036e7079a3c2cb8b5e8e89a2f9990cd507645af2600a10",
+    "swings/serve-23.svg": "01d6009b4d22f3ed602cfab8a6e8da400108b65af019b0b78e0c19c533f47b9c",
+    "swings/underhand-01.svg": "d886639143573a8eb1f4019ae85d03f63df7ec134e0443d168fa8d951f9a6cc6",
+    "swings/underhand-02.svg": "cae42c1104cdbd8148f47ab59e128caae63267f147463dbb160bfe27ba4db7dc",
+    "swings/underhand-03.svg": "32f3c065e3f71f88248127140c5f361c0dc661615cc96215d19d43085246d192",
+    "swings/underhand-04.svg": "2d714fd5d307e38cc0cfe25a7227ca609db569dbc052f4a2e38d61022f964203",
+    "swings/underhand-05.svg": "d9e7235f849187144810cac7522b1e4250ef89b68511fa45b5f9a8ea862397f0",
+    "swings/underhand-06.svg": "c223206bb788bcd12d0df36f756d1ae93013a663f6bbdb3eba0ba52c1a6979e4",
+    "swings/underhand-07.svg": "6aa5c52075b7fcaeaab3fcc4ad21d03baad2ffaf6cbe80ff64c6a3efba916cda",
+    "swings/underhand-08.svg": "eba67a06f8d14ac3596ae1a9a624c11f5b0ee314cc4f49ebbbd576bca5f72154",
+    "swings/underhand-09.svg": "289a1839b02a1c8f671c15af27e8167138938a1819aed0a9ef442d7f3169d086",
+    "swings/underhand-10.svg": "7cb1f62c120316588a46b13664b008076eed43e0b08ecce054a163ec17f9fe5d",
+    "swings/underhand-11.svg": "19ea0fb0ed0d5bdef80a96829ac385eb18e5490f89ba598648445994cc93b574",
+    "swings/underhand-12.svg": "8517d031ee58ea289f9dae05cb6092e564c4a69c48d8416ee5374e222f171869",
+    "swings/underhand-13.svg": "56f06892f01911651485fc76e77665f310175d3c9946e5c39cef3f68924fd97e",
+    "swings/underhand-14.svg": "ae0127b98fed7ebe3262ff211eedede177f14078b6710580ce8dc36ea340e41a",
+    "swings/underhand-15.svg": "8757fbb8408d390e6c6687209fdeefa6d7ba8efa591a2c5852f40037f458f0a5",
+    "swings/underhand-16.svg": "ac561ef8b22556d8578f6c228cbc3b293d53112b3d455c05ad94ba485e02fdf5",
+    "swings/underhand-17.svg": "6758e18ecf052362c60f2ab25afe836bc50ffb5430d846ae5c421e319b3872df",
+    "swings/underhand-18.svg": "dc072774de67db3209b5082bc6ceeffed977d1c1f3fc059bb0e6d993045c1081",
+    "swings/underhand-19.svg": "dcc595bd644078fb192946096bd5b11af9f23047ee75bc68c36f288e861c8b46"
+  }
+}

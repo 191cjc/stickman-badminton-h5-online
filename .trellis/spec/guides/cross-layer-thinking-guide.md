@@ -16,8 +16,8 @@ Keyboard/pointer -> InputFrame -> same-origin authenticated WS
 ## Contracts to preserve
 
 - Guest Cookie is the bearer identity; active socket/seat are server-derived. Room/side/score/position fields from a client are not accepted.
-- `seq` follows the guest's current room input scope. `ack` identifies incorporated/discarded logical input; `tick` identifies authoritative simulation time. Burst coalescing means they do not advance at a fixed one-to-two ratio.
-- Press edges are sampled once across two simulation substeps; the latest held state and the locked hit direction/jump combination have different purposes.
+- `seq` follows the guest's current room input scope. `ack` identifies incorporated/discarded logical input; `tick` identifies authoritative simulation time. Burst coalescing means they do not advance at a fixed ratio.
+- Press edges are sampled once in each60Hz simulation frame; movement uses the latest held direction, while the recent hit edge can preserve its jump state. Flash shot angles do not use the inherited internal hitMove field.
 - Online ball flight/collision/score/result are authoritative. Client prediction changes only local player presentation.
 - Release, close, reconnect deadlines, normal result retention, and queue expiry are separate lifecycle transitions.
 

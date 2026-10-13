@@ -1,5 +1,5 @@
-import type { Player } from "./entities";
-import type { Simulation } from "./simulation";
+import type { ClassicSimulation } from "./classic/simulation";
+import { cloneClassicPlayer } from "./classic/player";
 import type { PlayerIntent } from "./types";
 
 export const emptyIntent = (): PlayerIntent => ({
@@ -10,9 +10,6 @@ export const emptyIntent = (): PlayerIntent => ({
   hitPressed: false,
   pausePressed: false,
 });
-export const serializePlayer = (player: Player) => ({
-  ...player,
-  ai: { ...player.ai },
-});
+export const serializePlayer = cloneClassicPlayer;
 export type PlayerState = ReturnType<typeof serializePlayer>;
-export type GameState = ReturnType<Simulation["snapshot"]>;
+export type GameState = ReturnType<ClassicSimulation["snapshot"]>;

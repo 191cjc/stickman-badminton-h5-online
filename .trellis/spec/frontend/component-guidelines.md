@@ -18,9 +18,11 @@ Its generic does not validate the tag at runtime. When changing an element ID/ty
 
 ## Canvas presentation
 
-[Renderer.render](../../../src/client/renderer.ts) consumes `GameState` and `Viewport`; it hydrates reusable `Player`/`Shuttlecock` objects to use geometry methods. Renderer must not decide collisions, scores, room status, or gameplay input.
+[Renderer.render](../../../src/client/renderer.ts) consumes `GameState` and `Viewport`; it loads the extracted `public/classic/manifest.json` and SVG image layers. Renderer must not decide collisions, scores, room status, or gameplay input.
 
-The frame loop measures Canvas CSS dimensions, caps DPR at 2, calculates a uniform world scale, and sets the drawing transform. Preserve the 1600x900 world mapping from [config.ts](../../../src/shared/config.ts) rather than changing physics coordinates to fit the screen.
+The frame loop measures Canvas CSS dimensions, caps DPR at 2, calculates a uniform world scale, and sets the drawing transform. Preserve the640×426 world mapping from [CLASSIC_WORLD](../../../src/shared/classic/types.ts) rather than changing physics coordinates to fit the screen.
+
+Draw the selected swing behind the body, mirrored at±1.25horizontal/1.25vertical, using the same1-basedframe as numeric authority. The serve layer already contains its attached shuttle; draw the standalone shuttle only after release. Manifest dimensions/fps must agree with the simulation.
 
 ## Styling and accessibility
 

@@ -21,6 +21,7 @@ import {
   RESULT_MS,
   SIM_HZ,
   SNAPSHOT_HZ,
+  SUBPROTOCOL,
   parseClientMessage,
 } from "../shared/protocol";
 import type {
@@ -157,7 +158,11 @@ export function createGameService(options: ServiceOptions) {
     maxPayload: 1024,
     perMessageDeflate: false,
     handleProtocols: (protocols) =>
-      protocols.has("badminton-v1") ? "badminton-v1" : false,
+      protocols.has(SUBPROTOCOL)
+        ? SUBPROTOCOL
+        : protocols.has("badminton-v1")
+          ? "badminton-v1"
+          : false,
   });
   function send(guest: Guest, message: ServerMessage): void {
     const ws = guest.socket;
@@ -361,18 +366,24 @@ export function createGameService(options: ServiceOptions) {
     if (req.url !== `${BASE_PATH}ws`) return reject(404, "Not Found");
     if (!req.headers.origin || !options.origins.includes(req.headers.origin))
       return reject(403, "Forbidden");
-    if (
-      !req.headers["sec-websocket-protocol"]
-        ?.split(",")
-        .map((x) => x.trim())
-        .includes("badminton-v1")
-    )
+    const offered = req.headers["sec-websocket-protocol"]
+      ?.split(",")
+      .map((x) => x.trim());
+    if (!offered?.includes(SUBPROTOCOL) && !offered?.includes("badminton-v1"))
       return reject(400, "Bad Request");
     const id = cookieId(req);
     const guest = id ? guests.get(id) : undefined;
     if (!guest) return reject(401, "Unauthorized");
     if (guest.socket) return reject(409, "Conflict");
     wss.handleUpgrade(req, socket, head, (ws) => {
+      // A previously loaded v1 page gets a terminal policy close instead of
+      // reconnecting repeatedly. It never acquires a guest connection or seat.
+      if (ws.protocol !== SUBPROTOCOL) {
+        ws.on("error", () => {});
+        ws.send(JSON.stringify({ type: "error", code: "protocol_mismatch" }));
+        ws.close(1008, "protocol_mismatch");
+        return;
+      }
       guest.socket = ws;
       guest.seen = Date.now();
       let count = 0;
@@ -460,36 +471,34 @@ export function createGameService(options: ServiceOptions) {
     const now = Date.now();
     for (const room of rooms.values()) {
       if (room.status !== "playing") continue;
-      if (room.tick % 2 === 0) {
-        for (const side of SIDES) {
-          const seat = room.seats[side];
-          if (now - seat.lastInput > inputTimeoutMs) clearSeat(seat);
-          const input = seat.pending.at(-1);
-          if (input) {
-            seat.current = { ...input, pausePressed: false };
-            seat.current.jumpPressed = seat.pending.some(
-              (frame) => frame.jumpPressed,
-            );
-            const hit = seat.pending
-              .slice()
-              .reverse()
-              .find((frame) => frame.hitPressed);
-            seat.current.hitPressed = !!hit;
-            if (hit) {
-              seat.current.hitMove = hit.move;
-              seat.current.hitJump = hit.jump;
-            }
-            seat.currentSeq = input.seq;
-            seat.held = {
-              ...seat.current,
-              jumpPressed: false,
-              hitPressed: false,
-              hitMove: undefined,
-              hitJump: undefined,
-            };
-            seat.pending = [];
-          } else seat.current = seat.held;
-        }
+      for (const side of SIDES) {
+        const seat = room.seats[side];
+        if (now - seat.lastInput > inputTimeoutMs) clearSeat(seat);
+        const input = seat.pending.at(-1);
+        if (input) {
+          seat.current = { ...input, pausePressed: false };
+          seat.current.jumpPressed = seat.pending.some(
+            (frame) => frame.jumpPressed,
+          );
+          const hit = seat.pending
+            .slice()
+            .reverse()
+            .find((frame) => frame.hitPressed);
+          seat.current.hitPressed = !!hit;
+          if (hit) {
+            seat.current.hitMove = hit.move;
+            seat.current.hitJump = hit.jump;
+          }
+          seat.currentSeq = input.seq;
+          seat.held = {
+            ...seat.current,
+            jumpPressed: false,
+            hitPressed: false,
+            hitMove: undefined,
+            hitJump: undefined,
+          };
+          seat.pending = [];
+        } else seat.current = seat.held;
       }
       room.simulation.setIntents(
         room.seats.left.current,
@@ -504,31 +513,34 @@ export function createGameService(options: ServiceOptions) {
           jumpPressed: false,
           hitPressed: false,
         };
-        if (room.tick % 2 === 0) seat.ack = seat.currentSeq;
+        seat.ack = seat.currentSeq;
       }
       const state = room.simulation.snapshot();
       if (state.phase === "matchEnd") finish(room, state.winner, "score");
-      else if (room.tick % 4 === 0) snapshot(room);
+      else if (room.tick % (SIM_HZ / SNAPSHOT_HZ) === 0) snapshot(room);
     }
   }
   let accumulator = 0;
   let previous = performance.now();
   let broadcastTicks = 0;
-  const ticker = setInterval(() => {
-    const now = performance.now();
-    accumulator += Math.min(now - previous, 100);
-    previous = now;
-    let steps = 0;
-    while (accumulator >= 1000 / SIM_HZ && steps < 12) {
-      step();
-      accumulator -= 1000 / SIM_HZ;
-      steps += 1;
-      broadcastTicks += 1;
-      if (broadcastTicks % 4 === 0)
-        for (const room of rooms.values())
-          if (room.status !== "playing") snapshot(room);
-    }
-  }, 4);
+  const ticker = setInterval(
+    () => {
+      const now = performance.now();
+      accumulator += Math.min(now - previous, 100);
+      previous = now;
+      let steps = 0;
+      while (accumulator >= 1000 / SIM_HZ && steps < 6) {
+        step();
+        accumulator -= 1000 / SIM_HZ;
+        steps += 1;
+        broadcastTicks += 1;
+        if (broadcastTicks % (SIM_HZ / SNAPSHOT_HZ) === 0)
+          for (const room of rooms.values())
+            if (room.status !== "playing") snapshot(room);
+      }
+    },
+    Math.floor(1000 / SIM_HZ / 2),
+  );
   const collector = setInterval(() => {
     const now = Date.now();
     for (const room of rooms.values()) {

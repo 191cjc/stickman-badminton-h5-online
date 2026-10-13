@@ -1,4 +1,9 @@
-import { BASE_PATH, PROTOCOL } from "../shared/protocol";
+import {
+  BASE_PATH,
+  PROTOCOL,
+  RECONNECT_MS,
+  SUBPROTOCOL,
+} from "../shared/protocol";
 import type { ClientMessage, ServerMessage } from "../shared/protocol";
 
 export class Network {
@@ -8,13 +13,17 @@ export class Network {
   private reconnectStarted = 0;
   private stopped = false;
   private connecting = false;
+  private incompatible = false;
   constructor(
     private readonly onMessage: (message: ServerMessage) => void,
     private readonly onStatus: (connected: boolean, text: string) => void,
     private readonly onRtt: (rtt: number) => void,
   ) {}
+  get refreshRequired(): boolean {
+    return this.incompatible;
+  }
   get connected(): boolean {
-    return this.socket?.readyState === WebSocket.OPEN;
+    return !this.incompatible && this.socket?.readyState === WebSocket.OPEN;
   }
   send(message: ClientMessage): boolean {
     if (!this.connected || this.socket!.bufferedAmount > 64 * 1024)
@@ -22,8 +31,16 @@ export class Network {
     this.socket!.send(JSON.stringify(message));
     return true;
   }
+  private requireRefresh(): void {
+    this.incompatible = true;
+    this.stopped = true;
+    clearTimeout(this.retry);
+    clearInterval(this.ping);
+    this.onStatus(false, "版本已更新，请刷新页面");
+    this.socket?.close(1000, "protocol_mismatch");
+  }
   async connect(manual = false): Promise<void> {
-    if (this.connecting) return;
+    if (this.incompatible || this.connecting) return;
     if (this.socket && this.socket.readyState <= WebSocket.OPEN) return;
     if (manual) {
       this.reconnectStarted = 0;
@@ -43,8 +60,7 @@ export class Network {
         connected: boolean;
       };
       if (session.protocol !== PROTOCOL) {
-        this.stopped = true;
-        this.onStatus(false, "版本已更新，请刷新页面");
+        this.requireRefresh();
         return;
       }
       if (!this.reconnectStarted && session.connected) {
@@ -54,7 +70,7 @@ export class Network {
       }
       const url = new URL(`${BASE_PATH}ws`, location.href);
       url.protocol = location.protocol === "https:" ? "wss:" : "ws:";
-      const ws = new WebSocket(url, "badminton-v1");
+      const ws = new WebSocket(url, SUBPROTOCOL);
       this.socket = ws;
       ws.addEventListener("open", () => {
         this.reconnectStarted = 0;
@@ -66,6 +82,14 @@ export class Network {
       });
       ws.addEventListener("message", (event) => {
         const message = JSON.parse(event.data as string) as ServerMessage;
+        if (
+          (message.type === "hello" && message.protocol !== PROTOCOL) ||
+          (message.type === "error" && message.code === "protocol_mismatch")
+        ) {
+          this.requireRefresh();
+          return;
+        }
+        if (this.incompatible) return;
         if (message.type === "pong")
           this.onRtt(Math.round(performance.now() - message.time));
         this.onMessage(message);
@@ -73,6 +97,11 @@ export class Network {
       ws.addEventListener("close", (event) => {
         clearInterval(this.ping);
         this.socket = undefined;
+        if (this.incompatible) return;
+        if (event.reason === "protocol_mismatch") {
+          this.requireRefresh();
+          return;
+        }
         if (event.code === 1008) {
           this.stopped = true;
           this.onStatus(false, "连接被拒绝，请刷新后重试");
@@ -87,8 +116,9 @@ export class Network {
     }
   }
   private schedule(): void {
+    if (this.stopped || this.incompatible) return;
     this.reconnectStarted ||= Date.now();
-    if (Date.now() - this.reconnectStarted >= 15_000) {
+    if (Date.now() - this.reconnectStarted >= RECONNECT_MS) {
       this.stopped = true;
       this.onStatus(false, "连接中断，点击重新连接后再次匹配");
       return;

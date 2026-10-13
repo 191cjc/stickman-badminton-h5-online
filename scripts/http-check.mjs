@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { WebSocket } from "ws";
 const origin = process.argv[2] ?? "https://www.firesoul.cn";
 const base = new URL("/badminton-h5-online/", origin);
@@ -19,7 +20,31 @@ const health = await fetch(new URL("api/health", base));
 assert.equal(health.status, 200);
 const status = await health.json();
 assert.equal(status.ok, true);
-assert.equal(status.simulationHz, 120);
+assert.equal(status.protocol, 2);
+assert.equal(status.simulationHz, 60);
+assert.equal(status.snapshotHz, 30);
+const artResponse = await fetch(new URL("classic/manifest.json", base));
+assert.equal(artResponse.status, 200);
+const art = await artResponse.json();
+assert.equal(art.schema, 1);
+assert.equal(art.fps, 60);
+assert.deepEqual(art.coordinateSystem, { width: 640, height: 426 });
+assert.equal(
+  art.source.swfSha256,
+  "cab8a824c54af3a0b9454ef30fcbcabc532931f2a96717239fabd58f57e59912",
+);
+assert.equal(art.netFrames.length, 24);
+for (const frame of [art.background, art.shuttle, art.netFrames[1]]) {
+  const response = await fetch(new URL(`classic/${frame.path}`, base));
+  assert.equal(response.status, 200);
+  assert.ok(response.headers.get("content-type")?.includes("image/svg+xml"));
+  const bytes = Buffer.from(await response.arrayBuffer());
+  assert.ok(bytes.toString().includes("<svg"));
+  assert.equal(
+    createHash("sha256").update(bytes).digest("hex"),
+    art.files[frame.path],
+  );
+}
 const session = await fetch(new URL("api/session", base));
 assert.equal(session.status, 200);
 const setCookie = session.headers.get("set-cookie");
@@ -28,7 +53,7 @@ assert.ok(setCookie.includes("SameSite=Lax"));
 if (base.protocol === "https:") assert.ok(setCookie.includes("Secure"));
 const wsUrl = new URL("ws", base);
 wsUrl.protocol = base.protocol === "https:" ? "wss:" : "ws:";
-const ws = new WebSocket(wsUrl, "badminton-v1", {
+const ws = new WebSocket(wsUrl, "badminton-v2", {
   headers: { Cookie: setCookie.split(";")[0], Origin: new URL(origin).origin },
 });
 const greeting = await new Promise((resolve, reject) => {
@@ -46,7 +71,7 @@ const greeting = await new Promise((resolve, reject) => {
   });
 });
 assert.equal(greeting.type, "hello");
-assert.equal(greeting.protocol, 1);
+assert.equal(greeting.protocol, 2);
 ws.close();
 const existing = [];
 for (const path of [
@@ -65,8 +90,10 @@ console.log(
       page: page.status,
       assets: assets.length,
       health: status.ok,
+      classicArt:
+        "source record, 640x426, 60 fps, 24 net frames and 3 SVG hashes checked",
       cookie: "HttpOnly/SameSite checked",
-      websocket: "hello protocol=1",
+      websocket: "hello protocol=2",
       existing,
     },
     null,

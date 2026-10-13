@@ -1,29 +1,54 @@
-# Simulation, entities, and source reuse
+# Flash 90302 simulation and source reuse
 
-## Ownership and environment independence
+## 1. Scope / Trigger
 
-[Simulation](../../../src/shared/simulation.ts) owns players, shuttle, phase, score, server side, winner, rally, and impact state. It accepts logical PlayerIntent values and advances by explicit dt. Keep it independent of DOM, WS, Cookie identity, room creation, or client UI.
+Gameplay migrated from the community H5 kernel to recovered Flash90302. Use [ClassicSimulation](../../../src/shared/classic/simulation.ts), exposed as Simulation by [the adapter](../../../src/shared/simulation.ts), for online authority and local AI practice. It owns players, shuttle, phase, score, action clocks, server side, RNG and winner. Shared mechanics must remain free of DOM, WS, Cookie, wall-clock timers and Node service APIs.
 
-[config.ts](../../../src/shared/config.ts) owns world/player/racket/shuttle/match/AI tuning. The current world is 1600x900, groundY 780, netX 800, and target score 7. Keep rendering scale separate from these world coordinates.
+The active reference is the unchanged SWF, recovered ActionScript and compressed XML under [reference](../../../reference/flash-90302/README.md); [GAME_SOURCE.json](../../../GAME_SOURCE.json) identifies it. The frozen community `upstream/` is historical and must not become the new parity oracle. Neither source has a verified MIT grant.
 
-`entities.ts` supplies Player/Shuttlecock geometry and state. Attached shuttle animation uses elapsed simulation time passed into updateAttached; it must not read browser performance time inside shared mechanics. AI uses the shared controller intent and flight prediction; practice currently supports normal/boss tuning.
+## 2. Signatures
 
-## Mechanics reuse
+- `new ClassicSimulation(mode = 'versus', difficulty = 'normal', { seed? } = {})`
+- `setIntents(left: PlayerIntent, right: PlayerIntent): void`
+- `update(dt: number): void`; explicit bounded fixed60Hz stepping
+- `snapshot(): ClassicState`; serializable state, not a complete private restoration checkpoint
+- [stepClassicPlayer](../../../src/shared/classic/player.ts) accepts a plain player, logical intent, dt and read-only context; reused by Simulation and Prediction
+- [racketPose](../../../src/shared/classic/assets.ts) accepts action and1-basedframe and returns full-precision original geometry before runtime scale
 
-[stepPlayer](../../../src/shared/player-step.ts) contains movement, acceleration, gravity, jump buffering/coyote time, swing queuing/recovery, and feedback timers. Both Simulation and browser Prediction use it. The server supplies a callback for held-hit readiness based on authoritative shuttle state; prediction's default callback does not synthesize those ball-dependent hits.
+## 3. Contracts
 
-Shot launch, flight, racket/net collision, out/ground decisions, points, and winner remain in Simulation. [flight.ts](../../../src/shared/flight.ts) provides mutable/copy stepping of flight state with profile-specific drag; reuse it for AI and predictive trajectory calculations rather than creating another ball model.
+[CLASSIC_WORLD](../../../src/shared/classic/types.ts):640×426, ground400, net317.25, player scale1.25, fps60, target7. Canvas CSS scaling must not change these units. First version uses Average Joe; normal/boss AI are local tuning, not the full original campaign.
 
-`PlayerIntent.hitMove` and `hitJump` are optional internal locks preserving the hit-edge combination during server coalescing. Held state clears those locks. They must not be exposed as accepted client input fields.
+Authority steps left player, right player, birdie, then custom timeline callbacks. Serve frame7 releases the shuttle; overhead27/underhand19/serve23 frame events and stop behavior come from the original. Stage-add clock0 and gotoAndStop/stop frame/fps clocks differ; preserve per-clip clocks when switching actions, including hidden outgoing animation. Do not replace this with elapsed/duration swing windows. Source-supported exact60Hz serve resumes1→3 and releases on fifth fixed tick, but this formula is not a native Flash timing measurement.
 
-## State and rendering
+Racket `hitTestPoint(false)` uses transformed global AABB; selection zones use actual contours flattened within0.01Joe-localpixel error. Numeric authority retains SWF precision; SVG matrix strings use exporter rounding. Mirror/scale matrices identically for both sides. Net contact also drives the original net animation; it persists across rallies.
 
-[Snapshot state](../../../src/shared/state.ts) is inferred with `ReturnType<Simulation["snapshot"]>` and `ReturnType<typeof serializePlayer>`. `serializePlayer` spreads own fields and clones the nested AI memory. Class methods/getters are not JSON transport; consumers hydrate existing class instances using Object.assign to access geometry methods.
+AI retains last-toucher rejection. Human contact has no invented same-side rejection; rapid-input samples passing cannot establish that every own-recontact scenario is impossible. Held hit latches until release, and active actions cannot be canceled/restarted by repeated press.
 
-Snapshot additions must remain serializable data and update their consumers/tests. Renderer reads positions/geometry/visual fields without deciding mechanics. Current snapshots include score and visual state; they are not full restoration checkpoints for every private simulation diagnostic.
+Input `hitMove`/`hitJump` are server-internal coalescing locks, never accepted wire fields. Online clients cannot launch the shuttle or award points. Snapshots deep-copy nested player action/AI and score/ball data; preserve alias isolation.
 
-## Regression evidence
+## 4. Validation & Error Matrix
 
-[simulation.test.ts](../../../tests/simulation.test.ts) compares movements, jumps, swings, serve, flying shuttle, scores, and winner against the frozen community BadmintonGame over a full match without DOM. Attached shuttle bobbing intentionally uses a different time source, so the test does not compare that attached coordinate exactly. It also checks retained AI play.
+| Condition                                  | Observable behavior                                        |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| Nonfinite/nonpositive dt                   | No advancement                                             |
+| Excess elapsed time                        | At most0.25s/15frames catch-up                             |
+| Paused/ended state                         | No AI or point timer progression                           |
+| Held hit/repeated edge during active swing | No action restart                                          |
+| Ground event with active point             | One point, then1.5s next-rally delay                       |
+| Score reaches7                             | Winner and matchEnd, no repeated scoring                   |
+| Score/phase/room boundary                  | Prediction/interpolation reset, no ball authority transfer |
 
-Existing [flight](../../../src/shared/flight.test.ts), [math](../../../src/shared/math.test.ts), and [AI](../../../src/shared/ai-controller.test.ts) tests provide focused numerical coverage. [Prediction tests](../../../tests/prediction.test.ts) verify sharing the motion rules and replaying unacknowledged frames. Mechanics changes need observable regression evidence, not tests that mirror the implementation line by line.
+## 5. Good / Base / Bad Cases
+
+Good: both sides use shared player stepping and full source matrices while the server decides contacts and scores. Base: a serve event creates one upwards±40-degree1485-speed shot. Bad: changing draw scale without the numeric transforms, predicting ball collision, replacing fixed action events with wall-clock timeout, or modifying frozen source to make a test pass.
+
+## 6. Tests Required
+
+[Core tests](../../../tests/classic/core.test.ts) assert source-value movement/jump, both serves, custom action clocks, contact windows, opponent return, quick-input grids, net/top/side/wall/ground, single scoring, seven-point results, seeded AI and replay/pause. [Assets tests](../../../tests/classic/assets.test.ts) assert frozen hashes, origins, matrices, actual zone witnesses, visibility and extracted resources. [Prediction](../../../tests/prediction.test.ts) and [service](../../../tests/service.test.ts) check transport authority and completed-step ack.
+
+Source-derived numeric assertions, extraction determinism and migrated replay are different evidence from unchanged SWF execution. Original Ruffle screenshots are compatibility-runtime evidence, not native Flash or exhaustive parity. Record limits in [validation](../../../docs/validation.md).
+
+## 7. Wrong vs Correct
+
+Wrong: retain community120Hz two-substep assumptions and reuse a single zero-based swing duration. Correct: use one60Hz step and original1-based independent clip clocks/events, shared frame geometry and server-authoritative ball.

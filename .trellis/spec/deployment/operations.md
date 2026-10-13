@@ -2,16 +2,16 @@
 
 ## Owned resources
 
-| Resource | Current value |
-| --- | --- |
-| Independent project | `/home/ubuntu/stickman-badminton-h5-online/` |
-| Public entrance | `https://www.firesoul.cn/badminton-h5-online/` |
-| Backend | `127.0.0.1:8794` |
-| Development frontend | `127.0.0.1:5184` with project base path |
-| systemd | `badminton-h5-online.service` |
-| Nginx snippet | `/etc/nginx/snippets/badminton-h5-online.conf` |
-| Production environment | `/etc/badminton-h5-online.env`, root 0600 |
-| Release storage | `/opt/stickman-badminton-h5-online/releases/`; sibling `current`/`previous` symlinks at the project deploy root |
+| Resource               | Current value                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Independent project    | `/home/ubuntu/stickman-badminton-h5-online/`                                                                    |
+| Public entrance        | `https://www.firesoul.cn/badminton-h5-online/`                                                                  |
+| Backend                | `127.0.0.1:8794`                                                                                                |
+| Development frontend   | `127.0.0.1:5184` with project base path                                                                         |
+| systemd                | `badminton-h5-online.service`                                                                                   |
+| Nginx snippet          | `/etc/nginx/snippets/badminton-h5-online.conf`                                                                  |
+| Production environment | `/etc/badminton-h5-online.env`, root 0600                                                                       |
+| Release storage        | `/opt/stickman-badminton-h5-online/releases/`; sibling `current`/`previous` symlinks at the project deploy root |
 
 Sources: [unit](../../../ops/badminton-h5-online.service), [Nginx snippet](../../../ops/badminton-h5-online.nginx.conf), [environment example](../../../ops/production.env.example), and [deployment documentation](../../../docs/deployment.md).
 
@@ -47,8 +47,10 @@ node scripts/http-check.mjs https://www.firesoul.cn
 
 A docs-only task does not call publish or restart services. Validate Markdown/link/index changes locally. Publishing must belong to the authorized task scope, with checks completed before the release action.
 
-## Upstream reuse and license record
+## Active source and historical record
 
-The frozen source is from `https://github.com/LoveSeele-max/stickman_badminton_h5`, commit `1a8799e65a39f7dafab2075c9297d8e4965f1ecb`, originally downloaded at `/home/ubuntu/stickman-badminton-online/demo/`. [UPSTREAM.json](../../../UPSTREAM.json) stores file/blob checks, the inherited demo Vite-base change, and provenance; [upstream](../../../upstream/README.md) retains the original source for comparison.
+The active source is4399 Flash90302. [GAME_SOURCE.json](../../../GAME_SOURCE.json) records URL/hash/scope; [reference](../../../reference/flash-90302/README.md) freezes unchanged SWF, recovered ActionScript and gzip XML. This is recovered bytecode/data, not the author's editable source project. Preserve original copyright/markings and do not claim MIT or an unverified open-source grant.
 
-The verified commit root contains no license file and its README has no license grant. Do not add or claim MIT for that code. Preserve its origin/version, programmatic Canvas appearance, and test comparison; original-game asset replacement requires separate assessment. Copying source must exclude node_modules, dist, caches, and temporary output.
+The community [UPSTREAM.json](../../../UPSTREAM.json) and frozen [upstream](../../../upstream/README.md) retain commit1a8799e65a39f7dafab2075c9297d8e4965f1ecb as historical provenance. No community gameplay modules are live. Never change separate demo/cloud/original source or treat this historical simulation as the new parity reference.
+
+Releases include GAME_SOURCE.json and UPSTREAM.json, while reference/tools/artifacts remain outside dist/client and the public alias. Static resources are extracted public/classic SVGs; regeneration uses frozen XML and documented research-only JPEXS. Protocol2 requires refreshed pages; rollback to the prior community release also requires refresh. Always switch frontend/backend together and preserve the Cookie secret.

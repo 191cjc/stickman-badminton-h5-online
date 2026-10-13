@@ -12,7 +12,7 @@ npm run lint
 npm test
 npm run build
 sudo install -d -m 755 -o ubuntu -g ubuntu "$release_dir"
-tar -cf - dist package.json package-lock.json .npmrc UPSTREAM.json | tar -xf - -C "$release_dir"
+tar -cf - dist package.json package-lock.json .npmrc UPSTREAM.json GAME_SOURCE.json | tar -xf - -C "$release_dir"
 npm ci --omit=dev --ignore-scripts --no-audit --no-fund --prefix "$release_dir"
 sudo chown -R root:root "$release_dir"
 previous_release=$(readlink "$deploy_root/current" || true)

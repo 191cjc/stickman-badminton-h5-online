@@ -1,7 +1,8 @@
 import "./style.css";
-import { worldConfig } from "../shared/config";
+import { CLASSIC_WORLD as worldConfig } from "../shared/classic/types";
 import { emptyIntent } from "../shared/state";
 import { Simulation } from "../shared/simulation";
+import { INPUT_HZ, SIM_HZ } from "../shared/protocol";
 import type { Snapshot, ServerMessage } from "../shared/protocol";
 import type { GameState } from "../shared/state";
 import type { Side } from "../shared/types";
@@ -23,6 +24,7 @@ const cancel = el<HTMLButtonElement>("cancel");
 const leave = el<HTMLButtonElement>("leave");
 const practice = el<HTMLButtonElement>("practice");
 const renderer = new Renderer();
+let assetsReady = false;
 let interpolation = new Interpolation();
 let prediction: Prediction | undefined;
 let latest: Snapshot | undefined;
@@ -50,12 +52,18 @@ function buttons(): void {
   start.hidden =
     scene === "online" || scene === "queued" || scene === "practice";
   start.disabled =
-    scene === "online" || scene === "queued" || scene === "practice";
-  start.textContent = network.connected
-    ? scene === "result"
-      ? "再次匹配"
-      : "开始匹配"
-    : "重新连接";
+    !assetsReady ||
+    scene === "online" ||
+    scene === "queued" ||
+    scene === "practice";
+  practice.disabled = !assetsReady;
+  start.textContent = network.refreshRequired
+    ? "刷新页面"
+    : network.connected
+      ? scene === "result"
+        ? "再次匹配"
+        : "开始匹配"
+      : "重新连接";
   cancel.hidden = scene !== "queued";
   leave.hidden = scene !== "online" && scene !== "practice";
   practice.hidden =
@@ -77,8 +85,16 @@ const network = new Network(
     el("connection-dot").classList.toggle("online", connected);
     if (!connected) {
       clearInput(false);
+      if (network.refreshRequired && scene !== "practice") {
+        idle();
+        overlay("版本更新", "请刷新页面", text);
+      }
       if (scene === "online" || scene === "queued")
-        overlay("连接中断", "正在恢复连接", text);
+        overlay(
+          "连接中断",
+          network.refreshRequired ? "请刷新页面" : "正在恢复连接",
+          text,
+        );
     }
     buttons();
   },
@@ -121,7 +137,7 @@ function labels(): void {
     el("right-label").textContent = "右侧";
   }
   el("hint").textContent = side
-    ? `你控制${side === "left" ? "白色左侧" : "黄色右侧"}角色。A 向左，D 向右，W 跳跃，S 挥拍；向球网移动并挥拍可打出更快的球。`
+    ? `你控制${side === "left" ? "左侧" : "右侧"}角色（脚下有侧别标记）。A 向左，D 向右，W 跳跃，S 挥拍；按 S 发球。`
     : "两位玩家使用相同按键，匹配后显示你的场地位置。";
 }
 function handleMessage(message: ServerMessage): void {
@@ -163,7 +179,7 @@ function handleMessage(message: ServerMessage): void {
     overlay(
       "匹配成功",
       "准备开赛",
-      `你在${side === "left" ? "左侧（白色）" : "右侧（黄色）"}。`,
+      `你在${side === "left" ? "左侧" : "右侧"}。`,
     );
     labels();
     buttons();
@@ -235,6 +251,10 @@ function updateHud(state: GameState): void {
         : `回合击球 ${state.rallyHits} 次 · 先到 7 分获胜`;
 }
 start.addEventListener("click", () => {
+  if (network.refreshRequired) {
+    location.reload();
+    return;
+  }
   if (!network.connected) {
     el("connection").textContent = "正在连接";
     void network.connect(true);
@@ -269,14 +289,15 @@ function frame(time: number): void {
   requestAnimationFrame(frame);
   const dt = lastTime
     ? Math.max(0, Math.min((time - lastTime) / 1000, 0.1))
-    : 1 / 60;
+    : 1 / INPUT_HZ;
   lastTime = time;
   accumulated += dt;
   let steps = 0;
-  while (accumulated >= 1 / 60 && steps < 6) {
-    accumulated -= 1 / 60;
+  while (accumulated >= 1 / INPUT_HZ && steps < 6) {
+    accumulated -= 1 / INPUT_HZ;
     steps += 1;
     if (
+      assetsReady &&
       scene === "online" &&
       latest?.status === "playing" &&
       network.connected &&
@@ -290,12 +311,7 @@ function frame(time: number): void {
     } else if (scene === "practice" && offline) {
       const intent = toIntent(input.read(++seq));
       offline.setIntents(intent, emptyIntent());
-      offline.update(1 / 120);
-      offline.setIntents(
-        { ...intent, jumpPressed: false, hitPressed: false },
-        emptyIntent(),
-      );
-      offline.update(1 / 120);
+      offline.update(1 / SIM_HZ);
     }
   }
   let state = backdrop;
@@ -355,5 +371,26 @@ function frame(time: number): void {
     state,
   );
 }
+buttons();
+overlay("准备球场", "正在加载画面", "加载完成后即可匹配或练习。");
+void renderer
+  .load()
+  .then(() => {
+    assetsReady = true;
+    if (scene === "idle") {
+      idle();
+      if (network.refreshRequired)
+        overlay(
+          "版本更新",
+          "请刷新页面",
+          "版本已更新，请点击「刷新页面」继续。",
+        );
+    }
+    buttons();
+  })
+  .catch(() => {
+    overlay("加载失败", "画面资源未能加载", "请刷新页面后重试。");
+    buttons();
+  });
 void network.connect();
 requestAnimationFrame(frame);

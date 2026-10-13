@@ -104,13 +104,13 @@ header {
 .court {
   position: relative;
   width: 100%;
-  max-width: max(480px, calc((100svh - 152px) * 16 / 9));
+  max-width: max(480px, calc((100svh - 152px) * 640 / 426));
   margin: 0 auto;
   overflow: hidden;
   border-radius: 15px;
   border: 1px solid #ffffff24;
   box-shadow: 0 25px 60px #0005;
-  aspect-ratio: 16/9;
+  aspect-ratio: 640/426;
   background: #263c46;
 }
 canvas {

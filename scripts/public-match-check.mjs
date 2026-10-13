@@ -8,7 +8,7 @@ async function connect() {
   assert.equal(session.status, 200);
   const url = new URL("ws", base);
   url.protocol = base.protocol === "https:" ? "wss:" : "ws:";
-  const ws = new WebSocket(url, "badminton-v1", {
+  const ws = new WebSocket(url, "badminton-v2", {
     headers: {
       Origin: new URL(origin).origin,
       Cookie: session.headers.get("set-cookie").split(";")[0],
@@ -50,6 +50,9 @@ try {
   assert.equal(l.side, "left");
   assert.equal(r.side, "right");
   assert.equal(l.room, r.room);
+  const initial = await wait(left, "snapshot");
+  const initialX = initial.state.players.left.x;
+  const initialY = initial.state.players.left.y;
   let sampledJump = false;
   let sampledMove = false;
   let consistencyChecks = 0;
@@ -64,8 +67,8 @@ try {
         snapshots.delete(message.tick);
         consistencyChecks++;
       } else snapshots.set(message.tick, message.state);
-      if (message.state.players.left.y < 770) sampledJump = true;
-      if (message.state.players.left.x < 318) sampledMove = true;
+      if (message.state.players.left.y < initialY - 5) sampledJump = true;
+      if (message.state.players.left.x < initialX - 1) sampledMove = true;
     });
   timer = setInterval(() => {
     if (!left.latest || left.latest.status !== "playing") return;
@@ -78,7 +81,7 @@ try {
       const hit =
         state.shuttle.state === "attached" &&
         state.server === side &&
-        !state.players[side].swingType &&
+        !state.players[side].swinging &&
         seq > 30;
       send(player, {
         type: "input",

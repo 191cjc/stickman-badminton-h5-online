@@ -14,7 +14,7 @@ Keyboard handlers skip game input on focused button/input elements. Preserve Can
 
 ## Network lifecycle
 
-[network.ts](../../../src/client/network.ts) fetches the same-origin session with cookies, then opens a `badminton-v1` WS. `connecting` and socket-state guards prevent duplicate connection creation. Automatic retries use a bounded 15-second window; manual retries reset it. Policy close 1008, protocol mismatch, and an initial duplicate active guest stop automatic retry and display a reason.
+[network.ts](../../../src/client/network.ts) fetches the same-origin session with cookies, then opens a `badminton-v2` WS. `connecting` and socket-state guards prevent duplicate connection creation. Automatic retries use a bounded 15-second window; manual retries reset it. Policy close 1008, protocol mismatch, and an initial duplicate active guest stop automatic retry and display a reason.
 
 The client pings every two seconds and clears that interval on close. RTT is transport round-trip time, not input-to-render latency. Server heartbeat and seat retention are separate contracts.
 

@@ -1,0 +1,10 @@
+{"file": ".trellis/spec/shared/index.md", "reason": "Shared layer checklist; Flash design supersedes community-specific mechanics"}
+{"file": ".trellis/spec/shared/simulation.md", "reason": "Current authority and environment boundaries; numeric community assumptions are obsolete for migration"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Input validation, state version, ack and tick contracts"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Local prediction vs authoritative ball/score and interpolation"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Quality commands and user browser authorization"}
+{"file": ".trellis/spec/backend/rooms.md", "reason": "Preserve guest/room lifecycle; migrate timing and simulation integration"}
+{"file": ".trellis/spec/deployment/operations.md", "reason": "Independent release, old entrances, service isolation and rollback"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Share movement and collision data across browser/server"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace protocol/state/timebase changes across consumers"}
+{"file": ".trellis/tasks/10-13-serve-trajectory-fix/research/flash-original.md", "reason": "Verified Flash source, restored classes, timeline and evidence limits"}

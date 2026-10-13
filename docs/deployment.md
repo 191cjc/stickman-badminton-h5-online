@@ -51,6 +51,12 @@ node scripts/http-check.mjs https://www.firesoul.cn
 
 回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
 
+## 玩法版本与来源
+
+当前 Flash 内核使用协议 v2。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1 页面会被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。本次迁移保留的回滚基线为 `20261013T030548Z`。
+
+常规发布/HTTP 脚本不自动运行浏览器。用户已授权的本地浏览器验证使用隔离后端和独立 Cookie，不与线上等待游客匹配。
+
 ## 断线与资源规则
 
 - 活动 Cookie 只绑定一个 WS 连接；重复标签页拒绝（HTTP 409），不能抢占席位。

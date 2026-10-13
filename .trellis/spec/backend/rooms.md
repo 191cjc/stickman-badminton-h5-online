@@ -8,11 +8,11 @@ A playing/reconnecting guest must leave its current match before queueing. A fin
 
 ## Input sampling and acknowledgement
 
-Gameplay uses 120-Hz fixed steps. Every two room ticks, each seat samples the newest pending input; coalesces jump press edges; selects the most recent hit edge and preserves its direction/jump combination; and discards accumulated older held-state samples. This prevents a packet burst from creating a long queue or accelerating physics. With no new input, held state continues with press edges/internal hit locks cleared.
+Gameplay uses60-Hz fixed steps. On every room tick, each seat samples the newest pending held state; coalesces jump press edges; selects the most recent hit edge and preserves its hit-time jump state; and discards older held-state samples. Movement uses the latest direction. The inherited internal hitMove is still recorded but Flash does not use it to choose shot angles. This prevents a packet burst from creating a long queue or accelerating physics. With no new input, held state continues with press edges/internal hit locks cleared.
 
-The first substep receives press edges and the second clears them. Ack advances to the sampled sequence only after the two substeps finish. Input stale for 750 ms clears pending/held/current input and acknowledges discarded frames. `release` also clears the seat. Do not confuse this held-input safety with room disconnection or pause.
+The single step receives press edges once. Ack advances to the sampled sequence only after that60Hz simulation frame finishes. Input stale for 750 ms clears pending/held/current input and acknowledges discarded frames. `release` also clears the seat. Do not confuse this held-input safety with room disconnection or pause.
 
-Snapshots for playing rooms are sent on every fourth room tick (30 Hz), so normal acks represent completed input samples. Snapshot sends are restricted to guests still attached to that room; finished-room broadcasts must not leak into a guest's newly matched room.
+Snapshots for playing rooms are sent on every second room tick (30 Hz), so normal acks represent completed input samples. Snapshot sends are restricted to guests still attached to that room; finished-room broadcasts must not leak into a guest's newly matched room.
 
 ## Disconnect and reconnection
 
@@ -30,4 +30,4 @@ Natural winner is from `Simulation.snapshot().winner` at target score 7. `leave`
 
 Limits are 100 rooms and 5000 guest records; idle disconnected guests without queue/room expire after 24 hours. These resource caps are not evidence of a 100-room load test.
 
-[Service tests](../../../tests/service.test.ts) cover pair/rematch/leave, stale release, coalesced packet burst with combo preservation, queued disconnect, same-Cookie resume, expiry reclamation, and matching final seven-point results. [Shared simulation](../shared/simulation.md) defines mechanics; [frontend state](../frontend/state-management.md) defines their presentation.
+[Service tests](../../../tests/service.test.ts) cover pair/rematch/leave, stale release, coalesced packet bursts with latest movement and preserved action edges, queued disconnect, same-Cookie resume, expiry reclamation, and matching final seven-point results. [Shared simulation](../shared/simulation.md) defines mechanics; [frontend state](../frontend/state-management.md) defines their presentation.
