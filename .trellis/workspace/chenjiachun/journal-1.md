@@ -120,3 +120,26 @@ Tracked the game and static Trellis tooling, repaired the four reviewed validati
 ### Next Steps
 
 - 人工检查桌面、窄屏、短横屏、键盘焦点和触屏效果；公网发布另行处理。
+
+
+## Session 4: Flash original Joe authoritative H5 migration and release
+<!-- trellis-session: v=2 fp=c14b76be5dfdad23 -->
+
+**Date**: 2026-10-13
+**Task**: Flash original Joe authoritative H5 migration and release
+**Branch**: `main`
+
+### Summary
+
+Migrated Flash90302 Average Joe physics, independent animation clips, extracted original SVG art and net animation; preserved guest matchmaking, authority, prediction and lifecycle. Frozen SWF/112 recovered scripts/XML provenance and license limits in Git. Trellis review,78 tests, types/lint/build passed. Isolated original Ruffle plus Chromium AI/two-guest tests and full WS7-point match passed. Released20261013T065755Z-flash, restarted only own service14:58:28CST; public HTTP/assets/WS2, legacy1008 and old-route/service isolation verified. Previous20261013T030548Z retained. Physical dual-computer, touch, other-browser and weak-network experience remain external validation; no latency guarantee.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d69adb5` | feat: migrate Flash badminton into authoritative H5 multiplayer |
+| `d2a52e4` | docs: record Flash migration validation and release |
+
+### Status
+
+[OK] **Completed**
