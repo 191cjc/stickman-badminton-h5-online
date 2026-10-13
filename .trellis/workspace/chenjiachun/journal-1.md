@@ -145,3 +145,25 @@ Migrated Flash90302 Average Joe physics, independent animation clips, extracted 
 [OK] **Completed**
 
 Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`. This task was developed and committed directly on main with no PR; Trellis archive used its documented `--skip-branch-validation` option. Active-task pointer cleared after successful archive.
+
+
+## Session 5: 原版 Flash 全量下载与完整性归档
+<!-- trellis-session: v=2 fp=fd1ceed80b2ba8f0 -->
+
+**Date**: 2026-10-13
+**Task**: 原版 Flash 全量下载与完整性归档
+**Branch**: `main`
+
+### Summary
+
+重新下载确认的4399火柴人打羽毛球2发布SWF，字节与冻结源相同；全量恢复112AS/112Pcode、2ABC、4398原始标签、全部资源和1467帧，75Embed引用解析通过。完整包54,339,800bytes、11586文件，SHA25673c26baea166485903a880882871a0ecd138399d1f0ba4ec413f901c31c5a42a；独立解包哈希与逐ID/帧/代码覆盖核验通过。8Python/7asset测试、lint/typecheck和9项真实遗漏篡改探针通过。保存外部SDK当前快照及逐ID覆盖，记录watermark两处空设备字体、PlaytomicDNS失败和作者原始工程不可取得边界。补强固定XML哈希和Embed定义完整性；H5角色/特效尚待接入，未改运行代码或部署服务。任务已归档，无PR。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `89e217d` | chore: preserve full Flash release recovery and verification |
+
+### Status
+
+[OK] **Completed**

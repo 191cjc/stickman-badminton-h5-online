@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 4
+- **Total Sessions**: 5
 - **Last Active**: 2026-10-13
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~145 | Active |
+| `journal-1.md` | ~169 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 5 | 2026-10-13 | 原版 Flash 全量下载与完整性归档 | `89e217d` | `main` |
 | 4 | 2026-10-13 | Flash original Joe authoritative H5 migration and release | `d69adb5`, `d2a52e4` | `main` |
 | 3 | 2026-10-13 | 放大球场与场内匹配菜单 | `7244311` | `main` |
 | 2 | 2026-10-12 | Track project and fix protocol/reconnect boundaries | `a7a314bff69aec9205c3de1898d37cb6b7aeaf2a`, `8edc0746603541313ae58752e64680d5f4caf5a7` | `main` |
