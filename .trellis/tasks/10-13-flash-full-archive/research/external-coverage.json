@@ -1,0 +1,450 @@
+{
+  "scope": "Independently derived current supplemental external loader recovery coverage; does not change core game conversion_exceptions",
+  "loaders": [
+    {
+      "loader": "kongregate",
+      "source": "external/kongregate-sdk-https.swf",
+      "source_sha256": "191ea3fb93432f599b019437b89eccebe19f27ef0c2cc88726fe1c3da2cf59f5",
+      "xml_sha256": "f63324f4190dd7bb270bd1ce332d44304b6e849bef954eb41f5bb22b1e1882dd",
+      "code": {
+        "kind": "AS3 script QNames",
+        "expected": 29,
+        "as": 29,
+        "pcode": 29,
+        "identities": [
+          "as3_api_local",
+          "com.adobe.serialization.json.JSON",
+          "com.adobe.serialization.json.JSONDecoder",
+          "com.adobe.serialization.json.JSONEncoder",
+          "com.adobe.serialization.json.JSONParseError",
+          "com.adobe.serialization.json.JSONToken",
+          "com.adobe.serialization.json.JSONTokenType",
+          "com.adobe.serialization.json.JSONTokenizer",
+          "com.kongregate.as3.client.APIBootstrapShadow",
+          "com.kongregate.as3.client.IGameServices",
+          "com.kongregate.as3.client.services.AbstractShadowService",
+          "com.kongregate.as3.client.services.AnalyticsServiceShadow",
+          "com.kongregate.as3.client.services.ChatServiceShadow",
+          "com.kongregate.as3.client.services.HighScoreServiceShadow",
+          "com.kongregate.as3.client.services.IAnalyticsServices",
+          "com.kongregate.as3.client.services.IChatServices",
+          "com.kongregate.as3.client.services.IHighScoreServices",
+          "com.kongregate.as3.client.services.IKongregateServices",
+          "com.kongregate.as3.client.services.IMicrotransactionServices",
+          "com.kongregate.as3.client.services.ISharedContentServices",
+          "com.kongregate.as3.client.services.IStatServices",
+          "com.kongregate.as3.client.services.IUserServices",
+          "com.kongregate.as3.client.services.KongregateServiceShadow",
+          "com.kongregate.as3.client.services.MicrotransactionServiceShadow",
+          "com.kongregate.as3.client.services.SharedContentServiceShadow",
+          "com.kongregate.as3.client.services.StatServiceShadow",
+          "com.kongregate.as3.client.services.UserServiceShadow",
+          "com.kongregate.as3.common.events.LogEvent",
+          "com.kongregate.as3.common.util.Log"
+        ]
+      },
+      "root_frames": {
+        "expected": 1,
+        "exported": 1,
+        "outputs": [
+          "export/frames/1.svg"
+        ]
+      },
+      "resources": {
+        "shapes": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "morphshapes": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "images": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "fonts": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "texts": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "sounds": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "sprites": {
+          "expected_ids": 0,
+          "entries": [],
+          "expected_frames": 0,
+          "exported_frames": 0
+        },
+        "buttons": {
+          "expected_ids": 0,
+          "expected_states": 0,
+          "exported_states": 0,
+          "entries": []
+        }
+      },
+      "conversion_exceptions": [],
+      "status": "pass"
+    },
+    {
+      "loader": "cpmstar",
+      "source": "external/cpmstar-intro-https.swf",
+      "source_sha256": "674bd6ddf7709973aa4b4fbfd8ead2b1222e6431c0a16cf8af6a24090e97433a",
+      "xml_sha256": "d726c912971ba621707d594634bdf489e9e824f6009d31f74a2af89446946dfc",
+      "code": {
+        "kind": "AS3 script QNames",
+        "expected": 2,
+        "as": 2,
+        "pcode": 2,
+        "identities": [
+          "cpmstar.AdView",
+          "cpmstar.HTMLCompanion"
+        ]
+      },
+      "root_frames": {
+        "expected": 1,
+        "exported": 1,
+        "outputs": [
+          "export/frames/1.svg"
+        ]
+      },
+      "resources": {
+        "shapes": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "morphshapes": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "images": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "fonts": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "texts": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "sounds": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "sprites": {
+          "expected_ids": 0,
+          "entries": [],
+          "expected_frames": 0,
+          "exported_frames": 0
+        },
+        "buttons": {
+          "expected_ids": 0,
+          "expected_states": 0,
+          "exported_states": 0,
+          "entries": []
+        }
+      },
+      "conversion_exceptions": [],
+      "status": "pass"
+    },
+    {
+      "loader": "cpmstar-watermark",
+      "source": "external/cpmstar-watermark-https.swf",
+      "source_sha256": "41e6ce56f0be7222a6e3a75e1d356c49b632d52d0be21f8dbe1073d88a9cf355",
+      "xml_sha256": "45481bc7c4dd1ec3fed55e6906b516fa9c194b7c7eccfb018690adda3fe93ecb",
+      "code": {
+        "kind": "AS1/2 action blocks",
+        "expected": 10,
+        "as": 10,
+        "pcode": 10,
+        "identities": [
+          "DefineSprite_14.frame_1.DoAction",
+          "DefineSprite_14.frame_16.DoAction",
+          "DefineSprite_14.frame_17.DoAction",
+          "DefineSprite_14.frame_18.DoAction",
+          "DefineSprite_14.frame_28.DoAction",
+          "DefineSprite_14.frame_29.DoAction",
+          "DefineSprite_14.frame_39.DoAction",
+          "DefineSprite_14.frame_8.DoAction",
+          "__Packages.CreativesLoader",
+          "frame_1.DoAction"
+        ]
+      },
+      "root_frames": {
+        "expected": 1,
+        "exported": 1,
+        "outputs": [
+          "export/frames/1.svg"
+        ]
+      },
+      "resources": {
+        "shapes": {
+          "expected_ids": 3,
+          "exported_ids": 3,
+          "entries": [
+            {
+              "id": 1,
+              "tag_code": 2,
+              "outputs": [
+                "export/shapes/1.svg"
+              ]
+            },
+            {
+              "id": 9,
+              "tag_code": 22,
+              "outputs": [
+                "export/shapes/9.svg"
+              ]
+            },
+            {
+              "id": 10,
+              "tag_code": 22,
+              "outputs": [
+                "export/shapes/10.svg"
+              ]
+            }
+          ]
+        },
+        "morphshapes": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "images": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "fonts": {
+          "expected_ids": 2,
+          "exported_ids": 0,
+          "entries": [
+            {
+              "id": 2,
+              "tag_code": 75,
+              "outputs": [],
+              "conversion_exception": {
+                "category": "fonts",
+                "id": 2,
+                "font_name": "Arial\\u0000",
+                "bold": false,
+                "embedded_glyphs": 0,
+                "code_table_entries": 0,
+                "reason": "device-font placeholder with no embedded glyph data; no standalone TTF is produced",
+                "preserved_in": [
+                  "external/cpmstar-watermark-https.swf",
+                  "external/decompiled/cpmstar-watermark/original.xml"
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "tag_code": 75,
+              "outputs": [],
+              "conversion_exception": {
+                "category": "fonts",
+                "id": 6,
+                "font_name": "Arial\\u0000",
+                "bold": true,
+                "embedded_glyphs": 0,
+                "code_table_entries": 0,
+                "reason": "device-font placeholder with no embedded glyph data; no standalone TTF is produced",
+                "preserved_in": [
+                  "external/cpmstar-watermark-https.swf",
+                  "external/decompiled/cpmstar-watermark/original.xml"
+                ]
+              }
+            }
+          ]
+        },
+        "texts": {
+          "expected_ids": 3,
+          "exported_ids": 3,
+          "entries": [
+            {
+              "id": 3,
+              "tag_code": 37,
+              "outputs": [
+                "export/texts/3.txt"
+              ]
+            },
+            {
+              "id": 4,
+              "tag_code": 37,
+              "outputs": [
+                "export/texts/4.txt"
+              ]
+            },
+            {
+              "id": 7,
+              "tag_code": 37,
+              "outputs": [
+                "export/texts/7.txt"
+              ]
+            }
+          ]
+        },
+        "sounds": {
+          "expected_ids": 0,
+          "exported_ids": 0,
+          "entries": []
+        },
+        "sprites": {
+          "expected_ids": 6,
+          "entries": [
+            {
+              "id": 5,
+              "expected_frames": 1,
+              "exported_frames": 1,
+              "outputs": [
+                "export/sprites/DefineSprite_5/1.svg"
+              ]
+            },
+            {
+              "id": 8,
+              "expected_frames": 1,
+              "exported_frames": 1,
+              "outputs": [
+                "export/sprites/DefineSprite_8/1.svg"
+              ]
+            },
+            {
+              "id": 12,
+              "expected_frames": 1,
+              "exported_frames": 1,
+              "outputs": [
+                "export/sprites/DefineSprite_12/1.svg"
+              ]
+            },
+            {
+              "id": 13,
+              "expected_frames": 1,
+              "exported_frames": 1,
+              "outputs": [
+                "export/sprites/DefineSprite_13/1.svg"
+              ]
+            },
+            {
+              "id": 14,
+              "expected_frames": 39,
+              "exported_frames": 39,
+              "outputs": [
+                "export/sprites/DefineSprite_14/1.svg",
+                "export/sprites/DefineSprite_14/2.svg",
+                "export/sprites/DefineSprite_14/3.svg",
+                "export/sprites/DefineSprite_14/4.svg",
+                "export/sprites/DefineSprite_14/5.svg",
+                "export/sprites/DefineSprite_14/6.svg",
+                "export/sprites/DefineSprite_14/7.svg",
+                "export/sprites/DefineSprite_14/8.svg",
+                "export/sprites/DefineSprite_14/9.svg",
+                "export/sprites/DefineSprite_14/10.svg",
+                "export/sprites/DefineSprite_14/11.svg",
+                "export/sprites/DefineSprite_14/12.svg",
+                "export/sprites/DefineSprite_14/13.svg",
+                "export/sprites/DefineSprite_14/14.svg",
+                "export/sprites/DefineSprite_14/15.svg",
+                "export/sprites/DefineSprite_14/16.svg",
+                "export/sprites/DefineSprite_14/17.svg",
+                "export/sprites/DefineSprite_14/18.svg",
+                "export/sprites/DefineSprite_14/19.svg",
+                "export/sprites/DefineSprite_14/20.svg",
+                "export/sprites/DefineSprite_14/21.svg",
+                "export/sprites/DefineSprite_14/22.svg",
+                "export/sprites/DefineSprite_14/23.svg",
+                "export/sprites/DefineSprite_14/24.svg",
+                "export/sprites/DefineSprite_14/25.svg",
+                "export/sprites/DefineSprite_14/26.svg",
+                "export/sprites/DefineSprite_14/27.svg",
+                "export/sprites/DefineSprite_14/28.svg",
+                "export/sprites/DefineSprite_14/29.svg",
+                "export/sprites/DefineSprite_14/30.svg",
+                "export/sprites/DefineSprite_14/31.svg",
+                "export/sprites/DefineSprite_14/32.svg",
+                "export/sprites/DefineSprite_14/33.svg",
+                "export/sprites/DefineSprite_14/34.svg",
+                "export/sprites/DefineSprite_14/35.svg",
+                "export/sprites/DefineSprite_14/36.svg",
+                "export/sprites/DefineSprite_14/37.svg",
+                "export/sprites/DefineSprite_14/38.svg",
+                "export/sprites/DefineSprite_14/39.svg"
+              ]
+            },
+            {
+              "id": 15,
+              "expected_frames": 0,
+              "exported_frames": 0,
+              "outputs": []
+            }
+          ],
+          "expected_frames": 43,
+          "exported_frames": 43
+        },
+        "buttons": {
+          "expected_ids": 1,
+          "expected_states": 4,
+          "exported_states": 4,
+          "entries": [
+            {
+              "id": 11,
+              "states": {
+                "1_up": "export/buttons/DefineButton2_11/1_up.svg",
+                "2_over": "export/buttons/DefineButton2_11/2_over.svg",
+                "3_down": "export/buttons/DefineButton2_11/3_down.svg",
+                "4_hittest": "export/buttons/DefineButton2_11/4_hittest.svg"
+              }
+            }
+          ]
+        }
+      },
+      "conversion_exceptions": [
+        {
+          "category": "fonts",
+          "id": 2,
+          "font_name": "Arial\\u0000",
+          "bold": false,
+          "embedded_glyphs": 0,
+          "code_table_entries": 0,
+          "reason": "device-font placeholder with no embedded glyph data; no standalone TTF is produced",
+          "preserved_in": [
+            "external/cpmstar-watermark-https.swf",
+            "external/decompiled/cpmstar-watermark/original.xml"
+          ]
+        },
+        {
+          "category": "fonts",
+          "id": 6,
+          "font_name": "Arial\\u0000",
+          "bold": true,
+          "embedded_glyphs": 0,
+          "code_table_entries": 0,
+          "reason": "device-font placeholder with no embedded glyph data; no standalone TTF is produced",
+          "preserved_in": [
+            "external/cpmstar-watermark-https.swf",
+            "external/decompiled/cpmstar-watermark/original.xml"
+          ]
+        }
+      ],
+      "status": "pass_with_explicit_device_font_limits"
+    }
+  ]
+}
