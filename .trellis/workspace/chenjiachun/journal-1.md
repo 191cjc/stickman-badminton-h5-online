@@ -143,3 +143,5 @@ Migrated Flash90302 Average Joe physics, independent animation clips, extracted 
 ### Status
 
 [OK] **Completed**
+
+Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`. This task was developed and committed directly on main with no PR; Trellis archive used its documented `--skip-branch-validation` option. Active-task pointer cleared after successful archive.
