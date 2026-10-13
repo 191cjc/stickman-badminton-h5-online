@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { classicGeometry } from "../../src/shared/classic/assets";
-import { classicAiIntent } from "../../src/shared/classic/ai";
 import {
   classicShotVelocity,
   stepClassicBirdie,
@@ -38,7 +37,7 @@ const birdie = (
 function putRightServer(game: ClassicSimulation): void {
   game.server = "right";
   game.players.left.serving = false;
-  setupClassicServe(game.players.right, () => 0.5);
+  setupClassicServe(game.players.right);
 }
 
 function input(game: ClassicSimulation, side: Side, patch = {}) {
@@ -80,8 +79,8 @@ describe("Flash 90302 source-valued mechanics", () => {
     expect(left.x).toBe(48);
     expect(right.x).toBe(592);
     left.x = right.x = 317.25;
-    setupClassicServe(left, () => 0.5);
-    setupClassicServe(right, () => 0.5);
+    setupClassicServe(left);
+    setupClassicServe(right);
     expect(left.x).toBe(172.25);
     expect(right.x).toBe(462.25);
     left.serving = right.serving = false;
@@ -192,7 +191,7 @@ describe("Flash 90302 source-valued mechanics", () => {
   });
 });
 
-describe("original actions, AI, and authoritative boundaries", () => {
+describe("original human actions and authoritative boundaries", () => {
   it("uses stage-add zero for an untouched receiver clip and frame/fps after its frame-1 stop", () => {
     const receiver = createClassicPlayer("right");
     expect(receiver.swingClips.overhead.clock).toBe(0);
@@ -217,7 +216,7 @@ describe("original actions, AI, and authoritative boundaries", () => {
 
   it("resets every clip in setupServe and preserves hidden serve playback after switching to overhead", () => {
     const player = createClassicPlayer("left");
-    setupClassicServe(player, () => 0.5);
+    setupClassicServe(player);
     for (const clip of Object.values(player.swingClips))
       expect(clip).toEqual({ frame: 1, clock: dt, playing: false });
     stepClassicPlayer(
@@ -362,48 +361,6 @@ describe("original actions, AI, and authoritative boundaries", () => {
     expect(game.diagnostics().contacts[0].kind).toBe("overhead");
   });
 
-  it.each(["normal", "boss"] as const)(
-    "completes a seeded %s AI match and never swings at its own outgoing ball",
-    (difficulty) => {
-      const game = new ClassicSimulation("single", difficulty, {
-        seed: 0x90302,
-      });
-      for (let tick = 0; tick < 6000 && game.phase !== "matchEnd"; tick++) {
-        input(game, "left", {
-          hitPressed:
-            game.shuttle.state === "attached" && game.server === "left",
-        });
-      }
-      expect(game.phase).toBe("matchEnd");
-      expect(game.score.right).toBe(7);
-      const contacts = game.diagnostics().contacts;
-      expect(
-        contacts.some(
-          (contact) => contact.side === "right" && contact.kind === "overhead",
-        ),
-      ).toBe(true);
-      expect(
-        contacts.filter(
-          (contact) => contact.side === "right" && contact.kind === "serve",
-        ),
-      ).toHaveLength(6);
-      for (const contact of contacts.filter((item) => item.side === "right")) {
-        expect(contact.previousTouch).not.toBe("right");
-        if (contact.kind === "serve") expect(contact.vy).toBeLessThan(0);
-      }
-    },
-  );
-
-  it("AI retains the explicit last-hitter rejection even in its computer collision zone", () => {
-    const player = createClassicPlayer("right");
-    player.ai.enabled = true;
-    const ball = birdie({ x: 450, y: 250, vx: -100, lastTouchedBy: "right" });
-    const intent = classicAiIntent(player, ball, true, 10, () => 0.5);
-    expect(intent.hitPressed).toBe(false);
-    expect(intent.jumpPressed).toBe(false);
-    expect(intent.move).toBe(-1); // Return home, independent of the outgoing ball.
-  });
-
   it.each(["left", "right"] as const)(
     "does not self-contact in %s two-press serve+advance/jump source trajectories",
     (side) => {
@@ -440,11 +397,11 @@ describe("original actions, AI, and authoritative boundaries", () => {
     expect(predicted).toEqual(game.players.left);
     const state = game.snapshot();
     expect(JSON.parse(JSON.stringify(state))).toEqual(state);
-    state.players.left.ai.randomA = -1;
+    state.players.left.bob = -1;
     state.players.left.swingClips.serve.clock = -1;
     state.net.frame = 99;
     state.score.left = 99;
-    expect(game.players.left.ai.randomA).not.toBe(-1);
+    expect(game.players.left.bob).not.toBe(-1);
     expect(game.players.left.swingClips.serve.clock).not.toBe(-1);
     expect(game.net.frame).not.toBe(99);
     expect(game.score.left).toBe(0);
@@ -452,8 +409,8 @@ describe("original actions, AI, and authoritative boundaries", () => {
   });
 
   it("is deterministic, bounds large dt and preserves a sub-frame input edge", () => {
-    const first = new ClassicSimulation("single", "boss", { seed: 123 });
-    const second = new ClassicSimulation("single", "boss", { seed: 123 });
+    const first = new ClassicSimulation({ seed: 123 });
+    const second = new ClassicSimulation({ seed: 123 });
     for (let tick = 0; tick < 1200; tick++) {
       const serve =
         first.shuttle.state === "attached" && first.server === "left";

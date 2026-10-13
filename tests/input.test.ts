@@ -1,0 +1,65 @@
+import { afterEach, expect, it, vi } from "vitest";
+import { Input, bindings } from "../src/client/input";
+class Element {
+  constructor(readonly tagName: string) {}
+}
+afterEach(() => vi.unstubAllGlobals());
+it("Space hits; W/Up jump; M/Escape are local actions and focus loss releases everything", () => {
+  const win = new EventTarget(),
+    doc = new EventTarget();
+  Object.assign(doc, { hidden: false, querySelectorAll: () => [] });
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", doc);
+  vi.stubGlobal("HTMLElement", Element);
+  const release = vi.fn(),
+    mute = vi.fn(),
+    leave = vi.fn(),
+    input = new Input(release, mute, leave);
+  const key = (type: string, code: string) => {
+    const event = new Event(type, { cancelable: true });
+    Object.assign(event, { code, repeat: false });
+    win.dispatchEvent(event);
+  };
+  expect(bindings.Space).toBe("hit");
+  key("keydown", "Space");
+  let frame = input.read(1);
+  expect(frame.hitPressed).toBe(true);
+  expect(frame.hitHeld).toBe(true);
+  expect(frame.jump).toBe(false);
+  key("keydown", "KeyW");
+  frame = input.read(2);
+  expect(frame.jumpPressed).toBe(true);
+  expect(frame.jump).toBe(true);
+  key("keydown", "KeyM");
+  key("keydown", "Escape");
+  expect(mute).toHaveBeenCalledOnce();
+  expect(leave).toHaveBeenCalledOnce();
+  win.dispatchEvent(new Event("blur"));
+  expect(release).toHaveBeenCalledOnce();
+  frame = input.read(3);
+  expect(frame.move).toBe(0);
+  expect(frame.jump).toBe(false);
+  expect(frame.hitHeld).toBe(false);
+  expect(frame.hitPressed).toBe(false);
+});
+it("preserves native button Space activation while releasing any previously held game key", () => {
+  const win = new EventTarget(),
+    doc = new EventTarget();
+  Object.assign(doc, { hidden: false, querySelectorAll: () => [] });
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", doc);
+  vi.stubGlobal("HTMLElement", Element);
+  const input = new Input(() => {});
+  const down = new Event("keydown", { cancelable: true });
+  Object.assign(down, { code: "Space", repeat: false });
+  win.dispatchEvent(down);
+  expect(input.read(1).hitHeld).toBe(true);
+  for (const type of ["keydown", "keyup"]) {
+    const event = new Event(type, { cancelable: true });
+    Object.assign(event, { code: "Space", repeat: false });
+    Object.defineProperty(event, "target", { value: new Element("BUTTON") });
+    win.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  }
+  expect(input.read(2).hitHeld).toBe(false);
+});

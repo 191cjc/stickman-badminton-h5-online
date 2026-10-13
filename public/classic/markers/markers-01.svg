@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="49.7px" width="279.0px" viewBox="0 0 279.0 49.7">
+  <g transform="matrix(1.0, 0.0, 0.0, 1.0, -177.75, -374.3)">
+    <use height="49.7" id="switch" transform="matrix(1.0, 0.0, 0.0, 1.0, 192.25, 398.0)" width="27.7" xlink:href="#sprite0" />
+    <use height="49.7" id="_-2S" transform="matrix(-1.0, 0.0, 0.0, 1.0, 442.25, 398.0)" width="27.7" xlink:href="#sprite0" />
+  </g>
+  <defs>
+    <g id="sprite0">
+      <use height="49.7" transform="matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)" width="27.7" xlink:href="#shape0" />
+    </g>
+    <g id="shape0">
+      <path d="M9.4 -17.4 L12.2 -22.7 M3.7 -6.8 L6.5 -12.1 M-7.8 14.4 L-4.9 9.1 M-13.5 25.0 L-10.6 19.7 M-2.1 3.8 L0.8 -1.5" fill="none" stroke="#663300" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5882353" stroke-width="2.0" />
+    </g>
+  </defs>
+</svg>

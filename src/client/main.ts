@@ -1,15 +1,20 @@
 import "./style.css";
 import { CLASSIC_WORLD as worldConfig } from "../shared/classic/types";
-import { emptyIntent } from "../shared/state";
+import {
+  CHARACTERS,
+  CHARACTER_IDS,
+  type CharacterId,
+} from "../shared/classic/characters";
 import { Simulation } from "../shared/simulation";
-import { INPUT_HZ, SIM_HZ } from "../shared/protocol";
+import { INPUT_HZ, BASE_PATH } from "../shared/protocol";
 import type { Snapshot, ServerMessage } from "../shared/protocol";
-import type { GameState } from "../shared/state";
 import type { Side } from "../shared/types";
-import { Input, toIntent } from "./input";
+import { Input } from "./input";
 import { Network } from "./network";
 import { Prediction, Interpolation } from "./prediction";
 import { Renderer } from "./renderer";
+import { Effects } from "./effects";
+import { Audio } from "./audio";
 
 function el<T extends HTMLElement>(id: string): T {
   const value = document.getElementById(id);
@@ -19,24 +24,59 @@ function el<T extends HTMLElement>(id: string): T {
 const canvas = el<HTMLCanvasElement>("game");
 const ctx = canvas.getContext("2d", { alpha: false });
 if (!ctx) throw new Error("浏览器不支持 Canvas 2D");
-const start = el<HTMLButtonElement>("start");
-const cancel = el<HTMLButtonElement>("cancel");
-const leave = el<HTMLButtonElement>("leave");
-const practice = el<HTMLButtonElement>("practice");
-const renderer = new Renderer();
-let assetsReady = false;
-let interpolation = new Interpolation();
-let prediction: Prediction | undefined;
-let latest: Snapshot | undefined;
-let side: Side | undefined;
-let seq = 0;
-let scene: "idle" | "queued" | "online" | "practice" | "result" = "idle";
-let offline: Simulation | undefined;
-let backdrop = new Simulation().snapshot();
-let accumulated = 0;
-let lastTime = 0;
-let resultText = "";
-
+const start = el<HTMLButtonElement>("start"),
+  cancel = el<HTMLButtonElement>("cancel"),
+  leave = el<HTMLButtonElement>("leave"),
+  mute = el<HTMLButtonElement>("mute");
+const startLabel = el("start-label"),
+  rematchArt = el<HTMLImageElement>("rematch-art");
+let rematchUp = "",
+  rematchOver = "";
+const renderer = new Renderer(),
+  effects = new Effects(),
+  audio = new Audio();
+let assetsReady = false,
+  interpolation = new Interpolation(),
+  prediction: Prediction | undefined,
+  latest: Snapshot | undefined,
+  side: Side | undefined,
+  room: string | undefined;
+let selected: CharacterId = "joe",
+  seq = 0,
+  scene: "idle" | "queued" | "online" | "result" = "idle";
+let backdrop = new Simulation().snapshot(),
+  accumulated = 0,
+  lastTime = 0;
+const characterButtons = new Map<CharacterId, HTMLButtonElement>();
+for (const id of CHARACTER_IDS) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.dataset.character = id;
+  button.setAttribute("aria-pressed", String(id === selected));
+  const picture = document.createElement("img");
+  picture.alt = "";
+  picture.loading = "eager";
+  picture.className = "character-picture";
+  const name = document.createElement("span");
+  name.textContent = CHARACTERS[id].name;
+  button.append(picture, name);
+  button.addEventListener("click", () => {
+    if (scene !== "idle" && scene !== "result") return;
+    selected = id;
+    updateSelection();
+  });
+  characterButtons.set(id, button);
+  el("character-grid").append(button);
+}
+function updateSelection(): void {
+  for (const [id, button] of characterButtons) {
+    button.setAttribute("aria-pressed", String(selected === id));
+    button.disabled = scene !== "idle" && scene !== "result";
+  }
+  const p = CHARACTERS[selected];
+  el("character-detail").textContent =
+    `${p.label} · 移动 ${p.move.toFixed(2)} / 跳跃 ${p.jump.toFixed(2)} / 力量 ${p.power.toFixed(2)}`;
+}
 function overlay(
   tag: string,
   title: string,
@@ -49,35 +89,52 @@ function overlay(
   el("overlay-detail").textContent = detail;
 }
 function buttons(): void {
-  start.hidden =
-    scene === "online" || scene === "queued" || scene === "practice";
-  start.disabled =
-    !assetsReady ||
-    scene === "online" ||
-    scene === "queued" ||
-    scene === "practice";
-  practice.disabled = !assetsReady;
-  start.textContent = network.refreshRequired
+  start.hidden = scene === "online" || scene === "queued";
+  start.disabled = !assetsReady || start.hidden;
+  startLabel.textContent = network.refreshRequired
     ? "刷新页面"
     : network.connected
       ? scene === "result"
         ? "再次匹配"
         : "开始匹配"
       : "重新连接";
+  const originalRematch =
+    scene === "result" && network.connected && !network.refreshRequired;
+  rematchArt.hidden = !originalRematch;
+  start.classList.toggle("original-rematch", originalRematch);
   cancel.hidden = scene !== "queued";
-  leave.hidden = scene !== "online" && scene !== "practice";
-  practice.hidden =
-    scene === "queued" || scene === "online" || scene === "practice";
+  leave.hidden = scene !== "online";
+  el("character-selection").hidden = scene !== "idle" && scene !== "result";
+  el("overlay").classList.toggle("result", scene === "result");
+  updateSelection();
 }
 function clearInput(notify = true): void {
   input.release(false);
   prediction?.clear();
   if (notify) network.send({ type: "release" });
 }
-const input = new Input(() => {
-  prediction?.clear();
-  network.send({ type: "release" });
-});
+function toggleMute(): void {
+  void audio.unlock();
+  const muted = audio.toggle();
+  mute.setAttribute("aria-pressed", String(muted));
+  mute.textContent = muted ? "开启声音" : "静音";
+}
+function leaveMatch(): void {
+  if (scene !== "online") return;
+  clearInput();
+  audio.play("press");
+  network.send({ type: "leave" });
+}
+const input = new Input(
+  () => {
+    prediction?.clear();
+    network.send({ type: "release" });
+    effects.suspend();
+    audio.setMatch(false);
+  },
+  toggleMute,
+  leaveMatch,
+);
 const network = new Network(
   handleMessage,
   (connected, text) => {
@@ -85,7 +142,9 @@ const network = new Network(
     el("connection-dot").classList.toggle("online", connected);
     if (!connected) {
       clearInput(false);
-      if (network.refreshRequired && scene !== "practice") {
+      effects.suspend();
+      audio.setMatch(false);
+      if (network.refreshRequired) {
         idle();
         overlay("版本更新", "请刷新页面", text);
       }
@@ -102,47 +161,47 @@ const network = new Network(
     el("rtt").textContent = `RTT ${rtt} ms`;
   },
 );
-
 function idle(reason?: string): void {
   clearInput(false);
   scene = "idle";
   latest = undefined;
   side = undefined;
+  room = undefined;
   prediction = undefined;
-  offline = undefined;
   seq = 0;
   interpolation = new Interpolation();
+  effects.reset();
+  renderer.clearEffectsImages();
+  audio.setMatch(false);
   overlay(
     "即刻开打",
-    "球场正在等你",
+    "选择角色，进入球场",
     reason === "queue_timeout"
       ? "匹配等待已超时，可以重新开始。"
       : reason === "disconnect"
         ? "断线保留时间已结束，可以再次匹配。"
-        : "点击「开始匹配」进入在线对战，也可以先练习。",
+        : "选择角色后点击「开始匹配」，另一位玩家加入后自动开赛。",
   );
   labels();
   buttons();
 }
 function labels(): void {
-  el("left-label").textContent = side === "left" ? "你 · 左侧" : "对手 · 左侧";
-  el("right-label").textContent =
-    scene === "practice"
-      ? "AI · 右侧"
-      : side === "right"
-        ? "你 · 右侧"
-        : "对手 · 右侧";
-  if (!side) {
-    el("left-label").textContent = "左侧";
-    el("right-label").textContent = "右侧";
-  }
+  el("left-label").textContent = side
+    ? side === "left"
+      ? "你 · 左侧"
+      : "对手 · 左侧"
+    : "左侧";
+  el("right-label").textContent = side
+    ? side === "right"
+      ? "你 · 右侧"
+      : "对手 · 右侧"
+    : "右侧";
   el("hint").textContent = side
-    ? `你控制${side === "left" ? "左侧" : "右侧"}角色（脚下有侧别标记）。A 向左，D 向右，W 跳跃，S 挥拍；按 S 发球。`
+    ? `你控制${side === "left" ? "左侧" : "右侧"} · ${CHARACTERS[selected].name}。A/D 或 ←/→ 移动，W/↑ 跳跃，S/↓/空格击球与发球。M 静音，Esc 结束比赛。`
     : "两位玩家使用相同按键，匹配后显示你的场地位置。";
 }
 function handleMessage(message: ServerMessage): void {
   if (message.type === "idle") {
-    if (scene === "practice") return;
     if (
       scene === "result" &&
       ["finished", "disconnect", "left", "timeout"].includes(
@@ -150,6 +209,7 @@ function handleMessage(message: ServerMessage): void {
       )
     ) {
       latest = undefined;
+      room = undefined;
       buttons();
       return;
     }
@@ -162,7 +222,16 @@ function handleMessage(message: ServerMessage): void {
     latest = undefined;
     prediction = undefined;
     side = undefined;
-    overlay("匹配中", "正在寻找对手", "另一位玩家加入后会自动开赛。");
+    room = undefined;
+    selected = message.character;
+    effects.reset();
+    renderer.clearEffectsImages();
+    audio.setMatch(false);
+    overlay(
+      "匹配中",
+      "正在寻找对手",
+      `${CHARACTERS[selected].name} 已准备，另一位玩家加入后会自动开赛。`,
+    );
     labels();
     buttons();
     return;
@@ -170,12 +239,16 @@ function handleMessage(message: ServerMessage): void {
   if (message.type === "matched") {
     clearInput(false);
     scene = "online";
-    offline = undefined;
     side = message.side;
+    room = message.room;
+    selected = message.characters[side];
     seq = 0;
     latest = undefined;
-    prediction = new Prediction(side);
+    prediction = undefined;
     interpolation = new Interpolation();
+    effects.reset(room, message.resumed);
+    renderer.clearEffectsImages();
+    audio.stop();
     overlay(
       "匹配成功",
       "准备开赛",
@@ -187,16 +260,29 @@ function handleMessage(message: ServerMessage): void {
     return;
   }
   if (message.type === "snapshot") {
-    if (scene !== "online" && scene !== "result") return;
-    if (latest && latest.room !== message.room) return;
+    if ((scene !== "online" && scene !== "result") || message.room !== room)
+      return;
     const wasPaused = latest?.status === "reconnecting";
     latest = message;
     seq = Math.max(seq, message.ack);
-    prediction?.reconcile(message);
+    if (side) {
+      prediction ??= new Prediction(side, message.state.players[side]);
+      prediction.reconcile(message);
+    }
     interpolation.push(message, performance.now());
+    if (document.hidden) {
+      effects.suspend();
+      audio.setMatch(false);
+    } else {
+      effects.ingest(message);
+      audio.setMatch(
+        message.status === "playing" || message.resultReason === "score",
+      );
+    }
     if (scene === "online") {
       if (message.status === "reconnecting") {
         clearInput(false);
+        renderer.clearEffectsImages();
         overlay(
           "对手断线",
           "比赛已暂停",
@@ -213,9 +299,7 @@ function handleMessage(message: ServerMessage): void {
   if (message.type === "result") {
     clearInput(false);
     scene = "result";
-    const won = message.winner === side;
-    resultText =
-      message.winner === null ? "比赛结束" : won ? "你赢了！" : "本场结束";
+    effects.finish(message.reason === "score");
     const reason = {
       score: "比赛正常结束",
       leave: "有玩家主动结束比赛",
@@ -224,33 +308,36 @@ function handleMessage(message: ServerMessage): void {
     }[message.reason];
     overlay(
       "比赛结果",
-      resultText,
-      `${message.score.left} : ${message.score.right} · ${reason}。点击「再次匹配」开始下一场。`,
+      message.winner === null
+        ? "比赛结束"
+        : message.winner === side
+          ? "你赢了！"
+          : "本场结束",
+      `${message.score.left} : ${message.score.right} · ${reason}。选择角色后可再次匹配。`,
     );
     el("match-status").textContent = reason;
     buttons();
     return;
   }
-  if (message.type === "error") {
+  if (message.type === "error")
     el("match-status").textContent = `操作未完成：${message.code}`;
-  }
 }
-function updateHud(state: GameState): void {
+function updateHud(state: typeof backdrop): void {
   el("score-left").textContent = String(state.score.left);
   el("score-right").textContent = String(state.score.right);
   if (scene === "result") return;
-  if (latest?.status === "reconnecting") {
-    el("match-status").textContent = "比赛暂停 · 等待重连";
-    return;
-  }
   el("match-status").textContent =
-    state.phase === "point"
-      ? `${state.server === side ? "你" : scene === "practice" ? "AI" : "对手"}得分 · 下一回合准备中`
-      : state.shuttle.state === "attached"
-        ? `${state.server === side ? "轮到你发球，按 S / ↓" : "等待对手发球"} · 先到 7 分获胜`
-        : `回合击球 ${state.rallyHits} 次 · 先到 7 分获胜`;
+    latest?.status === "reconnecting"
+      ? "比赛暂停 · 等待重连"
+      : state.phase === "point"
+        ? `${state.server === side ? "你" : "对手"}得分 · 下一回合准备中`
+        : state.shuttle.state === "attached"
+          ? `${state.server === side ? "轮到你发球，按 S / ↓ / 空格" : "等待对手发球"} · 先到 7 分获胜`
+          : `回合击球 ${state.rallyHits} 次 · 先到 7 分获胜`;
 }
 start.addEventListener("click", () => {
+  void audio.unlock();
+  audio.play("press");
   if (network.refreshRequired) {
     location.reload();
     return;
@@ -262,40 +349,38 @@ start.addEventListener("click", () => {
   }
   clearInput();
   seq = 0;
-  network.send({ type: "queue" });
+  network.send({ type: "queue", character: selected });
   start.disabled = true;
 });
-cancel.addEventListener("click", () => network.send({ type: "cancel" }));
-leave.addEventListener("click", () => {
-  clearInput();
-  if (scene === "practice") idle();
-  else network.send({ type: "leave" });
+cancel.addEventListener("click", () => {
+  audio.play("press");
+  network.send({ type: "cancel" });
 });
-practice.addEventListener("click", () => {
-  clearInput();
-  scene = "practice";
-  latest = undefined;
-  prediction = undefined;
-  side = "left";
-  seq = 0;
-  offline = new Simulation("single");
-  overlay("", "", "", false);
-  labels();
-  buttons();
-  canvas.focus();
-});
-
+leave.addEventListener("click", leaveMatch);
+mute.addEventListener("click", toggleMute);
+for (const button of [start, cancel, leave]) {
+  button.addEventListener("pointerenter", () => audio.play("hover"));
+}
+for (const event of ["pointerenter", "focus"])
+  start.addEventListener(event, () => {
+    if (rematchOver) rematchArt.src = rematchOver;
+  });
+for (const event of ["pointerleave", "blur"])
+  start.addEventListener(event, () => {
+    if (rematchUp) rematchArt.src = rematchUp;
+  });
 function frame(time: number): void {
   requestAnimationFrame(frame);
   const dt = lastTime
     ? Math.max(0, Math.min((time - lastTime) / 1000, 0.1))
     : 1 / INPUT_HZ;
   lastTime = time;
+  audio.advance(dt);
   accumulated += dt;
   let steps = 0;
   while (accumulated >= 1 / INPUT_HZ && steps < 6) {
     accumulated -= 1 / INPUT_HZ;
-    steps += 1;
+    steps++;
     if (
       assetsReady &&
       scene === "online" &&
@@ -305,50 +390,34 @@ function frame(time: number): void {
     ) {
       const command = input.read(seq + 1);
       if (network.send(command)) {
-        seq += 1;
+        seq++;
         if (latest.state.phase === "playing") prediction?.apply(command);
       }
-    } else if (scene === "practice" && offline) {
-      const intent = toIntent(input.read(++seq));
-      offline.setIntents(intent, emptyIntent());
-      offline.update(1 / SIM_HZ);
     }
   }
   let state = backdrop;
-  if (scene === "practice" && offline) {
-    state = offline.snapshot();
-    backdrop = state;
-    updateHud(state);
-    if (state.phase === "matchEnd") {
-      scene = "result";
-      overlay(
-        "练习结束",
-        state.winner === "left" ? "你赢了！" : "再接再厉",
-        "可以再次练习，或开始在线匹配。",
-      );
-      buttons();
-    }
-  } else if (latest) {
+  if (latest) {
     state = interpolation.sample(time) ?? latest.state;
+    effects.advance(state.elapsed * 60, dt, (sound) => audio.play(sound));
     if (
       scene === "online" &&
       latest.status === "playing" &&
       latest.state.phase === "playing" &&
       prediction &&
       side
-    ) {
+    )
       state = {
         ...state,
         players: { ...state.players, [side]: prediction.drawState(dt) },
       };
-    }
     backdrop = state;
-  }
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const dpr = Math.min(devicePixelRatio || 1, 2);
-  const pixelWidth = Math.max(1, Math.round(width * dpr));
-  const pixelHeight = Math.max(1, Math.round(height * dpr));
+  } else if (scene === "result")
+    effects.advance(state.elapsed * 60, dt, (sound) => audio.play(sound));
+  const width = canvas.clientWidth,
+    height = canvas.clientHeight,
+    dpr = Math.min(devicePixelRatio || 1, 2);
+  const pixelWidth = Math.max(1, Math.round(width * dpr)),
+    pixelHeight = Math.max(1, Math.round(height * dpr));
   if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
     canvas.width = pixelWidth;
     canvas.height = pixelHeight;
@@ -369,13 +438,22 @@ function frame(time: number): void {
       dpr,
     },
     state,
+    scene === "online" || scene === "result" ? effects : undefined,
   );
 }
 buttons();
-overlay("准备球场", "正在加载画面", "加载完成后即可匹配或练习。");
+overlay("准备球场", "正在加载画面", "加载完成后即可选择角色并匹配。");
 void renderer
   .load()
-  .then(() => {
+  .then((manifest) => {
+    for (const [id, button] of characterButtons)
+      button.querySelector("img")!.src =
+        `${BASE_PATH}classic/${manifest.characters[id].preview.path}?v=${manifest.files[manifest.characters[id].preview.path]}`;
+    rematchUp = `${BASE_PATH}classic/${manifest.ui.rematchUp.path}?v=${manifest.files[manifest.ui.rematchUp.path]}`;
+    rematchOver = `${BASE_PATH}classic/${manifest.ui.rematchOver.path}?v=${manifest.files[manifest.ui.rematchOver.path]}`;
+    rematchArt.src = rematchUp;
+    // Audio downloads/decoding cannot hold up a playable court.
+    void audio.load(manifest);
     assetsReady = true;
     if (scene === "idle") {
       idle();

@@ -1,6 +1,5 @@
 import {
   cloneClassicPlayer,
-  createClassicPlayer,
   stepClassicPlayer,
 } from "../shared/classic/player";
 import type { ClassicPlayerContext } from "../shared/classic/types";
@@ -17,8 +16,11 @@ export class Prediction {
   private offset = { x: 0, y: 0 };
   private scoreKey = "";
   private context: ClassicPlayerContext = {};
-  constructor(readonly side: Side) {
-    this.player = createClassicPlayer(side);
+  constructor(
+    readonly side: Side,
+    initial: PlayerState,
+  ) {
+    this.player = cloneClassicPlayer(initial);
   }
   apply(input: InputFrame, remember = true): void {
     if (remember) {
@@ -30,7 +32,7 @@ export class Prediction {
     stepClassicPlayer(this.player, toIntent(input), 1 / INPUT_HZ, this.context);
   }
   reconcile(snapshot: Snapshot): void {
-    const key = `${snapshot.room}:${snapshot.state.score.left}:${snapshot.state.score.right}:${snapshot.state.phase}:${snapshot.status}`;
+    const key = `${snapshot.room}:${snapshot.state.players[this.side].characterId}:${snapshot.state.score.left}:${snapshot.state.score.right}:${snapshot.state.phase}:${snapshot.status}`;
     const reset = key !== this.scoreKey;
     this.scoreKey = key;
     const before = this.drawState(0);
@@ -78,6 +80,10 @@ export class Interpolation {
       last.snapshot.state.phase !== snapshot.state.phase ||
       last.snapshot.state.score.left !== snapshot.state.score.left ||
       last.snapshot.state.score.right !== snapshot.state.score.right ||
+      last.snapshot.state.players.left.characterId !==
+        snapshot.state.players.left.characterId ||
+      last.snapshot.state.players.right.characterId !==
+        snapshot.state.players.right.characterId ||
       snapshot.status !== "playing" ||
       snapshot.state.phase !== "playing"
     )

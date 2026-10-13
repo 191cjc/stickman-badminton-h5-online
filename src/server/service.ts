@@ -30,6 +30,7 @@ import type {
   RoomStatus,
   ServerMessage,
 } from "../shared/protocol";
+import type { CharacterId } from "../shared/classic/characters";
 import type { PlayerIntent, Side } from "../shared/types";
 
 const COOKIE = "badminton_h5_guest";
@@ -39,10 +40,12 @@ interface Guest {
   socket?: WebSocket;
   room?: string;
   queuedAt?: number;
+  character?: CharacterId;
   seen: number;
 }
 interface Seat {
   guest: Guest;
+  character: CharacterId;
   pending: InputFrame[];
   held: PlayerIntent;
   current: PlayerIntent;
@@ -160,9 +163,11 @@ export function createGameService(options: ServiceOptions) {
     handleProtocols: (protocols) =>
       protocols.has(SUBPROTOCOL)
         ? SUBPROTOCOL
-        : protocols.has("badminton-v1")
-          ? "badminton-v1"
-          : false,
+        : protocols.has("badminton-v2")
+          ? "badminton-v2"
+          : protocols.has("badminton-v1")
+            ? "badminton-v1"
+            : false,
   });
   function send(guest: Guest, message: ServerMessage): void {
     const ws = guest.socket;
@@ -178,6 +183,7 @@ export function createGameService(options: ServiceOptions) {
     const index = queue.indexOf(guest);
     if (index >= 0) queue.splice(index, 1);
     guest.queuedAt = undefined;
+    guest.character = undefined;
   }
   function clearSeat(seat: Seat): void {
     seat.pending = [];
@@ -203,6 +209,8 @@ export function createGameService(options: ServiceOptions) {
           status: room.status,
           reconnectRemainingMs: remaining,
           state,
+          effects: room.simulation.presentation(),
+          resultReason: room.result?.reason,
         });
   }
   function reclaim(room: Room, reason: string): void {
@@ -249,9 +257,10 @@ export function createGameService(options: ServiceOptions) {
     if (room && SIDES.every((side) => room.seats[side].guest.room !== room.id))
       reclaim(room, "finished");
   }
-  function makeSeat(guest: Guest): Seat {
+  function makeSeat(guest: Guest, character: CharacterId): Seat {
     return {
       guest,
+      character,
       pending: [],
       held: emptyIntent(),
       current: emptyIntent(),
@@ -265,15 +274,20 @@ export function createGameService(options: ServiceOptions) {
     while (queue.length >= 2 && rooms.size < 100) {
       const left = queue.shift()!;
       const right = queue.shift()!;
+      const characters = { left: left.character!, right: right.character! };
+      left.character = right.character = undefined;
       left.queuedAt = undefined;
       right.queuedAt = undefined;
       const room: Room = {
         id: randomUUID(),
-        simulation: new Simulation(),
+        simulation: new Simulation({ characters }),
         tick: 0,
         status: "playing",
         created: Date.now(),
-        seats: { left: makeSeat(left), right: makeSeat(right) },
+        seats: {
+          left: makeSeat(left, characters.left),
+          right: makeSeat(right, characters.right),
+        },
       };
       rooms.set(room.id, room);
       for (const side of SIDES) {
@@ -283,6 +297,7 @@ export function createGameService(options: ServiceOptions) {
           room: room.id,
           side,
           resumed: false,
+          characters,
         });
       }
       snapshot(room);
@@ -305,12 +320,20 @@ export function createGameService(options: ServiceOptions) {
         send(guest, { type: "error", code: "already_in_match" });
         return;
       }
+      if (
+        guest.queuedAt !== undefined &&
+        guest.character !== message.character
+      ) {
+        send(guest, { type: "error", code: "already_queued" });
+        return;
+      }
       detachFinished(guest);
-      if (!guest.queuedAt) {
+      if (guest.queuedAt === undefined) {
         guest.queuedAt = Date.now();
+        guest.character = message.character;
         queue.push(guest);
       }
-      send(guest, { type: "queued" });
+      send(guest, { type: "queued", character: message.character });
       match();
       return;
     }
@@ -369,14 +392,19 @@ export function createGameService(options: ServiceOptions) {
     const offered = req.headers["sec-websocket-protocol"]
       ?.split(",")
       .map((x) => x.trim());
-    if (!offered?.includes(SUBPROTOCOL) && !offered?.includes("badminton-v1"))
+    if (
+      !offered?.includes(SUBPROTOCOL) &&
+      !offered?.includes("badminton-v1") &&
+      !offered?.includes("badminton-v2")
+    )
       return reject(400, "Bad Request");
     const id = cookieId(req);
     const guest = id ? guests.get(id) : undefined;
     if (!guest) return reject(401, "Unauthorized");
-    if (guest.socket) return reject(409, "Conflict");
+    if (guest.socket && offered.includes(SUBPROTOCOL))
+      return reject(409, "Conflict");
     wss.handleUpgrade(req, socket, head, (ws) => {
-      // A previously loaded v1 page gets a terminal policy close instead of
+      // Previously loaded v1/v2 pages get a terminal policy close instead of
       // reconnecting repeatedly. It never acquires a guest connection or seat.
       if (ws.protocol !== SUBPROTOCOL) {
         ws.on("error", () => {});
@@ -411,7 +439,16 @@ export function createGameService(options: ServiceOptions) {
             )
           )
             room.status = "playing";
-          send(guest, { type: "matched", room: room.id, side, resumed: true });
+          send(guest, {
+            type: "matched",
+            room: room.id,
+            side,
+            resumed: true,
+            characters: {
+              left: room.seats.left.character,
+              right: room.seats.right.character,
+            },
+          });
           if (room.result) send(guest, room.result);
           snapshot(room);
         }
@@ -486,7 +523,6 @@ export function createGameService(options: ServiceOptions) {
             .find((frame) => frame.hitPressed);
           seat.current.hitPressed = !!hit;
           if (hit) {
-            seat.current.hitMove = hit.move;
             seat.current.hitJump = hit.jump;
           }
           seat.currentSeq = input.seq;
@@ -494,7 +530,6 @@ export function createGameService(options: ServiceOptions) {
             ...seat.current,
             jumpPressed: false,
             hitPressed: false,
-            hitMove: undefined,
             hitJump: undefined,
           };
           seat.pending = [];

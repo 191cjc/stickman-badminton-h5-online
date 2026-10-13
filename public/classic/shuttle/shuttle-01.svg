@@ -1,21 +1,24 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="15.45px" width="12.2px" viewBox="0 0 12.2 15.45">
-  <g transform="matrix(1.0, 0.0, 0.0, 1.0, 6.15, 2.55)">
-    <filter color-interpolation-filters="sRGB" height="300%" id="filter0" width="300%" x="-100%" y="-100%">
-      <feOffset dx="0.0" dy="0.0" in="SourceGraphic" result="filterResult0" />
-      <feColorMatrix in="filterResult0" result="filterResult1" type="matrix" values="0 0 0 0 1.0,0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 1.0 0" />
-      <feGaussianBlur in="filterResult1" result="filterResult2" stdDeviation="1.4142135623730951 1.4142135623730951" />
-      <feComposite in="SourceGraphic" in2="filterResult2" operator="over" result="filterResult3" />
-      <feOffset dx="3.5355799791601" dy="3.535487832104965" in="filterResult3" result="filterResult4" />
-      <feColorMatrix in="filterResult4" result="filterResult5" type="matrix" values="0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 1.0 0" />
-      <feGaussianBlur in="filterResult5" result="filterResult6" stdDeviation="1.4142135623730951 1.4142135623730951" />
-      <feColorMatrix in="filterResult6" result="filterResult7" type="matrix" values="1 0 0 0 0,0 1 0 0 0,0 0 1 0 0,0 0 0 0.296875 0" />
-      <feComposite in="filterResult3" in2="filterResult7" operator="over" result="filterResult8" />
-    </filter>
-    <use filter="url(#filter0)" height="27.15" id="_-3O" transform="matrix(0.5714, 0.0, 0.0, 0.5714, 0.0, 0.0)" width="21.45" xlink:href="#sprite0" />
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="47.45px" width="44.2px" viewBox="0 0 44.2 47.45">
+  <g transform="matrix(1,0,0,1,22.15,18.55)">
+    <use height="15.45" transform="matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)" width="12.2" xlink:href="#sprite0" />
   </g>
   <defs>
     <g id="sprite0">
+      <filter color-interpolation-filters="sRGB" height="2100%" id="filter0" width="2100%" x="-1000%" y="-1000%">
+        <feOffset dx="0.0" dy="0.0" in="SourceGraphic" result="filterResult0" />
+        <feColorMatrix in="filterResult0" result="filterResult1" type="matrix" values="0 0 0 0 1.0,0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 1.0 0" />
+        <feGaussianBlur in="filterResult1" result="filterResult2" stdDeviation="1.4142135623730951 1.4142135623730951" />
+        <feComposite in="SourceGraphic" in2="filterResult2" operator="over" result="filterResult3" />
+        <feOffset dx="3.5355799791601" dy="3.535487832104965" in="filterResult3" result="filterResult4" />
+        <feColorMatrix in="filterResult4" result="filterResult5" type="matrix" values="0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 1.0 0" />
+        <feGaussianBlur in="filterResult5" result="filterResult6" stdDeviation="1.4142135623730951 1.4142135623730951" />
+        <feColorMatrix in="filterResult6" result="filterResult7" type="matrix" values="1 0 0 0 0,0 1 0 0 0,0 0 1 0 0,0 0 0 0.296875 0" />
+        <feComposite in="filterResult3" in2="filterResult7" operator="over" result="filterResult8" />
+      </filter>
+      <use filter="url(#filter0)" height="27.15" id="_-3O" transform="matrix(0.5714, 0.0, 0.0, 0.5714, 0.0, 0.0)" width="21.45" xlink:href="#sprite1" />
+    </g>
+    <g id="sprite1">
       <use height="27.15" transform="matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)" width="21.45" xlink:href="#shape0" />
     </g>
     <g id="shape0">

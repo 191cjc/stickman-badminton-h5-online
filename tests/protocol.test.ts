@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseClientMessage } from "../src/shared/protocol";
 
-const commands = ["queue", "cancel", "leave", "release"];
+const commands = ["cancel", "leave", "release"];
 
 describe("logical command validation", () => {
   it.each(commands)(
@@ -31,4 +31,47 @@ describe("logical command validation", () => {
     for (const raw of ["{}", "null", "[]", '"queue"', "invalid JSON"])
       expect(parseClientMessage(raw)).toBeNull();
   });
+});
+
+it("accepts only the seven immutable role choices in queue and no injected authority fields", () => {
+  for (const character of [
+    "joe",
+    "nadia",
+    "harry",
+    "toaster",
+    "pirate",
+    "top-hat",
+    "red",
+  ]) {
+    expect(
+      parseClientMessage(JSON.stringify({ type: "queue", character })),
+    ).toEqual({ type: "queue", character });
+    for (const extra of [
+      { side: "left" },
+      { room: "stolen" },
+      { score: 7 },
+      { position: 0 },
+    ])
+      expect(
+        parseClientMessage(
+          JSON.stringify({ type: "queue", character, ...extra }),
+        ),
+      ).toBeNull();
+  }
+  for (const character of [
+    "robot",
+    "timmy",
+    "champ",
+    "constructor",
+    "__proto__",
+    null,
+    1,
+    [],
+    ["joe"],
+    {},
+  ])
+    expect(
+      parseClientMessage(JSON.stringify({ type: "queue", character })),
+    ).toBeNull();
+  expect(parseClientMessage('{"type":"queue"}')).toBeNull();
 });

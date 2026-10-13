@@ -1,137 +1,179 @@
 import { BASE_PATH } from "../shared/protocol";
 import { classicAnimation } from "../shared/classic/assets";
 import { CLASSIC_WORLD, classicDirection } from "../shared/classic/types";
-import type {
-  ClassicBodyFrame,
-  ClassicSwingKind,
-} from "../shared/classic/types";
+import type { AssetManifest, DrawFrame } from "../shared/classic/manifest";
 import type { GameState, PlayerState } from "../shared/state";
 import type { Viewport } from "../shared/types";
+import type { Effects, Particle, Spark } from "./effects";
+import { ConfettiImages } from "./confetti-images";
 
-interface DrawFrame {
-  path: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-interface AssetManifest {
-  schema: number;
-  fps: number;
-  coordinateSystem: { width: number; height: number };
-  body: Record<ClassicBodyFrame, DrawFrame[]>;
-  swings: Record<ClassicSwingKind, DrawFrame[]>;
-  shuttle: DrawFrame;
-  background: DrawFrame;
-  net: DrawFrame;
-  netFrames: DrawFrame[];
-}
-
-/** Draws the extracted Flash layers; no physics or contact decisions live here. */
+/** All draw entries share original registration with numeric authority. */
 export class Renderer {
   private manifest?: AssetManifest;
   private images = new Map<string, HTMLImageElement>();
-  async load(): Promise<void> {
-    const response = await fetch(`${BASE_PATH}classic/manifest.json`);
+  private colors?: ConfettiImages;
+  async load(): Promise<AssetManifest> {
+    const response = await fetch(`${BASE_PATH}classic/manifest.json`, {
+      cache: "no-store",
+    });
     if (!response.ok) throw new Error(`art_manifest_${response.status}`);
     const manifest = (await response.json()) as AssetManifest;
     if (
-      manifest.schema !== 1 ||
+      manifest.schema !== 2 ||
       manifest.fps !== CLASSIC_WORLD.fps ||
-      manifest.coordinateSystem.width !== CLASSIC_WORLD.width ||
-      manifest.coordinateSystem.height !== CLASSIC_WORLD.height ||
+      manifest.coordinateSystem.width !== 640 ||
+      manifest.coordinateSystem.height !== 426 ||
       manifest.netFrames.length !== classicAnimation.net.frames
     )
       throw new Error("art_manifest_incompatible");
-    const frames = [
-      manifest.background,
-      manifest.net,
-      ...manifest.netFrames,
-      manifest.shuttle,
-      ...Object.values(manifest.body).flat(),
-      ...Object.values(manifest.swings).flat(),
-    ];
     await Promise.all(
-      [...new Set(frames.map((frame) => frame.path))].map(async (path) => {
-        const image = new Image();
-        await new Promise<void>((resolve, reject) => {
-          image.onload = () => resolve();
-          image.onerror = () => reject(new Error(`art_load_${path}`));
-          image.src = `${BASE_PATH}classic/${path}`;
-        });
-        this.images.set(path, image);
-      }),
+      Object.keys(manifest.files)
+        .filter((path) => path.endsWith(".svg"))
+        .map(async (path) => {
+          const image = new Image();
+          await new Promise<void>((resolve, reject) => {
+            image.onload = () => resolve();
+            image.onerror = () => reject(new Error(`art_load_${path}`));
+            image.src = `${BASE_PATH}classic/${path}?v=${manifest.files[path]}`;
+          });
+          this.images.set(path, image);
+        }),
     );
+    const confetti = await fetch(
+      `${BASE_PATH}classic/${manifest.effects.confetti.frames[0].path}?v=${manifest.files[manifest.effects.confetti.frames[0].path]}`,
+    );
+    if (!confetti.ok) throw new Error("confetti_template_missing");
+    this.colors = new ConfettiImages(await confetti.text());
     this.manifest = manifest;
+    return manifest;
+  }
+  clearEffectsImages(): void {
+    this.colors?.reset();
   }
   render(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
     state: GameState,
+    effects?: Effects,
   ): void {
     ctx.fillStyle = "#101722";
     ctx.fillRect(0, 0, viewport.width, viewport.height);
-    if (!this.manifest) return;
+    const art = this.manifest;
+    if (!art) return;
     ctx.save();
     ctx.translate(viewport.offsetX, viewport.offsetY);
     ctx.scale(viewport.scale, viewport.scale);
     ctx.beginPath();
-    ctx.rect(0, 0, CLASSIC_WORLD.width, CLASSIC_WORLD.height);
+    ctx.rect(0, 0, 640, 426);
     ctx.clip();
-    this.draw(ctx, this.manifest.background);
-    this.drawPlayer(ctx, state.players.left);
-    this.drawPlayer(ctx, state.players.right);
+    this.draw(ctx, art.background);
     this.draw(
       ctx,
-      this.manifest.netFrames[
-        Math.max(
-          0,
-          Math.min(this.manifest.netFrames.length - 1, state.net.frame - 1),
-        )
+      art.netFrames[
+        Math.max(0, Math.min(art.netFrames.length - 1, state.net.frame - 1))
       ],
     );
-    // The extracted serve layer contains its own attached shuttle. Drawing the
-    // standalone one as well would duplicate it before the frame-7 release.
+    const score =
+      state.phase === "matchEnd" && state.winner
+        ? `${state.winner === "left" ? "p1" : "p2"}wins`
+        : `${state.score.left}-${state.score.right}`;
+    this.draw(ctx, art.scores[score]);
+    this.draw(ctx, art.markers);
+    if (effects)
+      for (const p of effects.particles)
+        if (p.kind === "smoke") this.drawParticle(ctx, p);
+    const players = effects?.frozenPlayers ?? state.players;
+    this.drawPlayer(ctx, players.left);
+    this.drawPlayer(ctx, players.right);
+    if (effects)
+      for (const p of effects.particles)
+        if (p.kind === "tail") this.drawParticle(ctx, p);
     if (state.shuttle.state !== "attached") {
       ctx.save();
-      ctx.translate(state.shuttle.x, state.shuttle.y);
+      ctx.translate(state.shuttle.x - 0.05, state.shuttle.y);
       ctx.rotate((state.shuttle.rotation * Math.PI) / 180);
-      this.draw(ctx, this.manifest.shuttle);
+      this.draw(ctx, art.shuttle);
       ctx.restore();
+    }
+    this.draw(ctx, art.courtBrand); // Original static court logo, depth38; no external action.
+    if (effects) {
+      // Intro is appended at match creation, sparks later. Finish is appended at victory;
+      // terminal confetti is appended last. Never blanket-separate spark from overlay.
+      if (effects.introAlpha > 0) {
+        ctx.save();
+        ctx.globalAlpha = effects.introAlpha;
+        ctx.translate(320, 213);
+        this.draw(ctx, art.ui.intro);
+        this.draw(
+          ctx,
+          art.introNames[`${state.players.left.characterId}-left`],
+        );
+        this.draw(
+          ctx,
+          art.introNames[`${state.players.right.characterId}-right`],
+        );
+        ctx.restore();
+      }
+      for (const spark of effects.sparks)
+        if (spark.order < effects.finishOrder) this.drawSpark(ctx, spark);
+      if (effects.finishAlpha > 0) {
+        ctx.save();
+        ctx.globalAlpha = effects.finishAlpha;
+        ctx.translate(320, 213);
+        this.draw(ctx, art.ui.finish);
+        ctx.restore();
+      }
+      for (const spark of effects.sparks)
+        if (spark.order >= effects.finishOrder) this.drawSpark(ctx, spark);
+      for (const p of effects.particles)
+        if (p.kind === "confetti") this.drawParticle(ctx, p);
     }
     ctx.restore();
   }
-  private draw(ctx: CanvasRenderingContext2D, frame: DrawFrame): void {
+  private draw(
+    ctx: CanvasRenderingContext2D,
+    frame: DrawFrame | undefined,
+  ): void {
+    if (!frame) return;
     const image = this.images.get(frame.path);
     if (image)
       ctx.drawImage(image, frame.x, frame.y, frame.width, frame.height);
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerState): void {
-    const manifest = this.manifest!;
-    const swings = manifest.swings[player.swingKind];
+    const art = this.manifest!;
+    const character = art.characters[player.characterId];
+    const swings = art.families[character.family].swings[player.swingKind];
     const swing =
       swings[Math.max(0, Math.min(swings.length - 1, player.swingFrame - 1))];
-    const bodyFrames = manifest.body[player.bodyFrame];
-    const bodyIndex = player.bodyFrameIndex - 1;
+    const bodyFrames = character.body[player.bodyFrame];
     const body =
-      bodyFrames[
-        ((bodyIndex % bodyFrames.length) + bodyFrames.length) %
-          bodyFrames.length
-      ];
-    // Side markers are presentation labels. Both players retain Joe's original
-    // black artwork and share exactly the same mirrored racket geometry.
-    ctx.fillStyle = player.side === "left" ? "#f8fafc" : "#facc15";
-    ctx.beginPath();
-    ctx.ellipse(player.x, CLASSIC_WORLD.groundY + 8, 10, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
+      bodyFrames[Math.max(0, player.bodyFrameIndex - 1) % bodyFrames.length];
     ctx.save();
-    ctx.translate(player.x, player.y);
-    ctx.scale(
-      classicDirection(player.side) * CLASSIC_WORLD.playerScale,
-      CLASSIC_WORLD.playerScale,
-    );
-    if (swing) this.draw(ctx, swing);
-    if (body) this.draw(ctx, body);
+    ctx.translate(player.x - 0.05, player.y);
+    ctx.scale(classicDirection(player.side) * 1.25, 1.25);
+    this.draw(ctx, swing);
+    this.draw(ctx, body);
+    ctx.restore();
+  }
+  private drawSpark(ctx: CanvasRenderingContext2D, spark: Spark): void {
+    ctx.save();
+    ctx.translate(spark.x, spark.y);
+    ctx.rotate((spark.dir * Math.PI) / 180);
+    ctx.scale(0.3, 0.3);
+    this.draw(ctx, this.manifest!.effects.spark.frames[spark.frame - 1]);
+    ctx.restore();
+  }
+  private drawParticle(ctx: CanvasRenderingContext2D, p: Particle): void {
+    const frame = this.manifest!.effects[p.kind].frames[0];
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate((p.rotation * Math.PI) / 180);
+    ctx.scale(p.scale, p.scale);
+    if (p.kind === "confetti") {
+      const image = this.colors?.get(p);
+      if (image)
+        ctx.drawImage(image, frame.x, frame.y, frame.width, frame.height);
+    } else this.draw(ctx, frame);
     ctx.restore();
   }
 }

@@ -8,7 +8,7 @@ async function connect() {
   assert.equal(session.status, 200);
   const url = new URL("ws", base);
   url.protocol = base.protocol === "https:" ? "wss:" : "ws:";
-  const ws = new WebSocket(url, "badminton-v2", {
+  const ws = new WebSocket(url, "badminton-v3", {
     headers: {
       Origin: new URL(origin).origin,
       Cookie: session.headers.get("set-cookie").split(";")[0],
@@ -43,8 +43,8 @@ let timer;
 try {
   const left = await connect();
   const right = await connect();
-  send(left, { type: "queue" });
-  send(right, { type: "queue" });
+  send(left, { type: "queue", character: "joe" });
+  send(right, { type: "queue", character: "joe" });
   const l = await wait(left, "matched");
   const r = await wait(right, "matched");
   assert.equal(l.side, "left");
@@ -103,8 +103,8 @@ try {
   assert.ok(sampledJump);
   assert.ok(sampledMove);
   assert.ok(consistencyChecks > 10);
-  send(left, { type: "queue" });
-  send(right, { type: "queue" });
+  send(left, { type: "queue", character: "joe" });
+  send(right, { type: "queue", character: "joe" });
   const rematch = await wait(left, "matched");
   await wait(right, "matched");
   assert.notEqual(rematch.room, l.room);

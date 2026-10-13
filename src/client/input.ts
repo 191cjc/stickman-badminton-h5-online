@@ -1,14 +1,14 @@
 import type { InputFrame } from "../shared/protocol";
 import type { PlayerIntent } from "../shared/types";
 
-const bindings: Record<string, string> = {
+export const bindings: Record<string, string> = {
   KeyA: "left",
   ArrowLeft: "left",
   KeyD: "right",
   ArrowRight: "right",
   KeyW: "jump",
   ArrowUp: "jump",
-  Space: "jump",
+  Space: "hit",
   KeyS: "hit",
   ArrowDown: "hit",
 };
@@ -16,20 +16,36 @@ export class Input {
   private down = new Set<string>();
   private jumpPressed = false;
   private hitPressed = false;
-  constructor(private readonly onRelease: () => void) {
+  constructor(
+    private readonly onRelease: () => void,
+    onMute: () => void = () => {},
+    onLeave: () => void = () => {},
+  ) {
     window.addEventListener("keydown", (event) => {
       if (
-        !bindings[event.code] ||
-        (event.target instanceof HTMLElement &&
-          ["BUTTON", "INPUT"].includes(event.target.tagName))
+        event.target instanceof HTMLElement &&
+        ["BUTTON", "INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)
       )
         return;
+      if (!event.repeat && ["KeyM", "Escape"].includes(event.code)) {
+        event.preventDefault();
+        if (event.code === "KeyM") onMute();
+        else onLeave();
+        return;
+      }
+      if (!bindings[event.code]) return;
       event.preventDefault();
       this.press(event.code);
     });
     window.addEventListener("keyup", (event) => {
       if (bindings[event.code]) {
-        event.preventDefault();
+        if (
+          !(event.target instanceof HTMLElement) ||
+          !["BUTTON", "INPUT", "SELECT", "TEXTAREA"].includes(
+            event.target.tagName,
+          )
+        )
+          event.preventDefault();
         this.down.delete(event.code);
       }
     });

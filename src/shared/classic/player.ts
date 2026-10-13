@@ -1,4 +1,9 @@
-import { classicAnimation, classicGeometry } from "./assets";
+import {
+  characterAnimation,
+  characterGeometry,
+  classicGeometry,
+} from "./assets";
+import { CHARACTERS, type CharacterId } from "./characters";
 import {
   advanceClassicClip,
   createClassicClip,
@@ -14,17 +19,25 @@ import {
 } from "./types";
 import type { PlayerIntent, Side } from "../types";
 
-export function createClassicPlayer(side: Side): ClassicPlayerState {
+export function createClassicPlayer(
+  side: Side,
+  characterId: CharacterId = "joe",
+): ClassicPlayerState {
+  const profile = CHARACTERS[characterId];
   return {
     side,
+    characterId,
+    bob: 0,
+    bobStep: 0.2,
+    bobBaseline: CLASSIC_WORLD.groundY,
     x: side === "left" ? 150 : 500,
     y: CLASSIC_WORLD.groundY,
     vx: 0,
     vy: 0,
     grounded: true,
-    moveMultiplier: 1,
-    jumpMultiplier: 1,
-    powerMultiplier: 1,
+    moveMultiplier: profile.move,
+    jumpMultiplier: profile.jump,
+    powerMultiplier: profile.power,
     bodyFrame: "normal",
     bodyFrameIndex: 1,
     swingKind: "overhead",
@@ -41,25 +54,6 @@ export function createClassicPlayer(side: Side): ClassicPlayerState {
     serving: false,
     hitLatched: false,
     jumpReady: false,
-    ai: {
-      enabled: false,
-      errorThreshold: 100,
-      initialErrorThreshold: 100,
-      overheadPreference: 100,
-      randomA: 100,
-      randomB: 100,
-      lastTrackedX: 0,
-      lastSwingTime: 0,
-      returnHome: false,
-      pointWasInactive: false,
-      homeAt: null,
-      serveTargetX: 526,
-      serveJump: false,
-      serveTriggered: false,
-      jumpAt: null,
-      swingAt: null,
-      pendingErrorRoll: false,
-    },
   };
 }
 
@@ -68,7 +62,6 @@ export function cloneClassicPlayer(
 ): ClassicPlayerState {
   return {
     ...player,
-    ai: { ...player.ai },
     swingClips: {
       serve: { ...player.swingClips.serve },
       underhand: { ...player.swingClips.underhand },
@@ -117,10 +110,7 @@ export function classicLocalPoint(
 }
 
 /** AS §_-h§.setupServe, with timers held in the serializable player. */
-export function setupClassicServe(
-  player: ClassicPlayerState,
-  random: () => number,
-): void {
+export function setupClassicServe(player: ClassicPlayerState): void {
   player.serving = true;
   player.swingKind = "serve";
   for (const clip of Object.values(player.swingClips)) resetClassicClip(clip);
@@ -128,21 +118,6 @@ export function setupClassicServe(
   player.swinging = false;
   player.contactEnabled = false;
   clampClassicPlayer(player);
-  if (!player.ai.enabled) return;
-  const ai = player.ai;
-  ai.serveTriggered = false;
-  ai.jumpAt = null;
-  ai.swingAt = null;
-  if (random() * 100 < 33) {
-    ai.serveTargetX = classicGeometry.net.x + CLASSIC_WORLD.serveNetInset;
-    ai.serveJump = !(random() * 100 < ai.errorThreshold);
-  } else if (random() * 100 < 50) {
-    ai.serveTargetX = 526;
-    ai.serveJump = false;
-  } else {
-    ai.serveTargetX = 570;
-    ai.serveJump = false;
-  }
 }
 
 function chooseClassicSwing(
@@ -158,7 +133,7 @@ function chooseClassicSwing(
   const inUnderhandZone = classicPointInPolygon(
     local.x,
     underhandY,
-    classicGeometry.underhandZone,
+    characterGeometry(player.characterId).underhandZone,
   );
   let kind: ClassicSwingKind =
     inUnderhandZone && (ball.vy > 0 || ball.y > classicGeometry.net.topOrigin.y)
@@ -168,14 +143,7 @@ function chooseClassicSwing(
     player.side === "left"
       ? ball.x > classicGeometry.net.sideOrigin.x - 15
       : ball.x < classicGeometry.net.sideOrigin.x + 15;
-  if (inUnderhandZone && !player.ai.enabled && nearNet) kind = "overhead";
-  if (
-    inUnderhandZone &&
-    player.ai.enabled &&
-    (context.random?.() ?? 1) * 100 < player.ai.overheadPreference
-  ) {
-    kind = "overhead";
-  }
+  if (inUnderhandZone && nearNet) kind = "overhead";
   return kind;
 }
 
@@ -207,20 +175,20 @@ export function advanceClassicAnimation(
     swingStarted: false,
     serveReleased: false,
   };
+  const animation = characterAnimation(player.characterId);
   // Hidden serve/underhand clips continue to their frame-1 stop after their
   // last-frame setupOverhead event. Switching visibility never resets a clock.
   for (const kind of ["serve", "underhand", "overhead"] as const) {
     const clip = player.swingClips[kind];
-    const duration = classicAnimation[kind].frames;
+    const duration = animation[kind].frames;
     advanceClassicClip(clip, duration, dt, (frame) => {
       if (frame === 1 && player.swingKind === kind) player.swinging = false;
-      if (kind === "serve" && frame === classicAnimation.serve.release) {
+      if (kind === "serve" && frame === animation.serve.release) {
         player.serving = false;
         events.serveReleased = true;
       }
       if (kind !== "serve") {
-        if (frame === classicAnimation[kind].contactEnd)
-          player.contactEnabled = false;
+        if (frame === animation[kind].contactEnd) player.contactEnabled = false;
       }
       if (frame === duration && !player.serving) {
         player.swinging = false;
@@ -302,10 +270,29 @@ export function stepClassicPlayer(
     player.vy = 0;
     player.grounded = true;
   }
+  // §_-h§ contact occurs here; override.handleEnterFrame writes its bob AFTER base.
+  const contactOrigin = { x: player.x, y: player.y };
+  finishClassicBob(player);
   const events =
     context.advanceAnimation === false
       ? { swingStarted: false, serveReleased: false }
       : advanceClassicAnimation(player, dt);
   events.swingStarted = swingStarted;
+  events.contactOrigin = contactOrigin;
   return events;
+}
+
+/** Toaster's human base jump bypasses its empty AI jumpMe override. */
+export function finishClassicBob(player: ClassicPlayerState): void {
+  if (player.characterId !== "toaster" || !player.grounded) return;
+  player.bob += player.bobStep;
+  if (player.bob > 4) {
+    player.bob = 4;
+    player.bobStep *= -1;
+  }
+  if (player.bob < -4) {
+    player.bob = -4;
+    player.bobStep *= -1;
+  }
+  player.y = player.bobBaseline + player.bob;
 }

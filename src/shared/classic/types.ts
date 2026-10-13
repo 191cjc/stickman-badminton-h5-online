@@ -1,10 +1,5 @@
-import type {
-  AiDifficulty,
-  GamePhase,
-  MatchMode,
-  PlayerIntent,
-  Side,
-} from "../types";
+import type { GamePhase, PlayerIntent, Side } from "../types";
+import type { CharacterId } from "./characters";
 
 /** Flash 90302 logical units, not CSS pixels. See reference/flash-90302. */
 export const CLASSIC_WORLD = {
@@ -32,30 +27,13 @@ export interface ClassicClipState {
   playing: boolean;
 }
 
-export interface ClassicAiState {
-  enabled: boolean;
-  /** Flash implements property and its initial value. Larger values mean more errors. */
-  errorThreshold: number;
-  initialErrorThreshold: number;
-  overheadPreference: number;
-  randomA: number;
-  randomB: number;
-  lastTrackedX: number;
-  lastSwingTime: number;
-  returnHome: boolean;
-  pointWasInactive: boolean;
-  homeAt: number | null;
-  serveTargetX: number;
-  serveJump: boolean;
-  serveTriggered: boolean;
-  jumpAt: number | null;
-  swingAt: number | null;
-  pendingErrorRoll: boolean;
-}
-
 /** All simulation/prediction fields are plain serializable data. */
 export interface ClassicPlayerState {
   side: Side;
+  characterId: CharacterId;
+  bob: number;
+  bobStep: number;
+  bobBaseline: number;
   x: number;
   y: number;
   vx: number;
@@ -77,7 +55,6 @@ export interface ClassicPlayerState {
   serving: boolean;
   hitLatched: boolean;
   jumpReady: boolean;
-  ai: ClassicAiState;
 }
 
 export interface ClassicShuttleState {
@@ -95,9 +72,7 @@ export interface ClassicShuttleState {
 }
 
 export interface ClassicState {
-  version: "flash-90302-v1";
-  mode: MatchMode;
-  difficulty: AiDifficulty;
+  version: "flash-90302-v2";
   phase: GamePhase;
   players: Record<Side, ClassicPlayerState>;
   shuttle: ClassicShuttleState;
@@ -122,13 +97,13 @@ export interface ClassicPlayerContext {
   pointActive?: boolean;
   /** Authority advances timelines after both players and the birdie. Prediction defaults to true. */
   advanceAnimation?: boolean;
-  /** Only used by the deterministic AI. Human prediction needs no random source. */
-  random?: () => number;
 }
 
 export interface ClassicPlayerEvents {
   swingStarted: boolean;
   serveReleased: boolean;
+  /** Base movement/contact precedes Toaster's final bob position. */
+  contactOrigin?: { x: number; y: number };
 }
 
 export type ClassicIntent = PlayerIntent;

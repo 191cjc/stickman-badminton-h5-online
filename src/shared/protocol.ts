@@ -1,8 +1,10 @@
 import type { GameState } from "./state";
 import type { Side } from "./types";
+import { isCharacterId, type CharacterId } from "./classic/characters";
+import type { PresentationJournal } from "./classic/presentation";
 
 export const BASE_PATH = "/badminton-h5-online/";
-export const PROTOCOL = 2;
+export const PROTOCOL = 3;
 export const SUBPROTOCOL = `badminton-v${PROTOCOL}`;
 export const SIM_HZ = 60;
 export const INPUT_HZ = 60;
@@ -22,7 +24,8 @@ export interface InputFrame {
 }
 export type ClientMessage =
   | InputFrame
-  | { type: "queue" | "cancel" | "leave" | "release" }
+  | { type: "queue"; character: CharacterId }
+  | { type: "cancel" | "leave" | "release" }
   | { type: "ping"; time: number };
 export type RoomStatus = "playing" | "reconnecting" | "finished";
 export interface Snapshot {
@@ -33,13 +36,21 @@ export interface Snapshot {
   status: RoomStatus;
   reconnectRemainingMs: number;
   state: GameState;
+  effects: PresentationJournal;
+  resultReason?: "score" | "leave" | "disconnect" | "timeout";
 }
 export type ServerMessage =
   | Snapshot
   | { type: "hello"; protocol: number; reconnectMs: number }
-  | { type: "queued" }
+  | { type: "queued"; character: CharacterId }
   | { type: "idle"; reason?: string }
-  | { type: "matched"; room: string; side: Side; resumed: boolean }
+  | {
+      type: "matched";
+      room: string;
+      side: Side;
+      resumed: boolean;
+      characters: Record<Side, CharacterId>;
+    }
   | {
       type: "result";
       winner: Side | null;
@@ -64,9 +75,12 @@ export function parseClientMessage(raw: string): ClientMessage | null {
     Object.keys(v).length === keys.length &&
     keys.every((k) => Object.hasOwn(v, k));
   if (
-    ["queue", "cancel", "leave", "release"].includes(v.type) &&
-    exactKeys(["type"])
+    v.type === "queue" &&
+    exactKeys(["type", "character"]) &&
+    isCharacterId(v.character)
   )
+    return { type: "queue", character: v.character };
+  if (["cancel", "leave", "release"].includes(v.type) && exactKeys(["type"]))
     return v as ClientMessage;
   if (
     v.type === "ping" &&

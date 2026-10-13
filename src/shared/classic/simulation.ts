@@ -1,6 +1,19 @@
-import { classicAnimation, classicGeometry, racketPose } from "./assets";
+import {
+  characterGeometry,
+  classicAnimation,
+  classicGeometry,
+  racketPose,
+} from "./assets";
 import { advanceClassicClip, createClassicClip } from "./animation";
-import { classicAiIntent } from "./ai";
+import type { CharacterId } from "./characters";
+import {
+  PRESENTATION_LIMIT,
+  PRESENTATION_TICKS,
+  seededRandom,
+  type ClassicPresentationEvent,
+  type PresentationJournal,
+  type PresentationPayload,
+} from "./presentation";
 import {
   classicPointInRect,
   launchClassicBirdie,
@@ -22,13 +35,7 @@ import {
   type ClassicShuttleState,
   type ClassicState,
 } from "./types";
-import type {
-  AiDifficulty,
-  GamePhase,
-  MatchMode,
-  PlayerIntent,
-  Side,
-} from "../types";
+import type { GamePhase, PlayerIntent, Side } from "../types";
 
 interface ClassicContact {
   at: number;
@@ -42,14 +49,14 @@ interface ClassicContact {
   vy: number;
 }
 
-/** Flash 90302's ordinary Joe match, independent of DOM, clocks and sockets. */
+/** Flash 90302's seven-human multiplayer match, independent of DOM, clocks and sockets. */
 export class ClassicSimulation {
-  readonly mode: MatchMode;
-  readonly difficulty: AiDifficulty;
-  readonly players = {
-    left: createClassicPlayer("left"),
-    right: createClassicPlayer("right"),
-  };
+  readonly players;
+  tick = 0;
+  private eventCursor = 0;
+  private events: ClassicPresentationEvent[] = [];
+  private readonly cosmeticRandom: () => number;
+  private readonly cosmetics: boolean;
   readonly net = createClassicClip();
   shuttle: ClassicShuttleState = {
     x: 0,
@@ -83,22 +90,49 @@ export class ClassicSimulation {
   private ballEvents: ClassicBallEvent[] = [];
 
   constructor(
-    mode: MatchMode = "versus",
-    difficulty: AiDifficulty = "normal",
-    options: { seed?: number } = {},
+    options: {
+      seed?: number;
+      characters?: Partial<Record<Side, CharacterId>>;
+      cosmeticSeed?: number;
+      cosmetics?: boolean;
+    } = {},
   ) {
-    this.mode = mode;
-    this.difficulty = difficulty;
+    this.players = {
+      left: createClassicPlayer("left", options.characters?.left),
+      right: createClassicPlayer("right", options.characters?.right),
+    };
     this.rngState = (options.seed ?? 0x90302) >>> 0 || 0x90302;
-    if (mode === "single") {
-      const right = this.players.right;
-      right.ai.enabled = true;
-      right.moveMultiplier = difficulty === "boss" ? 1.15 : 1.1;
-      right.ai.errorThreshold = right.ai.initialErrorThreshold =
-        difficulty === "boss" ? 35 : 100;
-      right.ai.overheadPreference = right.ai.errorThreshold;
-    }
+    this.cosmeticRandom = seededRandom(options.cosmeticSeed ?? 0x90302f);
+    this.cosmetics = options.cosmetics !== false;
     this.setupRally();
+  }
+
+  private emit(payload: PresentationPayload): void {
+    if (!this.cosmetics) return;
+    this.events.push({ ...payload, id: ++this.eventCursor, tick: this.tick });
+    if (this.events.length > PRESENTATION_LIMIT) this.events.shift();
+  }
+  presentation(): PresentationJournal {
+    return {
+      cursor: this.eventCursor,
+      events: this.events
+        .filter((e) => e.tick >= this.tick - PRESENTATION_TICKS)
+        .map((e) => ({ ...e })),
+    };
+  }
+  private emitSmoke(side: Side): void {
+    const p = this.players[side];
+    if (
+      this.cosmetics &&
+      p.characterId === "toaster" &&
+      this.cosmeticRandom() * 100 < 25
+    )
+      this.emit({
+        kind: "smoke",
+        x: p.x + this.cosmeticRandom() * 10 - 5,
+        y: p.y - 60,
+        seed: Math.floor(this.cosmeticRandom() * 0x100000000),
+      });
   }
 
   private random = (): number => {
@@ -126,7 +160,7 @@ export class ClassicSimulation {
     };
   }
 
-  /** Bound catch-up to 15 original frames. Paused time never advances AI or point timers. */
+  /** Bound catch-up to 15 original frames. Paused time never advances point timers. */
   update(dt: number): void {
     if (!(dt > 0) || !Number.isFinite(dt)) return;
     if (this.intents.left.pausePressed || this.intents.right.pausePressed) {
@@ -156,13 +190,16 @@ export class ClassicSimulation {
       this.intents[side].hitPressed = false;
       this.intents[side].jumpPressed = false;
       this.intents[side].pausePressed = false;
-      delete this.intents[side].hitMove;
       delete this.intents[side].hitJump;
     }
   }
 
   private step(dt: number): void {
     this.elapsed += dt;
+    this.tick++;
+    this.events = this.events.filter(
+      (e) => e.tick >= this.tick - PRESENTATION_TICKS,
+    );
     this.ballEvents = [];
     if (this.phase === "point") {
       this.pointTimer = Math.max(0, this.pointTimer - dt);
@@ -171,29 +208,34 @@ export class ClassicSimulation {
     // Original PlayState.handleEnterFrame: left -> right -> birdie. Timeline callbacks follow.
     for (const side of ["left", "right"] as const) {
       const player = this.players[side];
-      const intent = player.ai.enabled
-        ? classicAiIntent(
-            player,
-            this.shuttle,
-            this.pointActive,
-            this.elapsed,
-            this.random,
-          )
-        : this.intents[side];
-      stepClassicPlayer(player, intent, dt, {
+      const events = stepClassicPlayer(player, this.intents[side], dt, {
         shuttle: this.shuttle.state === "attached" ? undefined : this.shuttle,
         pointActive: this.pointActive,
-        random: this.random,
         advanceAnimation: false,
       });
-      if (player.ai.pendingErrorRoll) {
-        player.ai.randomA = this.random() * 100;
-        player.ai.randomB = this.random() * 100;
-        player.ai.pendingErrorRoll = false;
-      }
-      this.tryContact(side);
+      if (events.swingStarted)
+        this.emit({ kind: "swing", side, sound: "whoosh" });
+      this.tryContact(side, events.contactOrigin);
+      this.emitSmoke(side);
     }
-    this.ballEvents = stepClassicBirdie(this.shuttle, dt, this.random);
+    this.ballEvents = stepClassicBirdie(
+      this.shuttle,
+      dt,
+      this.random,
+      (ball) => {
+        if (
+          this.cosmetics &&
+          ball.speed > 50 &&
+          this.cosmeticRandom() * 100 < (ball.speed * 100) / 1400
+        )
+          this.emit({
+            kind: "tail",
+            x: ball.x,
+            y: ball.y,
+            seed: Math.floor(this.cosmeticRandom() * 0x100000000),
+          });
+      },
+    );
     if (
       this.ballEvents.includes("netTop") ||
       this.ballEvents.includes("netSide")
@@ -216,10 +258,11 @@ export class ClassicSimulation {
 
   private attachShuttle(): void {
     const player = this.players[this.server];
+    const geometry = characterGeometry(player.characterId);
     // AS serveBirdie uses the unscaled local offset explicitly, despite Joe's draw scale of 1.25.
     this.shuttle.x =
-      player.x + classicGeometry.servePoint.x * classicDirection(player.side);
-    this.shuttle.y = player.y + classicGeometry.servePoint.y;
+      player.x + geometry.servePoint.x * classicDirection(player.side);
+    this.shuttle.y = player.y + geometry.servePoint.y;
   }
 
   private setupRally(): void {
@@ -233,11 +276,8 @@ export class ClassicSimulation {
       const player = this.players[side];
       player.serving = false;
       player.contactEnabled = false;
-      player.ai.jumpAt = null;
-      player.ai.swingAt = null;
-      player.ai.serveTriggered = false;
     }
-    setupClassicServe(this.players[this.server], this.random);
+    setupClassicServe(this.players[this.server]);
     this.shuttle = {
       x: 0,
       y: 0,
@@ -263,9 +303,13 @@ export class ClassicSimulation {
     this.lastShotSide = side;
     this.statusText = "对打中";
     this.recordContact(side, "serve", previousTouch);
+    this.shotEvent(
+      side,
+      this.players[side].characterId === "toaster" ? "toasterpop" : "birdiehit",
+    );
   }
 
-  private tryContact(side: Side): void {
+  private tryContact(side: Side, origin?: { x: number; y: number }): void {
     const player = this.players[side];
     if (
       !this.pointActive ||
@@ -273,11 +317,18 @@ export class ClassicSimulation {
       !player.contactEnabled
     )
       return;
-    const pose = racketPose(player.swingKind, player.swingFrame);
-    const local = classicLocalPoint(player, this.shuttle.x, this.shuttle.y);
+    const pose = racketPose(
+      player.swingKind,
+      player.swingFrame,
+      player.characterId,
+    );
+    const local = classicLocalPoint(
+      origin ? { ...player, ...origin } : player,
+      this.shuttle.x,
+      this.shuttle.y,
+    );
     if (!classicPointInRect(local.x, local.y, pose.hitbox)) return;
     player.contactEnabled = false;
-    player.ai.errorThreshold += 7;
     const overhead = player.swingKind === "overhead";
     const speed = overhead
       ? 1250 * 1.4 * player.powerMultiplier * 0.9
@@ -296,6 +347,18 @@ export class ClassicSimulation {
       overhead ? "overhead" : "underhand",
       previousTouch,
     );
+    this.shotEvent(side, "birdiehit");
+  }
+
+  private shotEvent(side: Side, sound: "birdiehit" | "toasterpop"): void {
+    this.emit({
+      kind: "shot",
+      side,
+      x: this.shuttle.x,
+      y: this.shuttle.y,
+      dir: this.shuttle.dir,
+      sound,
+    });
   }
 
   private recordContact(
@@ -322,6 +385,7 @@ export class ClassicSimulation {
     if (!this.pointActive) return;
     this.pointActive = false;
     this.score[side]++;
+    this.emit({ kind: "point", side, sound: "ding" });
     this.server = side;
     this.lastPointSide = side;
     this.lastPointReason = "落地";
@@ -329,6 +393,7 @@ export class ClassicSimulation {
       player.contactEnabled = false;
     if (this.score[side] >= CLASSIC_WORLD.targetScore) {
       this.winner = side;
+      this.emit({ kind: "victory", side, sound: "cheer" });
       this.phase = "matchEnd";
       this.pointTimer = 0;
       this.statusText = `${side === "left" ? "左" : "右"}侧获胜`;
@@ -341,9 +406,7 @@ export class ClassicSimulation {
 
   snapshot(): ClassicState {
     return {
-      version: "flash-90302-v1",
-      mode: this.mode,
-      difficulty: this.difficulty,
+      version: "flash-90302-v2",
       phase: this.phase,
       players: {
         left: cloneClassicPlayer(this.players.left),

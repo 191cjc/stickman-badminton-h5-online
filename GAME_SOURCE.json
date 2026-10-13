@@ -5,7 +5,21 @@
   "swfSha256": "cab8a824c54af3a0b9454ef30fcbcabc532931f2a96717239fabd58f57e59912",
   "reference": "reference/flash-90302/SOURCE.json",
   "method": "Recovered ActionScript and SWF timeline/shape data migrated to shared TypeScript and Canvas SVG layers; not an original editable Flash project.",
-  "firstVersionScope": "Average Joe, online versus and local AI practice; other characters and campaign deferred.",
+  "firstVersionScope": "Historical first Flash migration: Average Joe, online versus and local AI practice; superseded by currentScope.",
+  "currentScope": "Original human two-player versus converted to online multiplayer with seven directly available characters, source actions/physics/scoring, BigSpark, star trail, Toaster smoke, natural-win confetti, original versus intro/finish artwork and sounds. No AI practice, campaign, unlocks, Robot or Timmy.",
+  "characters": [
+    "joe",
+    "nadia",
+    "harry",
+    "toaster",
+    "pirate",
+    "top-hat",
+    "red"
+  ],
+  "protocol": 3,
+  "stateVersion": "flash-90302-v2",
+  "fullArchive": "reference/flash-90302/ARCHIVE.json",
+  "networkAdaptations": "Cookie matching and fixed room selection; authoritative 60 Hz simulation and 30 Hz snapshots; own-character prediction; presentation events with independent cosmetic RNG; accessible online controls. Recovered behavior and Canvas conversion do not establish native Flash pixel or random-sequence parity.",
   "copyright": "Original game artwork and recovered scripts retain original rights and markings. No open-source license verified; no MIT claim.",
   "historicalCommunitySource": {
     "record": "UPSTREAM.json",

@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="103.75px" width="20.55px" viewBox="0 0 20.55 103.75">
-  <g transform="matrix(1.0, 0.0, 0.0, 1.0, -306.6, -318.25)">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="125.75px" width="42.55px" viewBox="0 0 42.55 125.75">
+  <g transform="matrix(1,0,0,1,-295.6,-307.25)">
     <use height="75.1" id="_-3m" transform="matrix(1.4572, 0.0, 0.0, 1.3813, 317.25, 374.45)" width="14.1" xlink:href="#sprite0" />
   </g>
   <defs>
     <g id="sprite0">
       <use height="31.85" transform="matrix(1.0, 0.0, 0.0, 1.1514, -0.1, -15.65)" width="6.35" xlink:href="#sprite1" />
       <use height="42.2" transform="matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)" width="14.1" xlink:href="#shape1" />
-      <filter color-interpolation-filters="sRGB" height="300%" id="filter0" width="300%" x="-100%" y="-100%">
+      <filter color-interpolation-filters="sRGB" height="2100%" id="filter0" width="2100%" x="-1000%" y="-1000%">
         <feOffset dx="3.5355799791601" dy="3.535487832104965" in="SourceGraphic" result="filterResult0" />
         <feFlood flood-color="#ff0000" flood-opacity="1.0" result="filterResult1" />
         <feComposite in="filterResult1" in2="filterResult0" operator="out" result="filterResult2" />

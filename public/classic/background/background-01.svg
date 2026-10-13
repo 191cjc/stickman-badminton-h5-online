@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="536.95px" width="826.6px" viewBox="0 0 826.6 536.95">
-  <g transform="matrix(1.0, 0.0, 0.0, 1.0, 93.25, 37.5)">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="580.95px" width="870.6px" viewBox="0 0 870.6 580.95">
+  <g transform="matrix(1,0,0,1,115.25,59.5)">
     <use height="426.0" transform="matrix(1.0, 0.0, 0.0, 1.0, 320.0, 213.0)" width="640.0" xlink:href="#sprite0" />
-    <filter color-interpolation-filters="sRGB" height="300%" id="filter0" width="300%" x="-100%" y="-100%">
+    <filter color-interpolation-filters="sRGB" height="2100%" id="filter0" width="2100%" x="-1000%" y="-1000%">
       <feColorMatrix in="SourceGraphic" result="filterResult0" type="matrix" values="0.16927536 -0.13708813 1.1778128 0.0 -0.25162533 0.383377 1.0918591 -0.26523596 0.0 -0.25162536 -0.7248273 1.5669248 0.36790243 0.0 -0.25162533 0.0 0.0 0.0 1.0 0.0" />
     </filter>
     <use filter="url(#filter0)" height="462.55" transform="matrix(1.1437, 0.0, 0.0, 1.1437, 320.05, 235.0)" width="722.8" xlink:href="#sprite1" />
-    <filter color-interpolation-filters="sRGB" height="300%" id="filter1" width="300%" x="-100%" y="-100%">
+    <filter color-interpolation-filters="sRGB" height="2100%" id="filter1" width="2100%" x="-1000%" y="-1000%">
       <feOffset dx="0.0" dy="0.0" in="SourceGraphic" result="filterResult1" />
       <feColorMatrix in="filterResult1" result="filterResult2" type="matrix" values="0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 0 0.0,0 0 0 1.0 0" />
       <feGaussianBlur in="filterResult2" result="filterResult3" stdDeviation="0.5 0.5" />
@@ -14,7 +14,7 @@
       <feComposite in="SourceGraphic" in2="filterResult4" operator="over" result="filterResult5" />
     </filter>
     <use filter="url(#filter1)" height="421.0" transform="matrix(1.0, 0.0, 0.0, 1.0, 320.45, 173.0)" width="507.95" xlink:href="#sprite4" />
-    <filter color-interpolation-filters="sRGB" height="300%" id="filter2" width="300%" x="-100%" y="-100%">
+    <filter color-interpolation-filters="sRGB" height="2100%" id="filter2" width="2100%" x="-1000%" y="-1000%">
       <feOffset dx="3.5355799791601" dy="3.535487832104965" in="SourceGraphic" result="filterResult6" />
       <feFlood flood-color="#ff0000" flood-opacity="1.0" result="filterResult7" />
       <feComposite in="filterResult7" in2="filterResult6" operator="out" result="filterResult8" />
@@ -53,7 +53,7 @@
       <feComposite in="filterResult31" in2="filterResult35" operator="over" result="filterResult36" />
     </filter>
     <use filter="url(#filter2)" height="41.95" transform="matrix(1.0, 0.0, 0.0, 1.0, 320.45, 31.0)" width="138.85" xlink:href="#sprite5" />
-    <filter color-interpolation-filters="sRGB" height="300%" id="filter3" width="300%" x="-100%" y="-100%">
+    <filter color-interpolation-filters="sRGB" height="2100%" id="filter3" width="2100%" x="-1000%" y="-1000%">
       <feColorMatrix in="SourceGraphic" result="filterResult37" type="matrix" values="1.3189083 -0.2810858 -0.037822507 0.0 -0.03515625 -0.14234178 1.1801643 -0.037822507 0.0 -0.03515625 -0.14234178 -0.2810858 1.4234276 0.0 -0.03515625 0.0 0.0 0.0 1.0 0.0" />
       <feOffset dx="0.0" dy="0.0" in="filterResult37" result="filterResult38" />
       <feColorMatrix in="filterResult38" result="filterResult39" type="matrix" values="0 0 0 0 0.23529412,0 0 0 0 0.23529412,0 0 0 0 0.23529412,0 0 0 1.0 0" />

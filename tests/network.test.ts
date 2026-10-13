@@ -48,12 +48,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 it("stops before opening a socket on incompatible session and requires a refresh even after manual retry", async () => {
-  const fetcher = vi
-    .fn()
-    .mockResolvedValue({
-      ok: true,
-      json: async () => ({ protocol: PROTOCOL - 1, connected: false }),
-    });
+  const fetcher = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ protocol: PROTOCOL - 1, connected: false }),
+  });
   vi.stubGlobal("fetch", fetcher);
   const statuses: string[] = [];
   const network = new Network(
@@ -66,7 +64,7 @@ it("stops before opening a socket on incompatible session and requires a refresh
   await vi.advanceTimersByTimeAsync(20_000);
   expect(network.refreshRequired).toBe(true);
   expect(network.connected).toBe(false);
-  expect(network.send({ type: "queue" })).toBe(false);
+  expect(network.send({ type: "queue", character: "joe" })).toBe(false);
   expect(fetcher).toHaveBeenCalledTimes(1);
   expect(sockets).toHaveLength(0);
   expect(statuses.at(-1)).toContain("刷新");
@@ -74,12 +72,10 @@ it("stops before opening a socket on incompatible session and requires a refresh
 it.each(["hello", "error"])(
   "stops reconnecting and discards gameplay on a %s version mismatch after upgrade",
   async (type) => {
-    const fetcher = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ protocol: PROTOCOL, connected: false }),
-      });
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ protocol: PROTOCOL, connected: false }),
+    });
     vi.stubGlobal("fetch", fetcher);
     const received: unknown[] = [];
     const network = new Network(

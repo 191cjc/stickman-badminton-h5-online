@@ -10,6 +10,7 @@ import {
   SUBPROTOCOL,
   parseClientMessage,
 } from "../src/shared/protocol";
+import type { CharacterId } from "../src/shared/classic/characters";
 import { CLASSIC_WORLD } from "../src/shared/classic/types";
 import type {
   ClientMessage,
@@ -133,12 +134,15 @@ describe("real HTTP / WebSocket rooms", () => {
     );
     expect(status).toBe(code);
   }
-  async function pair(): Promise<[Peer, Peer, string]> {
+  async function pair(
+    leftCharacter: CharacterId = "joe",
+    rightCharacter: CharacterId = "joe",
+  ): Promise<[Peer, Peer, string]> {
     const identity = await cookie();
     const left = await connect(identity);
     const right = await connect(await cookie());
-    left.send({ type: "queue" });
-    right.send({ type: "queue" });
+    left.send({ type: "queue", character: leftCharacter });
+    right.send({ type: "queue", character: rightCharacter });
     const l = await left.wait("matched");
     const r = await right.wait("matched");
     expect(l.side).toBe("left");
@@ -161,38 +165,75 @@ describe("real HTTP / WebSocket rooms", () => {
     await rejected(identity, 409);
     expect((await fetch(`${base}${BASE_PATH}api/health`)).status).toBe(200);
   });
-  it("negotiates the new cadence and closes a legacy page before it can claim a connection or match", async () => {
-    const identity = await cookie();
-    const legacy = rawConnect(identity, "http://test.local", "badminton-v1");
-    const messages: ServerMessage[] = [];
-    legacy.on("message", (raw) =>
-      messages.push(JSON.parse(raw.toString()) as ServerMessage),
-    );
-    const closed = new Promise<{ code: number; reason: string }>((resolve) => {
-      legacy.once("close", (code, reason) =>
-        resolve({ code, reason: reason.toString() }),
+  it.each(["badminton-v1", "badminton-v2"])(
+    "negotiates the new cadence and closes a legacy page before it can claim a connection or match (%s)",
+    async (legacyProtocol) => {
+      const identity = await cookie();
+      const legacy = rawConnect(identity, "http://test.local", legacyProtocol);
+      const messages: ServerMessage[] = [];
+      legacy.on("message", (raw) =>
+        messages.push(JSON.parse(raw.toString()) as ServerMessage),
       );
-    });
-    legacy.once("open", () => legacy.send(JSON.stringify({ type: "queue" })));
-    expect(await closed).toEqual({ code: 1008, reason: "protocol_mismatch" });
-    expect(messages).toEqual([{ type: "error", code: "protocol_mismatch" }]);
-    expect(service.stats()).toMatchObject({ rooms: 0, queued: 0 });
-    const current = await connect(identity);
-    current.send({ type: "queue" });
-    await current.wait("queued");
-    const health = await (await fetch(`${base}${BASE_PATH}api/health`)).json();
-    expect(health).toMatchObject({
-      protocol: PROTOCOL,
-      simulationHz: 60,
-      snapshotHz: 30,
-    });
-  });
+      const closed = new Promise<{ code: number; reason: string }>(
+        (resolve) => {
+          legacy.once("close", (code, reason) =>
+            resolve({ code, reason: reason.toString() }),
+          );
+        },
+      );
+      legacy.once("open", () =>
+        legacy.send(JSON.stringify({ type: "queue", character: "joe" })),
+      );
+      expect(await closed).toEqual({ code: 1008, reason: "protocol_mismatch" });
+      expect(messages).toEqual([{ type: "error", code: "protocol_mismatch" }]);
+      expect(service.stats()).toMatchObject({ rooms: 0, queued: 0 });
+      const current = await connect(identity);
+      current.send({ type: "queue", character: "joe" });
+      await current.wait("queued");
+      // Legacy pages report their version mismatch even while this guest has an
+      // active current connection; they cannot replace it or change its queued role.
+      const stale = new Peer(
+        rawConnect(identity, "http://test.local", legacyProtocol),
+      );
+      peers.push(stale);
+      const staleClosed = new Promise<{ code: number; reason: string }>(
+        (resolve) => {
+          stale.ws.once("close", (code, reason) =>
+            resolve({ code, reason: reason.toString() }),
+          );
+        },
+      );
+      expect(await stale.wait("error")).toEqual({
+        type: "error",
+        code: "protocol_mismatch",
+      });
+      expect(await staleClosed).toEqual({
+        code: 1008,
+        reason: "protocol_mismatch",
+      });
+      expect(current.ws.readyState).toBe(WebSocket.OPEN);
+      expect(service.stats()).toMatchObject({ rooms: 0, queued: 1 });
+      current.send({ type: "queue", character: "joe" });
+      expect(await current.wait("queued")).toEqual({
+        type: "queued",
+        character: "joe",
+      });
+      const health = await (
+        await fetch(`${base}${BASE_PATH}api/health`)
+      ).json();
+      expect(health).toMatchObject({
+        protocol: PROTOCOL,
+        simulationHz: 60,
+        snapshotHz: 30,
+      });
+    },
+  );
   it("sends exactly the same original ball and score to both seats at the same authoritative tick", async () => {
     const [left, right] = await pair();
     left.input(0, true);
     const a = await left.wait("snapshot", (s) => s.tick >= 10 && s.ack === 1);
     const b = await right.wait("snapshot", (s) => s.tick === a.tick);
-    expect(a.state.version).toBe("flash-90302-v1");
+    expect(a.state.version).toBe("flash-90302-v2");
     expect(a.state.shuttle.state).toBe("flying");
     expect(a.state).toEqual(b.state);
     expect(b.ack).toBe(0);
@@ -270,8 +311,8 @@ describe("real HTTP / WebSocket rooms", () => {
     const result = await right.wait("result");
     expect(result.reason).toBe("leave");
     expect(result.winner).toBe("right");
-    left.send({ type: "queue" });
-    right.send({ type: "queue" });
+    left.send({ type: "queue", character: "joe" });
+    right.send({ type: "queue", character: "joe" });
     expect((await left.wait("matched")).room).not.toBe(l.room);
   });
   it("samples packet bursts once using the latest held motion and preserving action edges", async () => {
@@ -301,15 +342,67 @@ describe("real HTTP / WebSocket rooms", () => {
       state.state.players.left.swingFrame,
     );
   });
+  it("freezes validated queue choices, allows identical roles, and restores retained seat character", async () => {
+    const identity = await cookie(),
+      a = await connect(identity);
+    a.send({ type: "queue", character: "toaster" });
+    expect((await a.wait("queued")).character).toBe("toaster");
+    a.send({ type: "queue", character: "toaster" });
+    await a.wait("queued");
+    expect(service.stats().queued).toBe(1);
+    a.send({ type: "queue", character: "pirate" });
+    expect((await a.wait("error")).code).toBe("already_queued");
+    const b = await connect(await cookie());
+    b.send({ type: "queue", character: "pirate" });
+    const matched = await a.wait("matched");
+    await b.wait("matched");
+    expect(matched.characters).toEqual({ left: "toaster", right: "pirate" });
+    const initial = await a.wait("snapshot");
+    expect(initial.state.players.left.characterId).toBe("toaster");
+    expect(initial.state.players.right.characterId).toBe("pirate");
+    a.send({ type: "queue", character: "red" });
+    expect((await a.wait("error")).code).toBe("already_in_match");
+    await new Promise<void>((resolve) => {
+      a.ws.once("close", () => resolve());
+      a.ws.close();
+    });
+    await b.wait("snapshot", (s) => s.status === "reconnecting");
+    const resumed = await connect(identity);
+    expect((await resumed.wait("matched")).characters).toEqual(
+      matched.characters,
+    );
+    const state = await resumed.wait("snapshot");
+    expect(state.state.players.left.characterId).toBe("toaster");
+    resumed.send({ type: "leave" });
+    await b.wait("result");
+    resumed.send({ type: "queue", character: "red" });
+    b.send({ type: "queue", character: "red" });
+    const same = await resumed.wait("matched");
+    await b.wait("matched");
+    expect(same.characters).toEqual({ left: "red", right: "red" });
+    expect(same.room).not.toBe(matched.room);
+  });
+  it.each(["robot", "timmy", "joe-invalid", ["joe"], null])(
+    "rejects invalid queue role %j before it can enter queue",
+    async (character) => {
+      const peer = await connect(await cookie());
+      const closed = new Promise<number>((resolve) =>
+        peer.ws.once("close", (code) => resolve(code)),
+      );
+      peer.ws.send(JSON.stringify({ type: "queue", character }));
+      expect(await closed).toBe(1008);
+      expect(service.stats().queued).toBe(0);
+    },
+  );
   it("cancels queued guests and removes them when their connection closes", async () => {
     const peer = await connect(await cookie());
-    peer.send({ type: "queue" });
+    peer.send({ type: "queue", character: "joe" });
     await peer.wait("queued");
     expect(service.stats().queued).toBe(1);
     peer.send({ type: "cancel" });
     await peer.wait("idle", (s) => s.reason === "cancelled");
     expect(service.stats().queued).toBe(0);
-    peer.send({ type: "queue" });
+    peer.send({ type: "queue", character: "joe" });
     await peer.wait("queued");
     await new Promise<void>((resolve) => {
       peer.ws.once("close", () => resolve());
@@ -399,18 +492,32 @@ describe("real HTTP / WebSocket rooms", () => {
         expect(await right.wait("result")).toEqual(result);
         await right.wait("idle", (s) => s.reason === "disconnect");
       }
-      resumed.send({ type: "queue" });
+      resumed.send({ type: "queue", character: "joe" });
       await resumed.wait("queued");
       expect(service.stats()).toMatchObject({ rooms: 0, queued: 1 });
     },
   );
   it("finishes an authoritative seven-point match with identical results on both connections", async () => {
-    const [left, right] = await pair();
+    const [left, right] = await pair("toaster", "pirate");
     let latest: Snapshot | undefined;
     left.ws.on("message", (raw) => {
       const message = JSON.parse(raw.toString()) as ServerMessage;
       if (message.type === "snapshot") latest = message;
     });
+    const delivered = {
+      left: new Map<number, Snapshot["effects"]["events"][number]>(),
+      right: new Map<number, Snapshot["effects"]["events"][number]>(),
+    };
+    for (const [peer, side] of [
+      [left, "left"],
+      [right, "right"],
+    ] as const)
+      peer.ws.on("message", (raw) => {
+        const message = JSON.parse(raw.toString()) as ServerMessage;
+        if (message.type === "snapshot")
+          for (const event of message.effects.events)
+            delivered[side].set(event.id, event);
+      });
     const timer = setInterval(() => {
       if (!latest || latest.status !== "playing") return;
       for (const [peer, side] of [
@@ -430,6 +537,23 @@ describe("real HTTP / WebSocket rooms", () => {
       expect(a).toEqual(b);
       expect(a.reason).toBe("score");
       expect(Math.max(a.score.left, a.score.right)).toBe(7);
+      const final = await left.wait("snapshot", (s) => s.status === "finished");
+      const other = await right.wait(
+        "snapshot",
+        (s) => s.status === "finished" && s.tick === final.tick,
+      );
+      expect(final.state).toEqual(other.state);
+      expect(final.effects).toEqual(other.effects);
+      expect(final.resultReason).toBe("score");
+      expect(
+        [...delivered.left.values()].filter((e) => e.kind === "point"),
+      ).toHaveLength(7);
+      expect(
+        [...delivered.left.values()].filter((e) => e.kind === "victory"),
+      ).toHaveLength(1);
+      expect([...delivered.left.values()]).toEqual([
+        ...delivered.right.values(),
+      ]);
     } finally {
       clearInterval(timer);
     }

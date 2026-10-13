@@ -1,8 +1,19 @@
 import { classicAssetData } from "./assets-data";
+import { CHARACTERS, type CharacterId } from "./characters";
 
-/** Geometry in original Joe coordinates, BEFORE the runtime ±1.25 / +1.25 scale. */
-export const classicGeometry = classicAssetData.geometry;
-export const classicAnimation = classicAssetData.animation;
+export const classicAnimation = {
+  ...classicAssetData.animation,
+  ...classicAssetData.families.adult.animation,
+};
+/** Default Joe geometry kept as a source regression oracle. */
+export const classicGeometry = {
+  ...classicAssetData.families.adult.geometry,
+  net: classicAssetData.net,
+};
+export const characterGeometry = (id: CharacterId) =>
+  classicAssetData.families[CHARACTERS[id].family].geometry;
+export const characterAnimation = (id: CharacterId) =>
+  classicAssetData.families[CHARACTERS[id].family].animation;
 export type ClassicRacketKind = "serve" | "overhead" | "underhand";
 export interface ClassicPoint {
   readonly x: number;
@@ -13,18 +24,16 @@ export interface ClassicRect extends ClassicPoint {
   readonly height: number;
 }
 export interface ClassicRacketPose {
-  /** Racket.rotation in currentSwing-local degrees, as used by the original shot code. */
   readonly rotation: number;
-  /** Stage-axis bounding rectangle at Joe scale +1, matching hitTestPoint(false). */
   readonly hitbox: ClassicRect;
 }
-
-/** Flash frames are 1-based; hold the last pose if the action has completed. */
+/** Original mounted geometry BEFORE mirrored runtime scale; frames are 1-based. */
 export function racketPose(
   kind: ClassicRacketKind,
   frame: number,
+  id: CharacterId = "joe",
 ): ClassicRacketPose {
-  const poses = classicAssetData.poses[kind];
+  const poses = classicAssetData.families[CHARACTERS[id].family].poses[kind];
   const index = Number.isFinite(frame)
     ? Math.min(poses.length - 1, Math.max(0, Math.trunc(frame) - 1))
     : 0;

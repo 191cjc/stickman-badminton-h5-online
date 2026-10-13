@@ -105,6 +105,7 @@ export function stepClassicBirdie(
   ball: ClassicShuttleState,
   dt: number,
   random: () => number,
+  onFlight?: (ball: Readonly<ClassicShuttleState>) => void,
 ): ClassicBallEvent[] {
   if (ball.state === "attached" || !(dt > 0) || !Number.isFinite(dt)) return [];
   const events: ClassicBallEvent[] = [];
@@ -119,6 +120,8 @@ export function stepClassicBirdie(
   ball.dir = (Math.atan2(ball.vy, ball.vx) / Math.PI) * 180 + 90;
   ball.rotation = ball.dir;
   ball.speed = Math.hypot(ball.vx, ball.vy);
+  // §_-24§: source tail emission position is after flight, BEFORE any collision.
+  onFlight?.(ball);
   if (ball.y < -500) ball.y = -500;
   if (ball.x > CLASSIC_WORLD.width - CLASSIC_WORLD.wallInset) {
     ball.x = CLASSIC_WORLD.width - CLASSIC_WORLD.wallInset;

@@ -13,6 +13,7 @@ function snapshot(game: Simulation, ack = 0, tick = 0): Snapshot {
     ack,
     tick,
     state: game.snapshot(),
+    effects: game.presentation(),
     status: "playing",
     reconnectRemainingMs: 0,
   };
@@ -31,7 +32,7 @@ function command(seq: number, patch: Partial<InputFrame> = {}): InputFrame {
 }
 it("replays unacknowledged original movement, jumps and body frames at one 60-Hz step per input", () => {
   const game = new Simulation();
-  const prediction = new Prediction("left");
+  const prediction = new Prediction("left", game.players.left);
   prediction.reconcile(snapshot(game));
   let acknowledged: Snapshot | undefined;
   for (let seq = 1; seq <= 20; seq++) {
@@ -54,7 +55,7 @@ it("predicts explicit original serve animation while leaving the authoritative s
   const game = new Simulation();
   const authority = snapshot(game);
   const frozen = JSON.stringify(authority);
-  const prediction = new Prediction("left");
+  const prediction = new Prediction("left", game.players.left);
   prediction.reconcile(authority);
   for (let seq = 1; seq <= 6; seq++) {
     const input = command(seq, { hitHeld: true, hitPressed: seq === 1 });
@@ -71,7 +72,7 @@ it("predicts explicit original serve animation while leaving the authoritative s
 });
 it("drops old inputs on a score, room or reconnect transition and clones nested latches", () => {
   const game = new Simulation();
-  const prediction = new Prediction("right");
+  const prediction = new Prediction("right", game.players.right);
   prediction.reconcile(snapshot(game));
   prediction.apply(
     command(1, {
@@ -88,8 +89,8 @@ it("drops old inputs on a score, room or reconnect transition and clones nested 
   authority.state.score.left = 1;
   prediction.reconcile(authority);
   expect(prediction.player).toEqual(authority.state.players.right);
-  prediction.player.ai.randomA = 7;
-  expect(authority.state.players.right.ai.randomA).not.toBe(7);
+  prediction.player.swingClips.overhead.clock = 7;
+  expect(authority.state.players.right.swingClips.overhead.clock).not.toBe(7);
   const nextRoom = snapshot(game, 0, 0);
   nextRoom.room = "new-room";
   prediction.reconcile(nextRoom);

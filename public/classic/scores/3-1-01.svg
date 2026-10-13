@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="35.0px" width="143.95px" viewBox="0 0 143.95 35.0">
+  <g transform="matrix(1.0, 0.0, 0.0, 1.0, -248.05, -15.0)">
+    <use height="35.0" id="_-4P" transform="matrix(1.0, 0.0, 0.0, 1.0, 250.05, 17.0)" width="143.95" xlink:href="#text0" />
+  </g>
+  <defs>
+    <g id="text0">
+      <g transform="matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)">
+        <use fill="#ff0000" height="35.0" transform="matrix(0.0263, 0.0, 0.0, 0.0263, 48.5, 22.05)" width="143.95" xlink:href="#font_DS-Digital_Bold_30" />
+      </g>
+      <g transform="matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)">
+        <use fill="#ff0000" height="35.0" transform="matrix(0.0263, 0.0, 0.0, 0.0263, 68.65, 22.05)" width="143.95" xlink:href="#font_DS-Digital_Bold_-0" />
+      </g>
+      <g transform="matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)">
+        <use fill="#ff0000" height="35.0" transform="matrix(0.0263, 0.0, 0.0, 0.0263, 87.75, 22.05)" width="143.95" xlink:href="#font_DS-Digital_Bold_10" />
+      </g>
+    </g>
+    <g id="font_DS-Digital_Bold_30">
+      <path d="M181.05 -429.95 L418.45 -429.95 474.25 -374.8 418.45 -319.05 181.05 -319.05 125.3 -374.8 181.05 -429.95 M494.35 -394.9 L424.8 -465.6 424.8 -617.35 536.3 -727.15 536.3 -437.45 494.35 -394.9 M494.35 -352.95 L536.3 -311.55 536.3 -21.85 424.8 -133.35 424.8 -283.95 494.35 -352.95 M404.7 -111.5 L515.6 0.0 83.35 0.0 194.85 -111.5 404.7 -111.5 M83.35 -749.0 L515.6 -749.0 404.7 -638.05 194.85 -638.05 83.35 -749.0" fill-rule="evenodd" stroke="none" />
+    </g>
+    <g id="font_DS-Digital_Bold_-0">
+      <path d="M447.2 -429.95 L502.95 -374.8 447.2 -319.05 105.75 -319.05 50.6 -374.8 105.75 -429.95 447.2 -429.95" fill-rule="evenodd" stroke="none" />
+    </g>
+    <g id="font_DS-Digital_Bold_10">
+      <path d="M182.2 -394.9 L112.1 -465.6 112.1 -616.8 223.6 -728.3 223.6 -438.0 182.2 -394.9 M182.2 -352.95 L223.6 -311.55 223.6 -21.25 112.1 -132.8 112.1 -283.4 182.2 -352.95" fill-rule="evenodd" stroke="none" />
+    </g>
+  </defs>
+</svg>

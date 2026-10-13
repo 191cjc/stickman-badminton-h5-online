@@ -15,24 +15,20 @@ const reference = resolve(root, "reference/flash-90302");
 const xml = gunzipSync(
   readFileSync(resolve(reference, "original.xml.gz")),
 ).toString();
-interface DrawFrame {
-  path: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import type {
+  AssetManifest,
+  DrawFrame,
+} from "../../src/shared/classic/manifest";
+import { CHARACTER_IDS } from "../../src/shared/classic/characters";
+import {
+  characterAnimation,
+  characterGeometry,
+} from "../../src/shared/classic/assets";
 const manifest = JSON.parse(
   readFileSync(resolve(root, "public/classic/manifest.json"), "utf8"),
-) as {
-  body: Record<string, DrawFrame[]>;
-  swings: Record<string, DrawFrame[]>;
-  background: DrawFrame;
-  shuttle: DrawFrame;
-  net: DrawFrame;
-  netFrames: DrawFrame[];
-  files: Record<string, string>;
-};
+) as AssetManifest;
+const body = manifest.characters.joe.body;
+const swings = manifest.families.adult.swings;
 const readArt = (frame: DrawFrame) =>
   readFileSync(resolve(root, "public/classic", frame.path), "utf8");
 const hash = (data: string | Buffer) =>
@@ -113,7 +109,6 @@ describe("frozen Flash artwork and collision evidence", () => {
 
   it("retains curved selection zones instead of substituting bounding boxes", () => {
     expect(classicGeometry.underhandZone.length).toBeGreaterThan(100);
-    expect(classicGeometry.computerZone.length).toBeGreaterThan(100);
     expect(classicAssetData.source.polygonTolerance).toBe(0.01);
     const under = classicGeometry.underhandZone;
     expect(under[0].x).toBeCloseTo(17.25 + 24.1 * 1.1691132, 9);
@@ -125,24 +120,21 @@ describe("frozen Flash artwork and collision evidence", () => {
   it("draws only the body plus selected swing and preserves nested walking frames", () => {
     expect(
       Object.fromEntries(
-        Object.entries(manifest.body).map(([name, frames]) => [
-          name,
-          frames.length,
-        ]),
+        Object.entries(body).map(([name, frames]) => [name, frames.length]),
       ),
     ).toEqual({ normal: 1, backward: 16, forward: 16, jump: 1 });
-    for (const frames of Object.values(manifest.body)) {
+    for (const frames of Object.values(body)) {
       for (const frame of frames)
         expect(readArt(frame)).not.toMatch(
           /serveSwing|underhandSwing|overheadSwing|underHitbox|computerHitbox/,
         );
     }
     for (const name of ["forward", "backward"]) {
-      const frames = manifest.body[name].map(readArt);
+      const frames = body[name as "forward" | "backward"].map(readArt);
       expect(new Set(frames).size).toBe(8);
       for (let i = 0; i < 16; i += 2) expect(frames[i]).toBe(frames[i + 1]);
     }
-    for (const [kind, frames] of Object.entries(manifest.swings)) {
+    for (const [kind, frames] of Object.entries(swings)) {
       expect(frames).toHaveLength(
         classicAnimation[kind as keyof Omit<typeof classicAnimation, "fps">]
           .frames,
@@ -163,6 +155,7 @@ describe("frozen Flash artwork and collision evidence", () => {
       expect(path).not.toMatch(/\.\.|^\//);
       const art = readFileSync(resolve(root, "public/classic", path));
       expect(hash(art)).toBe(digest);
+      if (!path.endsWith(".svg")) continue;
       expect(art.toString()).not.toMatch(
         /<script|<foreignObject|<a\s|\son\w+=|(?:xlink:)?href=["'](?:https?:|javascript:)/i,
       );
@@ -172,7 +165,106 @@ describe("frozen Flash artwork and collision evidence", () => {
       /kongBtn|switch|mouseHitbox2/,
     );
     expect(manifest.netFrames).toHaveLength(24);
-    expect(manifest.net.x).toBeGreaterThan(300);
+    expect(
+      manifest.netFrames[0].x + manifest.netFrames[0].filterPadding,
+    ).toBeGreaterThan(300);
     expect(manifest.shuttle.x).toBeLessThan(0);
+  });
+});
+
+describe("original multiplayer assets beyond Joe", () => {
+  it("includes exactly the seven accessible roles and source body art/attachments", () => {
+    expect(Object.keys(manifest.characters)).toEqual(CHARACTER_IDS);
+    for (const id of CHARACTER_IDS) {
+      const character = manifest.characters[id];
+      for (const frames of Object.values(character.body))
+        for (const frame of frames)
+          expect(readArt(frame)).not.toMatch(
+            /underHitbox|computerHitbox|Swing/,
+          );
+      expect(character.body.normal[0].path).toContain(id);
+    }
+    // Pirate's additional shape220/depth21 survives the body closure.
+    expect(manifest.characters.pirate.bodySymbols.normal).toEqual([
+      142, 144, 219, 220,
+    ]);
+    expect(manifest.characters.pirate.bodyDepths.normal).toEqual([
+      11, 13, 15, 21,
+    ]);
+    expect(manifest.uiSources).toEqual({
+      courtBrand: { symbol: 343, frame: 1 },
+      intro: { symbol: 255, frame: 1 },
+      finish: { symbol: 269, frame: 1 },
+    });
+    expect(hash(readArt(manifest.characters.pirate.body.normal[0]))).not.toBe(
+      hash(readArt(manifest.characters.joe.body.normal[0])),
+    );
+    expect(manifest.characters.toaster.body.forward).toHaveLength(1);
+    const script = readFileSync(
+      resolve(reference, "scripts/Symbol30copy9.as"),
+      "utf8",
+    );
+    expect(script).toContain(
+      "addFrameScript(0,this.frame1,7,this.frame8,26,this.frame27)",
+    );
+    expect(characterAnimation("toaster").serve).toEqual({
+      frames: 27,
+      release: 8,
+    });
+    expect(characterGeometry("toaster").servePoint).toEqual({
+      x: 22,
+      y: -86.55,
+    });
+    expect(racketPose("overhead", 1, "toaster")).not.toEqual(
+      racketPose("overhead", 1, "joe"),
+    );
+  });
+  it("exports original FX lifetimes with padded unchanged filter hierarchy and only active sounds", () => {
+    expect(manifest.schema).toBe(2);
+    expect(manifest.effects.spark.originalSymbol).toBe(278);
+    expect(manifest.effects.spark.frames).toHaveLength(25);
+    expect(manifest.effects.spark.removeFrame).toBe(22);
+    for (const name of ["tail", "smoke", "confetti"] as const) {
+      const frame = manifest.effects[name].frames[0];
+      expect(frame.filterPadding).toBeGreaterThan(0);
+      expect(readArt(frame)).toContain("feGaussianBlur");
+    }
+    expect(readArt(manifest.effects.confetti.frames[0])).toContain(
+      'data-confetti-body="true"',
+    );
+    expect(readArt(manifest.effects.confetti.frames[0])).toContain(
+      'flood-color="#ff0000"',
+    );
+    expect(
+      Object.values(manifest.sounds)
+        .map((s) => s.originalSymbol)
+        .sort((a, b) => a - b),
+    ).toEqual([19, 20, 38, 40, 43, 45, 46, 47]);
+    for (const sound of Object.values(manifest.sounds)) {
+      const tag = xml.match(
+        new RegExp(
+          '<item type="DefineSoundTag"[^>]*soundId="' +
+            sound.originalSymbol +
+            '"[^>]*>',
+        ),
+      )?.[0];
+      const raw = Buffer.from(
+        tag!.match(/soundData="([a-fA-F0-9]+)"/)![1],
+        "hex",
+      );
+      expect(hash(raw.subarray(2))).toBe(sound.sha256);
+      expect(raw.readInt16LE()).toBe(sound.seekSamples);
+    }
+    expect(readArt(manifest.ui.intro)).not.toContain("Quarter-Finals");
+    expect(Object.keys(manifest.scores)).toHaveLength(66);
+  });
+  it("retains the original court brand's visible Up art, registration and filters without executable sponsor actions", () => {
+    expect(xml).toMatch(/characterId="343"[^>]*name="kongBtn"/);
+    expect(manifest.uiSources.courtBrand).toEqual({ symbol: 343, frame: 1 });
+    const art = readArt(manifest.courtBrand);
+    expect(art).toContain("matrix(1.0, 0.0, 0.0, 1.0, 565.9, 12.95)");
+    expect(art).toContain("feGaussianBlur");
+    expect(art).toContain("feComposite");
+    expect(art).not.toMatch(/<a\s|<script|kongBtn|https?:\/\/(?!www\.w3\.org)/);
   });
 });

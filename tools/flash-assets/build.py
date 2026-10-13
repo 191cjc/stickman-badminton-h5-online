@@ -30,7 +30,7 @@ def main():
     if exported.exists():
         shutil.rmtree(exported)
     with (intermediate/'export.log').open('w') as log:
-        subprocess.run(command+['-onerror','abort','-ignorebackground','-format','sprite:svg','-selectid','100,1001-1004,1011-1013,1020-1021','-export','sprite',str(exported),str(intermediate/'art-only.swf')],check=True,stdout=log,stderr=subprocess.STDOUT)
+        subprocess.run(command+['-onerror','abort','-ignorebackground','-format','sprite:svg','-selectid',','.join(str(s['symbol']) for s in json.loads((intermediate/'export-specs.json').read_text())),'-export','sprite',str(exported),str(intermediate/'art-only.swf')],check=True,stdout=log,stderr=subprocess.STDOUT)
     subprocess.run([sys.executable,str(ROOT/'tools/flash-assets/finalize.py')],check=True)
     # Keep generated TypeScript formatting reproducible under repository tooling.
     subprocess.run([str(ROOT/'node_modules/.bin/prettier'),'--write',str(ROOT/'src/shared/classic/assets-data.ts')],check=True)

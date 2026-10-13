@@ -13,7 +13,7 @@
     <main id="app">
       <header>
         <a class="brand" href="/badminton-h5-online/"
-          >火柴人羽毛球 <span>ONLINE</span></a
+          >火柴人羽毛球2 <span>ONLINE</span></a
         >
         <div class="connection">
           <i id="connection-dot"></i><span id="connection">正在连接</span
@@ -40,16 +40,21 @@
             <h2 id="overlay-title">球场正在等你</h2>
             <div class="actions" aria-label="比赛菜单">
               <button id="start" class="primary" type="button" disabled>
-                开始匹配</button
-              ><button id="cancel" type="button" hidden>取消匹配</button
-              ><button id="practice" type="button">AI 练习</button>
+                <img id="rematch-art" alt="" hidden />
+                <span id="start-label">开始匹配</span></button
+              ><button id="cancel" type="button" hidden>取消匹配</button>
+            </div>
+            <div id="character-selection">
+              <div id="character-grid" role="group" aria-label="选择角色"></div>
+              <p id="character-detail" aria-live="polite"></p>
             </div>
             <p id="overlay-detail">
-              点击「开始匹配」进入在线对战，也可以先练习。
+              选择角色后点击「开始匹配」，另一位玩家加入后自动开赛。
             </p>
           </div>
         </div>
         <div class="court-actions">
+          <button id="mute" type="button" aria-pressed="false">静音</button>
           <button id="leave" type="button" hidden>结束比赛</button>
         </div>
         <div
@@ -64,7 +69,7 @@
       <section class="controls">
         <p>
           <kbd>A</kbd><kbd>D</kbd> 移动 <kbd>W</kbd> 跳跃 <kbd>S</kbd> 挥拍 /
-          发球 <span>也支持方向键，空格跳跃</span>
+          发球 <span>也支持方向键，空格击球 · M 静音 · Esc 结束比赛</span>
         </p>
         <p id="hint">两位玩家使用相同按键，匹配后显示你的场地位置。</p>
       </section>
