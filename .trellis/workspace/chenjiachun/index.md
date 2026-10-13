@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 5
+- **Total Sessions**: 6
 - **Last Active**: 2026-10-13
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~169 | Active |
+| `journal-1.md` | ~206 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 6 | 2026-10-13 | 原版双人七角色联机、特效与独立发布 | `0f6a273`, `5dfb8de` | `feat/flash-versus-gameplay-effects` |
 | 5 | 2026-10-13 | 原版 Flash 全量下载与完整性归档 | `89e217d` | `main` |
 | 4 | 2026-10-13 | Flash original Joe authoritative H5 migration and release | `d69adb5`, `d2a52e4` | `main` |
 | 3 | 2026-10-13 | 放大球场与场内匹配菜单 | `7244311` | `main` |

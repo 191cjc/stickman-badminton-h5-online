@@ -167,3 +167,40 @@ Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`
 ### Status
 
 [OK] **Completed**
+
+
+## Session 6: 原版双人七角色联机、特效与独立发布
+<!-- trellis-session: v=2 fp=f7daa383768a38f3 -->
+
+**Date**: 2026-10-13
+**Task**: 原版双人七角色联机、特效与独立发布
+**Branch**: `feat/flash-versus-gameplay-effects`
+
+### Summary
+
+完成Flash90302七角色人类双人联机，移除AI/闯关；接入原闪光、星尾、Toaster烟雾、胜利彩屑及八声音。161项测试和独立复核通过；授权隔离Chromium完整比赛924组状态一致、重连/再匹配通过，原SWF Ruffle对照完成。发布20261013T110500Z-versus，19:05:26重启本项目服务；公网507素材、v3及完整比赛590组状态一致通过，其他项目/服务和Cookie密钥不变。已停止本地验证服务；真实双机、弱网、触屏及其他浏览器仍待外部验收。
+
+### Main Changes
+
+- 共享七角色动作/权威模拟、严格v3选角席位与本地预测
+- 原素材生成器schema2、特效事件去重及有界图像/音频生命周期
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0f6a273` | feat: port seven-character Flash versus gameplay and effects |
+| `5dfb8de` | docs: record Flash versus design and release verification |
+
+### Testing
+
+- [OK] typecheck/lint/11文件161测试/build及最终本地/公网HTTP通过
+- [OK] 两Cookie浏览器比赛、同角色再匹配、失焦/保留Cookie重连及Esc退出通过
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 用户用真实两台公网电脑验收对战手感、连续回击和视听表现
