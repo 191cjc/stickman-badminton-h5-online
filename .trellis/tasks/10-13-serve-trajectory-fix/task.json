@@ -15,7 +15,7 @@
   "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
-  "commit": null,
+  "commit": "d69adb5",
   "pr_url": null,
   "subtasks": [],
   "children": [],
@@ -35,11 +35,13 @@
   "notes": "User approved the complete Flash migration plan with 开始改造. Implement ordinary Joe online and AI practice; preserve archived community repair evidence and frozen upstream. Use isolated local testing before independent release.",
   "meta": {
     "implementation_paused_by_user": false,
-    "attribution": "inherited from verified upstream commit",
+    "attribution": "Flash90302 frozen SWF and recovered ActionScript; original rights preserved, no open-source license verified",
     "community_repair_abandoned_by_user": true,
     "new_source": "https://www.4399.com/flash/90302.htm",
     "planning_review_pending": false,
     "source_recovery": "112 ActionScript scripts and full SWF XML; 104 parsed SVG frame samples",
-    "approved_message": "开始改造"
+    "approved_message": "开始改造",
+    "release": "20261013T065755Z-flash",
+    "validation": "78 tests; isolated original Ruffle and Chromium practice/two-guest checks; public HTTP/SVG/WS2 and legacy1008; physical dual-computer/weak-network pending"
   }
 }

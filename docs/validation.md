@@ -54,6 +54,17 @@ node scripts/public-match-check.mjs https://www.firesoul.cn
 
 常规命令不会自动运行浏览器；此次额外检查依据用户明确授权。临时浏览器脚本、图片和原始结果保留在忽略的 artifacts 目录，正式规格和来源记录纳入 Git。物理双机的网络手感、其他浏览器、触屏与弱网仍须外部验收，不承诺按键延迟数值。
 
+## 2026-10-13 Flash 版公网发布
+
+- 已发布 `20261013T065755Z-flash`，对应实现提交 `d69adb5`，入口 https://www.firesoul.cn/badminton-h5-online/ 。发布流程再次完成类型、lint、78 项测试和构建，Nginx 配置校验通过。
+- `badminton-h5-online.service` 于北京时间 2026-10-13 14:58:28 重启，PID2358332，active/running；后端健康为协议2、模拟60Hz、快照30Hz。Nginx 已 reload，服务日志未出现运行异常。启动后的首次健康连接在服务绑定前失败一次，既有重试随即成功，发布退出码0。
+- 公网 HTML、JS、CSS 返回200，与当前构建逐字节一致；manifest 640×426/60fps/24网帧正确，三个实际 SVG SHA-256 与清单一致。生产游客 Cookie 与同源 WebSocket v2 hello 通过。额外验证 v1 收到 protocol_mismatch 后1008关闭，同一游客仍可用 v2 正常连接；没有加入公网匹配队列。
+- 原 SWF、恢复脚本和 release 根部来源记录均不在公网 alias，所查 URL 返回404。来源记录随 release 保存在非静态根目录，冻结资料仍在 Git 项目中。
+- `/badminton/`、`/badminton-original/`、`/badminton-cloud/` 仍返回200；共享 HTTPS 配置、三个旧 Nginx snippets 和社区试玩核心文件 SHA-256保持不变。云游戏 PID1311812、启动时间2026-10-10 15:31:12 CST保持不变；flash-global-data 服务也未重启。
+- `previous` 保留 `20261013T030548Z`，可按部署文档回滚，前后端一起恢复且需刷新页面。本次未执行生产回滚演练；完整双人比赛与浏览器测试在隔离本地完成，真实两台公网电脑、触屏、其他浏览器和弱网体验仍待外部验证。
+
+原始发布日志、前后快照与协议复验保存在 `artifacts/flash-local-verification/`，未提交敏感 Cookie/密钥，临时本地验证服务已停止。当前页面使用协议 v2，旧页面应刷新后再进入。
+
 ## 已实现与效果边界
 
 实现的协议流程：游客、开始/取消匹配、双人权威模拟、发球/移动/跳跃/击球/计分、结束/再匹配、失焦清键、断线暂停/重连/回收、席位保护与输入校验。客户端已经加入角色预测、按 ack 重放和小幅平滑校正、对手与羽毛球快照插值，以及 AI 练习。
