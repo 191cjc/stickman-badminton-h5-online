@@ -10,6 +10,6 @@
 - [x] Record code/HTTP evidence and separate manual visual/focus/touch acceptance.
 - [x] Update component specs and commit this scoped work.
 - [x] Archive this completed local task.
-- [ ] Record the session journal.
+- [x] Record the session journal.
 
 Validation commands: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`; targeted formatting of changed files only. Do not add tests that restate HTML/CSS assignments, and do not launch browsers, production matchmaking guests or deployment scripts.

@@ -34,6 +34,7 @@
     "production_published": false,
     "automated_browser_started": false,
     "manual_acceptance_pending": true,
-    "archived": true
+    "archived": true,
+    "journal_recorded": true
   }
 }

@@ -84,3 +84,39 @@ Tracked the game and static Trellis tooling, repaired the four reviewed validati
 
 - Publish the verified repair as an independent project release when requested; production currently remains on the earlier release.
 - Perform external two-computer, mobile/browser and weak-network acceptance; no physical input latency has been measured.
+
+
+## Session 3: 放大球场与场内匹配菜单
+<!-- trellis-session: v=2 fp=f079ffacf83b2084 -->
+
+**Date**: 2026-10-13
+**Task**: 放大球场与场内匹配菜单
+**Branch**: `main`
+
+### Summary
+
+放大 H5 球场并移除外部介绍区，将匹配/练习/结算操作移入场内菜单，结束按钮独立位于右上角；修复短横屏比分与结束按钮的布局边界。完成独立复核、代码及本地 HTTP 验证，未发布公网或启动浏览器。
+
+### Main Changes
+
+- 仅调整 HTML/CSS 展示，复用原有按钮与全部游戏/网络状态逻辑。
+- 同步 frontend component spec 和人工界面验收说明；任务已归档。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `7244311` | feat: enlarge court and move match actions in game |
+
+### Testing
+
+- [OK] Lint、类型、50 项测试、生产构建与格式检查通过；20 份 spec 的 169 条本地链接通过。
+- [OK] 最终 HTML/JS/CSS 本地 HTTP 200，结构检查通过，预览已停止；无自动浏览器测试。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 人工检查桌面、窄屏、短横屏、键盘焦点和触屏效果；公网发布另行处理。
