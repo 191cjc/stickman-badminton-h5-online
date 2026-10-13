@@ -25,13 +25,22 @@ node scripts/public-match-check.mjs https://www.firesoul.cn
 
 `public-match-check.mjs` 会建立两个测试游客并匹配比赛，建议在队列为空时运行，避免与真实等候玩家配对。HTTP 检查只做握手，不加入匹配。原始结果保存在 `artifacts/public-http-check.json` 与 `artifacts/public-match-check.json`，本地 artifacts 不进入版本控制。
 
-## 2026-10-13 本地界面调整（未发布）
+## 2026-10-13 本地界面调整（发布前）
 
 - 页面最大宽度从 1180px 提高到 1600px，缩短页头并移除球场上方的介绍区；球场按窗口高度调整，保持等比例绘制。
 - 开始匹配、取消匹配、AI 练习和再次匹配使用场内菜单；结束比赛按钮独立位于球场右上角，开赛后菜单隐藏时仍可使用。窄屏和短横屏共用紧凑比分布局，菜单在空间不足时允许内部滚动。
 - 独立复核后，lint、类型检查、7 个测试文件共 50 项测试、生产构建和格式检查通过。匹配、输入、Canvas 绘制与模拟代码无需改动。
 - 最终构建在独立本地预览入口 `/badminton-h5-online/` 完成 HTTP 检查，HTML、JS 和 CSS 均返回 200；结构检查确认按钮全部位于球场内、结束按钮不在隐藏菜单中、ID 唯一、Canvas 可聚焦、状态播报保留。预览服务检查后已停止。
-- 本次没有发布公网、重启生产服务或自动启动浏览器；实际画面、焦点滚动和触屏效果仍需人工检查。
+- 本地验收阶段没有发布公网、重启生产服务或自动启动浏览器；实际画面、焦点滚动和触屏效果仍需人工检查。
+
+## 2026-10-13 公网发布与服务重启
+
+- 已发布版本 `20261013T030548Z`，入口 https://www.firesoul.cn/badminton-h5-online/ 。包含球场放大及场内菜单调整（`7244311`）和此前输入校验、重连回收修复（`8edc074`）；发布时源码为 `d82a75a`。
+- 发布流程重新完成类型检查、lint、50 项测试和构建；`nginx -t` 通过。`badminton-h5-online.service` 于北京时间 2026-10-13 11:06:19 重启，发布后为 active/running，健康接口正常。Nginx 已 reload。
+- 公网 HTML、JS、CSS 均返回 200，并逐字节核对与新版本目录一致；场内按钮结构检查通过。生产 Cookie 属性及同源 WebSocket 协议 v1 握手通过，没有运行浏览器或实际匹配脚本。
+- `/badminton/`、`/badminton-original/`、`/badminton-cloud/` 均继续返回 200；共享 Nginx 配置和三个旧入口 snippets 的 SHA256 保持一致。云游戏服务 PID 与启动时间保持不变，没有重启。
+- `previous` 指向 `20261012T063353Z`，可使用既有回滚脚本恢复。此次发布未做回滚演练，视觉、键盘焦点、触屏和真人双机效果仍待人工验收。
+- 发布日志与前后检查保存在本地 `artifacts/deploy-20261013T030548Z.log`、`artifacts/deploy-20261013T030548Z-before.json`、`artifacts/deploy-20261013T030548Z-after.json`；临时产物不纳入 Git。
 
 ## 已实现与效果边界
 
