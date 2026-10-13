@@ -17,8 +17,10 @@ Use lowercase hyphenated filenames for modules, PascalCase classes, and named ex
 
 ## Imports and builds
 
-Client modules import gameplay contracts and pure helpers from `src/shared`. They must not import `src/server`, Node APIs, or the archived `upstream` entry point. `Simulation` is used locally for AI practice, not for authoritative online ball prediction.
+Client modules import gameplay contracts and pure helpers from `src/shared`. They must not import `src/server`, Node APIs, or the archived `upstream` entry point. Product scenes have no local AI Simulation; only shared player stepping is predicted, never online ball authority.
 
 [Vite configuration](../../../vite.config.ts) sets `/badminton-h5-online/`, builds `dist/client`, and proxies only this project's API/WS during development. Keep asset URLs compatible with that base. Source artwork is extracted from the frozen Flash XML into public/classic SVG layers. Numeric data and visible frames must regenerate from the same source via tools/flash-assets; keep research tool binaries out of production.
 
 [package.json](../../../package.json) builds an independent server bundle separately. Treat `dist`, `node_modules`, coverage, and artifacts as generated/local output. Preserve [GAME_SOURCE.json](../../../GAME_SOURCE.json) and the frozen Flash reference for current source evidence; [UPSTREAM.json](../../../UPSTREAM.json) remains historical community provenance, not the Flash parity reference.
+
+[Effects](../../../src/client/effects.ts) owns authority event consumption and bounded60Hz particle/result clocks. [Audio](../../../src/client/audio.ts) owns same-origin source audio, gesture unlocking, gain/mute and bounded overlapping nodes. Renderer owns scene images/Blob URL disposal and draws the Effects data; main composes these owners.

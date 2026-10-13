@@ -1,0 +1,24 @@
+{"file": ".trellis/spec/shared/index.md", "reason": "Shared boundary and whole-layer checks"}
+{"file": ".trellis/spec/shared/simulation.md", "reason": "Source geometry, fixed clocks, authority and replay"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Strict inputs, ack/tick and coordinated version migration"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend ownership and required checks"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Client modules and build boundaries"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Court menu accessibility and original Canvas layers"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Input release, reconnect and controller lifecycle"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Local prediction and remote interpolation boundaries"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Types and runtime trust boundaries"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Meaningful tests and browser authorization limits"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend layer checks"}
+{"file": ".trellis/spec/backend/architecture.md", "reason": "Testable service and timers/resources"}
+{"file": ".trellis/spec/backend/identity-and-input.md", "reason": "Cookie, Origin, seat and input validation"}
+{"file": ".trellis/spec/backend/rooms.md", "reason": "Queue, input coalescing, reconnect and cleanup"}
+{"file": ".trellis/spec/deployment/index.md", "reason": "Independent resources and publication boundary"}
+{"file": ".trellis/spec/deployment/operations.md", "reason": "Atomic release, rollback and provenance"}
+{"file": ".trellis/spec/deployment/source-archive.md", "reason": "Frozen archive and production asset boundary"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Use shared owners and unchanged comparison source"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace producer/parser/authority/consumer and deployment"}
+{"file": ".trellis/tasks/10-13-flash-gameplay-effects/research/characters.md", "reason": "Actual versus7 roster, source attributes and Toaster exceptions"}
+{"file": ".trellis/tasks/10-13-flash-gameplay-effects/research/effects.md", "reason": "Actual particle/audio triggers, depths and multiplayer result"}
+{"file": ".trellis/tasks/10-13-flash-gameplay-effects/research/effects-conversion-and-sync.md", "reason": "Untruncated asset conversion, event/RNG synchronization and fidelity caveats"}
+{"file": ".trellis/tasks/10-13-flash-gameplay-effects/research/integration-boundaries.md", "reason": "Present code anchors and cross-layer gaps"}
+{"file": ".trellis/tasks/10-13-flash-gameplay-effects/research/live-source-audit.md", "reason": "Inherited neutral interfaces versus deleted community behavior"}

@@ -1,54 +1,56 @@
-# Flash 90302 simulation and source reuse
+# Flash90302 human-versus simulation
 
 ## 1. Scope / Trigger
 
-Gameplay migrated from the community H5 kernel to recovered Flash90302. Use [ClassicSimulation](../../../src/shared/classic/simulation.ts), exposed as Simulation by [the adapter](../../../src/shared/simulation.ts), for online authority and local AI practice. It owns players, shuttle, phase, score, action clocks, server side, RNG and winner. Shared mechanics must remain free of DOM, WS, Cookie, wall-clock timers and Node service APIs.
+[ClassicSimulation](../../../src/shared/classic/simulation.ts), exported through [Simulation](../../../src/shared/simulation.ts), owns online human-versus mechanics. Shared code contains no DOM, Cookie, WS, service APIs or wall-clock timers. Source is unchanged Flash90302 in [reference](../../../reference/flash-90302/README.md); community `upstream/` is historical, never the parity oracle. No verified MIT grant.
 
-The active reference is the unchanged SWF, recovered ActionScript and compressed XML under [reference](../../../reference/flash-90302/README.md); [GAME_SOURCE.json](../../../GAME_SOURCE.json) identifies it. The frozen community `upstream/` is historical and must not become the new parity oracle. Neither source has a verified MIT grant.
+The product roster is exactly `joe`, `nadia`, `harry`, `toaster`, `pirate`, `top-hat`, `red`. No AI, campaign, unlock state, Robot or Timmy runtime. Preserve their frozen reference files.
 
 ## 2. Signatures
 
-- `new ClassicSimulation(mode = 'versus', difficulty = 'normal', { seed? } = {})`
+- `new ClassicSimulation({characters?: Partial<Record<Side, CharacterId>>, seed?, cosmeticSeed?, cosmetics?} = {})`
 - `setIntents(left: PlayerIntent, right: PlayerIntent): void`
-- `update(dt: number): void`; explicit bounded fixed60Hz stepping
-- `snapshot(): ClassicState`; serializable state, not a complete private restoration checkpoint
-- [stepClassicPlayer](../../../src/shared/classic/player.ts) accepts a plain player, logical intent, dt and read-only context; reused by Simulation and Prediction
-- [racketPose](../../../src/shared/classic/assets.ts) accepts action and1-basedframe and returns full-precision original geometry before runtime scale
+- `update(dt: number): void`; bounded explicit fixed60Hz stepping
+- `snapshot(): ClassicState`; version `flash-90302-v2`, plain deep-copied player/clip/bob/ball/score data
+- `presentation(): PresentationJournal`; cursor and recent events, separate from gameplay restoration
+- [stepClassicPlayer](../../../src/shared/classic/player.ts) is shared by authority and own-character Prediction; returns source action events and Toaster contact origin
+- [assets](../../../src/shared/classic/assets.ts) provides character-aware geometry, animation and racket poses from generated source data
 
 ## 3. Contracts
 
-[CLASSIC_WORLD](../../../src/shared/classic/types.ts):640×426, ground400, net317.25, player scale1.25, fps60, target7. Canvas CSS scaling must not change these units. First version uses Average Joe; normal/boss AI are local tuning, not the full original campaign.
+World640×426, ground400, net317.25, player scale1.25, target7, pointDelay1.5s. Authority order: left actor, right actor, birdie, independent clip callbacks. Adult serve23/release7, Toaster27/release8; overhead27/contactEnd15, underhand19/contactEnd10. Preserve source stage-add clock0 versus stop frame/fps clocks and hidden outgoing clip progression. Do not replace with elapsed-duration swing windows.
 
-Authority steps left player, right player, birdie, then custom timeline callbacks. Serve frame7 releases the shuttle; overhead27/underhand19/serve23 frame events and stop behavior come from the original. Stage-add clock0 and gotoAndStop/stop frame/fps clocks differ; preserve per-clip clocks when switching actions, including hidden outgoing animation. Do not replace this with elapsed/duration swing windows. Source-supported exact60Hz serve resumes1→3 and releases on fifth fixed tick, but this formula is not a native Flash timing measurement.
+Character constructor attributes are movement/jump/power; [registry](../../../src/shared/classic/characters.ts) pins all seven. Human Toaster can jump; base movement/contact precedes final bob y. Use returned `contactOrigin` for that frame, and original unscaled servePoint despite draw scale1.25. Pirate has shape220/depth21.
 
-Racket `hitTestPoint(false)` uses transformed global AABB; selection zones use actual contours flattened within0.01Joe-localpixel error. Numeric authority retains SWF precision; SVG matrix strings use exporter rounding. Mirror/scale matrices identically for both sides. Net contact also drives the original net animation; it persists across rallies.
+Racket hitTestPoint(false) is transformed global AABB; shot selection zones use source contours within0.01localpixel flattening error. Numeric data retains SWF precision; SVG matrices use exporter rounding. Mirror both sides identically. Human contact has no invented last-toucher rejection. Held hit latches until release; repeated presses cannot restart active actions.
 
-AI retains last-toucher rejection. Human contact has no invented same-side rejection; rapid-input samples passing cannot establish that every own-recontact scenario is impossible. Held hit latches until release, and active actions cannot be canceled/restarted by repeated press.
+`hitJump` is internal hit-time edge protection for burst sampling, never a wire field. Obsolete `hitMove` is removed. Prediction never launches the birdie, scores or emits authority effects. Snapshot nested clips/bob must not alias mutable state.
 
-Input `hitMove`/`hitJump` are server-internal coalescing locks, never accepted wire fields. Online clients cannot launch the shuttle or award points. Snapshots deep-copy nested player action/AI and score/ball data; preserve alias isolation.
+[Presentation events](../../../src/shared/classic/presentation.ts) have monotonically increasing match IDs and simulation tick. Limit128 groups, keep30ticks. Separate cosmetic RNG; enabling effects or changing cosmeticSeed must not alter gameplay replay/RNG. Tail emits pairs after source speed update before collisions; Toaster smoke follows source actor callback. Rendering owns particle movement, not authority.
 
 ## 4. Validation & Error Matrix
 
-| Condition                                  | Observable behavior                                        |
-| ------------------------------------------ | ---------------------------------------------------------- |
-| Nonfinite/nonpositive dt                   | No advancement                                             |
-| Excess elapsed time                        | At most0.25s/15frames catch-up                             |
-| Paused/ended state                         | No AI or point timer progression                           |
-| Held hit/repeated edge during active swing | No action restart                                          |
-| Ground event with active point             | One point, then1.5s next-rally delay                       |
-| Score reaches7                             | Winner and matchEnd, no repeated scoring                   |
-| Score/phase/room boundary                  | Prediction/interpolation reset, no ball authority transfer |
+| Condition | Behavior |
+| --- | --- |
+| Nonfinite/nonpositive dt | No advancement |
+| Excess dt | At most0.25s/15frames catch-up |
+| Paused/ended authority | No point timer or score progression |
+| Repeated press during active swing | No restart |
+| Ground with active point | Exactly one point and1.5s next rally |
+| Score7 | One matchEnd/winner; no repeated score |
+| Score/phase/role/room/status boundary | Reset prediction history |
+| FX disabled or alternate cosmeticSeed | Identical ball/score/gameplay RNG |
 
 ## 5. Good / Base / Bad Cases
 
-Good: both sides use shared player stepping and full source matrices while the server decides contacts and scores. Base: a serve event creates one upwards±40-degree1485-speed shot. Bad: changing draw scale without the numeric transforms, predicting ball collision, replacing fixed action events with wall-clock timeout, or modifying frozen source to make a test pass.
+Good: source geometry, per-role movement and shared stepping with server ball authority. Base: Joe defaults preserve source behavior and upward1485-speed ±40-degree serve. Bad: same Joe geometry for Toaster, final bob contact instead of pre-bob contact, extra servePoint scaling, or community physics reintroduced.
 
 ## 6. Tests Required
 
-[Core tests](../../../tests/classic/core.test.ts) assert source-value movement/jump, both serves, custom action clocks, contact windows, opponent return, quick-input grids, net/top/side/wall/ground, single scoring, seven-point results, seeded AI and replay/pause. [Assets tests](../../../tests/classic/assets.test.ts) assert frozen hashes, origins, matrices, actual zone witnesses, visibility and extracted resources. [Prediction](../../../tests/prediction.test.ts) and [service](../../../tests/service.test.ts) check transport authority and completed-step ack.
+[Core](../../../tests/classic/core.test.ts): seven×two-side movement/jump/serve, Toaster release/bob/contact order, clip clocks/hidden playback, action latches, legal return, quick inputs, net/wall/ground, one score/seven-point result, replay/pause and cosmetic isolation. [Assets](../../../tests/classic/assets.test.ts): frozen digests, source values, transforms, shape witnesses, visibility, Pirate attachment, sounds/filter bounds and reconstructible schema2 outputs. [Prediction](../../../tests/prediction.test.ts) and [service](../../../tests/service.test.ts): role-aware replay, authority boundaries and completed-step ack.
 
-Source-derived numeric assertions, extraction determinism and migrated replay are different evidence from unchanged SWF execution. Original Ruffle screenshots are compatibility-runtime evidence, not native Flash or exhaustive parity. Record limits in [validation](../../../docs/validation.md).
+Source-derived numbers and migrated replay are different from unchanged-SWF execution. Ruffle is a compatibility runtime, not native Flash. Preserve limits in [validation](../../../docs/validation.md).
 
 ## 7. Wrong vs Correct
 
-Wrong: retain community120Hz two-substep assumptions and reuse a single zero-based swing duration. Correct: use one60Hz step and original1-based independent clip clocks/events, shared frame geometry and server-authoritative ball.
+Wrong: swap artwork only, collapse independent timelines, predict ball scoring or modify frozen source to satisfy tests. Correct: generate role-aware numeric/visible contracts from unchanged XML and keep server-owned ball/score with isolated presentation events.

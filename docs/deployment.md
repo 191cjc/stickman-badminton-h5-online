@@ -53,7 +53,9 @@ node scripts/http-check.mjs https://www.firesoul.cn
 
 ## 玩法版本与来源
 
-当前 Flash 内核使用协议 v2。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1 页面会被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。本次迁移保留的回滚基线为 `20261013T030548Z`。
+当前七角色双人内核使用协议 v3（`badminton-v3`、`flash-90302-v2`）。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1/v2 页面会在绑定席位前被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。本次七角色迁移的回滚基线为 `20261013T065755Z-flash`；协议变化须前后端一起回滚。
+
+本项目 CSP 使用 `img-src 'self' blob:`，用于本地生成带原滤镜的彩屑着色 SVG。发布只安装本项目 snippet，不更改其他游戏的策略。
 
 常规发布/HTTP 脚本不自动运行浏览器。用户已授权的本地浏览器验证使用隔离后端和独立 Cookie，不与线上等待游客匹配。
 

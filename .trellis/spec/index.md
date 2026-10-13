@@ -6,7 +6,7 @@ One npm package contains a TypeScript/Vite/Canvas browser client and a Node.js/W
 | --- | --- | --- |
 | Frontend | DOM UI, input, network callbacks, presentation | [Frontend](frontend/index.md) |
 | Backend | HTTP identity, matching, rooms, authoritative scheduling | [Backend](backend/index.md) |
-| Shared | Types, protocol, movement, flight, scoring, AI | [Shared](shared/index.md) |
+| Shared | Types, protocol, movement, flight, scoring, presentation events | [Shared](shared/index.md) |
 | Deployment | Independent public entry, service, releases, rollback | [Deployment](deployment/index.md) |
 | Cross-layer | Contract changes and reuse | [Thinking guides](guides/index.md) |
 

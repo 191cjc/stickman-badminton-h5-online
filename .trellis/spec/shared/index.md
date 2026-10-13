@@ -1,6 +1,6 @@
 # Shared simulation and contracts
 
-`src/shared` contains environment-independent gameplay entities, physics, AI, logical types, and transport definitions. It is imported by the browser and server; the server runs the authoritative online match.
+`src/shared` contains environment-independent gameplay entities, physics, human actions, logical types, and transport definitions. It is imported by the browser and server; the server runs the authoritative online match.
 
 ## Pre-development checklist
 
@@ -14,7 +14,7 @@
 
 | Document                    | Concern                                                    |
 | --------------------------- | ---------------------------------------------------------- |
-| [Simulation](simulation.md) | Physics, player step, AI, state serialization, regressions |
+| [Simulation](simulation.md) | Physics, player step, presentation events, state serialization, regressions |
 | [Protocol](protocol.md)     | Wire messages, input bounds, cadence, consistency          |
 
 Shared code must not import DOM runtime modules or Node server APIs. Inspect [state.ts](../../../src/shared/state.ts) for type-only dependencies that avoid an executable import cycle.

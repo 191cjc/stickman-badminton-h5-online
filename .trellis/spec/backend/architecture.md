@@ -10,7 +10,7 @@ Production requires COOKIE_SECRET of at least 32 characters; development creates
 
 ## Time and scheduling
 
-`performance.now()` drives the simulation accumulator; Date.now() drives wall-clock expiry/rate limits. The ticker runs every 4 ms, accumulates at most 100 ms from a callback gap, and processes at most 12 fixed steps per callback. Do not simulate a larger duration per gameplay step to catch up.
+`performance.now()` drives the simulation accumulator; Date.now() drives wall-clock expiry/rate limits. The ticker runs every 8 ms, accumulates at most 100 ms from a callback gap, and processes at most 6 fixed steps per callback. Do not simulate a larger duration per gameplay step to catch up.
 
 Room ticks advance only while playing. Paused/finished rooms can still send snapshots on the global broadcast cadence. Collector logic runs every 100 ms and owns expiry, idle session cleanup, and further matching. See [room rules](rooms.md) for the per-step contract.
 
