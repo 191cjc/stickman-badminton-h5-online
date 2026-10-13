@@ -21,7 +21,10 @@ button {
   color: #e9edf6;
   border-radius: 9px;
   padding: 12px 19px;
-  font: 600 14px inherit;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
   cursor: pointer;
   background: #26323c;
 }
@@ -40,6 +43,11 @@ button.primary {
 button.primary:hover {
   background: #dffd8f;
 }
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #cef56e;
+  outline-offset: 3px;
+}
 [hidden] {
   display: none !important;
 }
@@ -48,15 +56,15 @@ a {
   text-decoration: none;
 }
 #app {
-  width: min(1180px, 94%);
+  width: min(1600px, calc(100% - 32px));
   margin: 0 auto;
 }
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 26px 0;
-  border-bottom: 1px solid #ffffff12;
+  min-height: 56px;
+  padding: 14px 0;
   gap: 12px;
 }
 .brand {
@@ -86,35 +94,18 @@ header {
 .connection i.online {
   background: #cef56e;
 }
-.intro {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 27px 0 22px;
-}
-.eyebrow {
-  font-size: 11px;
-  color: #cef56e;
-  letter-spacing: 0.2em;
-  margin: 0 0 9px;
-}
-h1 {
-  font-size: clamp(23px, 3vw, 31px);
-  margin: 0 0 8px;
-}
-.intro p:not(.eyebrow) {
-  margin: 0;
-  font-size: 13px;
-  color: #a8b5c3;
-}
 .actions {
   display: flex;
+  justify-content: center;
   gap: 9px;
   flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 .court {
   position: relative;
+  width: 100%;
+  max-width: max(480px, calc((100svh - 152px) * 16 / 9));
+  margin: 0 auto;
   overflow: hidden;
   border-radius: 15px;
   border: 1px solid #ffffff24;
@@ -128,6 +119,24 @@ canvas {
   height: 100%;
   outline: none;
   touch-action: none;
+}
+canvas:focus-visible {
+  outline: 2px solid #cef56e;
+  outline-offset: -4px;
+}
+.court-actions {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  z-index: 3;
+}
+.court-actions button {
+  padding: 9px 13px;
+  font-size: 12px;
+  background: #132131dd;
+}
+.court-actions button:hover {
+  background: #334653;
 }
 .scoreboard {
   z-index: 2;
@@ -144,6 +153,7 @@ canvas {
   border-radius: 10px;
   padding: 8px 22px;
   white-space: nowrap;
+  pointer-events: none;
 }
 .scoreboard div {
   display: flex;
@@ -177,26 +187,32 @@ canvas {
   position: absolute;
   inset: 0;
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
+  padding: 76px 24px 60px;
   text-align: center;
   background: #0a152058;
   z-index: 1;
 }
-.overlay > div {
+.menu-panel {
   background: #132131eb;
   border: 1px solid #ffffff25;
   border-radius: 14px;
-  padding: 27px 40px;
-  max-width: 88%;
+  padding: 24px 32px;
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
-.overlay span {
+#overlay-tag {
   font-size: 11px;
   letter-spacing: 0.15em;
   color: #cef56e;
 }
 .overlay h2 {
   font-size: clamp(20px, 3vw, 30px);
-  margin: 12px 0;
+  margin: 10px 0 18px;
 }
 .overlay p {
   margin: 0;
@@ -205,6 +221,7 @@ canvas {
   line-height: 1.8;
 }
 .match-status {
+  z-index: 2;
   position: absolute;
   bottom: 12px;
   left: 50%;
@@ -216,6 +233,7 @@ canvas {
   text-align: center;
   max-width: 90%;
   width: max-content;
+  pointer-events: none;
 }
 .controls {
   padding: 19px 2px 8px;
@@ -273,49 +291,90 @@ footer a:hover {
     display: flex;
   }
 }
+@media (max-width: 640px), (max-height: 540px) {
+  .scoreboard {
+    top: 7px;
+    left: 7px;
+    transform: none;
+    max-width: calc(100% - 100px);
+    padding: 5px 9px;
+    gap: 9px;
+  }
+  .scoreboard strong {
+    flex-shrink: 0;
+    font-size: 20px;
+    gap: 8px;
+  }
+  .scoreboard div {
+    min-width: 0;
+    font-size: 10px;
+    gap: 5px;
+  }
+  .scoreboard div span {
+    white-space: normal;
+    line-height: 1.2;
+  }
+  .scoreboard b {
+    flex-shrink: 0;
+  }
+}
 @media (max-width: 640px) {
+  #app {
+    width: calc(100% - 16px);
+  }
   header {
-    padding: 18px 0;
+    padding: 10px 0;
     flex-wrap: wrap;
+    gap: 7px;
   }
   .brand {
     font-size: 17px;
   }
-  .intro {
-    flex-wrap: wrap;
-    padding-top: 20px;
+  .court {
+    max-width: none;
+    border-radius: 10px;
+  }
+  .court-actions {
+    top: 7px;
+    right: 7px;
+  }
+  .court-actions button {
+    padding: 7px 9px;
+    font-size: 11px;
   }
   .actions {
-    width: 100%;
+    gap: 7px;
+    margin-bottom: 8px;
   }
   .actions button {
     flex: 1;
+    padding: 8px 10px;
+    font-size: 12px;
+    white-space: nowrap;
   }
-  .scoreboard {
-    top: 7px;
-    padding: 5px 12px;
-    gap: 12px;
+  .overlay {
+    padding: 50px 12px 48px;
   }
-  .scoreboard strong {
-    font-size: 22px;
-    gap: 10px;
+  .menu-panel {
+    padding: 5px 10px;
+    border-radius: 9px;
   }
-  .scoreboard div {
-    font-size: 10px;
-    gap: 5px;
-  }
-  .overlay > div {
-    padding: 17px 20px;
+  #overlay-tag {
+    display: none;
   }
   .overlay h2 {
-    margin: 5px 0;
+    font-size: 16px;
+    line-height: 1.2;
+    margin: 0 0 5px;
   }
   .overlay p {
     font-size: 11px;
+    line-height: 1.5;
   }
   .match-status {
     bottom: 7px;
     font-size: 10px;
+    line-height: 1.4;
     padding: 4px 9px;
   }
   .controls p {
@@ -324,5 +383,46 @@ footer a:hover {
   .controls p span {
     display: block;
     margin-left: 0;
+  }
+  .touch-controls {
+    gap: 7px;
+  }
+  .touch-controls button {
+    padding: 12px 8px;
+  }
+}
+@media (max-height: 540px) and (min-width: 641px) {
+  header {
+    min-height: 42px;
+    padding: 8px 0;
+  }
+  .overlay {
+    padding: 66px 16px 48px;
+  }
+  .menu-panel {
+    padding: 12px 18px;
+  }
+  #overlay-tag {
+    display: none;
+  }
+  .overlay h2 {
+    font-size: 22px;
+    margin: 0 0 10px;
+  }
+  .actions {
+    margin-bottom: 10px;
+  }
+  .actions button {
+    padding: 8px 14px;
+  }
+  .overlay p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .controls {
+    padding-top: 10px;
+  }
+  .controls p {
+    margin-bottom: 6px;
   }
 }

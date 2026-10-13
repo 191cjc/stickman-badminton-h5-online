@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-13",
+  "scope": "isolated local built preview; not public deployment",
+  "html": {
+    "url": "http://127.0.0.1:45184/badminton-h5-online/",
+    "httpStatus": 200
+  },
+  "assets": [
+    {
+      "path": "/badminton-h5-online/assets/index-CNo39k9F.js",
+      "httpStatus": 200,
+      "contentType": "text/javascript",
+      "bytes": 48184
+    },
+    {
+      "path": "/badminton-h5-online/assets/index-ZjfDxUHx.css",
+      "httpStatus": 200,
+      "contentType": "text/css",
+      "bytes": 5581
+    }
+  ],
+  "structure": {
+    "uniqueIds": true,
+    "allMatchButtonsInsideCourt": true,
+    "endMatchOutsideHiddenOverlay": true,
+    "introRemoved": true,
+    "focusableCanvas": true,
+    "liveMatchStatus": true
+  },
+  "checks": {
+    "lint": "passed",
+    "types": "passed",
+    "tests": {
+      "files": 7,
+      "passed": 50
+    },
+    "build": "passed",
+    "independentReview": "passed after short-landscape HUD clearance fix"
+  },
+  "limits": {
+    "automatedBrowserStarted": false,
+    "productionPublished": false,
+    "manualAcceptancePending": [
+      "visual layout with native fonts",
+      "keyboard focus and menu scrolling",
+      "touch controls and actual two-computer feel"
+    ]
+  },
+  "previewStopped": true,
+  "specs": {
+    "files": 20,
+    "localLinksChecked": 169,
+    "result": "passed"
+  }
+}

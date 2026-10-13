@@ -1,0 +1,38 @@
+{
+  "id": "court-ui-layout",
+  "name": "court-ui-layout",
+  "title": "放大球场并将匹配按钮移入游戏区域",
+  "description": "放大 H5 球场展示，将匹配、取消、练习、结束和再次匹配操作放到游戏内，兼顾桌面及触屏布局。",
+  "status": "in_progress",
+  "dev_type": "frontend",
+  "scope": "frontend",
+  "package": null,
+  "priority": "P2",
+  "creator": "chenjiachun",
+  "assignee": "chenjiachun",
+  "createdAt": "2026-10-13",
+  "completedAt": null,
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "index.html",
+    "src/client/style.css",
+    "docs/validation.md",
+    ".trellis/spec/frontend/component-guidelines.md"
+  ],
+  "notes": "User authorized task creation and continued implementation. Local presentation work only; no public publication or browser automation.",
+  "meta": {
+    "implementation_complete": true,
+    "independent_review": "passed",
+    "local_validation": "passed",
+    "production_published": false,
+    "automated_browser_started": false,
+    "manual_acceptance_pending": true
+  }
+}

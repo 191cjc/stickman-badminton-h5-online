@@ -20,19 +20,6 @@
           ><span id="rtt"></span>
         </div>
       </header>
-      <section class="intro">
-        <div>
-          <p class="eyebrow">一场球，认识一个对手</p>
-          <h1>准备好上场了吗？</h1>
-          <p>无需账号。点击开始，匹配另一位玩家。</p>
-        </div>
-        <div class="actions">
-          <button id="start" class="primary" disabled>开始匹配</button
-          ><button id="cancel" hidden>取消匹配</button
-          ><button id="leave" hidden>结束比赛</button
-          ><button id="practice">AI 练习</button>
-        </div>
-      </section>
       <section class="court" aria-label="羽毛球场">
         <div class="scoreboard">
           <div><b class="white"></b><span id="left-label">左侧</span></div>
@@ -48,13 +35,22 @@
           tabindex="0"
         ></canvas>
         <div id="overlay" class="overlay">
-          <div>
+          <div class="menu-panel">
             <span id="overlay-tag">即刻开打</span>
             <h2 id="overlay-title">球场正在等你</h2>
+            <div class="actions" aria-label="比赛菜单">
+              <button id="start" class="primary" type="button" disabled>
+                开始匹配</button
+              ><button id="cancel" type="button" hidden>取消匹配</button
+              ><button id="practice" type="button">AI 练习</button>
+            </div>
             <p id="overlay-detail">
               点击「开始匹配」进入在线对战，也可以先练习。
             </p>
           </div>
+        </div>
+        <div class="court-actions">
+          <button id="leave" type="button" hidden>结束比赛</button>
         </div>
         <div
           id="match-status"
