@@ -3,7 +3,7 @@
   "name": "court-ui-layout",
   "title": "放大球场并将匹配按钮移入游戏区域",
   "description": "放大 H5 球场展示，将匹配、取消、练习、结束和再次匹配操作放到游戏内，兼顾桌面及触屏布局。",
-  "status": "in_progress",
+  "status": "completed",
   "dev_type": "frontend",
   "scope": "frontend",
   "package": null,
@@ -11,11 +11,11 @@
   "creator": "chenjiachun",
   "assignee": "chenjiachun",
   "createdAt": "2026-10-13",
-  "completedAt": null,
+  "completedAt": "2026-10-13",
   "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
-  "commit": null,
+  "commit": "7244311ba237294eadbd5f1a5a6f63b8143c0958",
   "pr_url": null,
   "subtasks": [],
   "children": [],
@@ -33,6 +33,7 @@
     "local_validation": "passed",
     "production_published": false,
     "automated_browser_started": false,
-    "manual_acceptance_pending": true
+    "manual_acceptance_pending": true,
+    "archived": true
   }
 }

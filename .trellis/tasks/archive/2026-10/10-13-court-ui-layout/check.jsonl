@@ -4,4 +4,4 @@
 {"file": ".trellis/spec/frontend/state-management.md", "reason": "Retain scene and authoritative-state ownership"}
 {"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Headless validation and prohibition on automatic browser tests"}
 {"file": ".trellis/spec/guides/index.md", "reason": "Shared thinking-guide entry point"}
-{"file": ".trellis/tasks/10-13-court-ui-layout/research/layout-findings.md", "reason": "Inspected existing layout and overlay visibility pitfall"}
+{"file": ".trellis/tasks/archive/2026-10/10-13-court-ui-layout/research/layout-findings.md", "reason": "Inspected existing layout and overlay visibility pitfall"}

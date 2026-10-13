@@ -8,6 +8,8 @@
 - [x] Run lint and types, then independent full-scope review and appropriate existing tests/build.
 - [x] Verify built HTML and resources through isolated local HTTP; stop preview afterwards.
 - [x] Record code/HTTP evidence and separate manual visual/focus/touch acceptance.
-- [ ] Update component specs, commit this scoped work, archive task and journal session.
+- [x] Update component specs and commit this scoped work.
+- [x] Archive this completed local task.
+- [ ] Record the session journal.
 
 Validation commands: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`; targeted formatting of changed files only. Do not add tests that restate HTML/CSS assignments, and do not launch browsers, production matchmaking guests or deployment scripts.
