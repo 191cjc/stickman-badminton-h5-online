@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
+- **Total Sessions**: 8
 - **Last Active**: 2026-10-14
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~229 | Active |
+| `journal-1.md` | ~251 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 8 | 2026-10-14 | 首次加载进度、分批预热与公网发布 | `26cf23a` | `feat/loading-screen` |
 | 7 | 2026-10-14 | 联网卡顿测量、优化与独立发布 | `299b207`, `d15099e` | `feat/network-smoothness` |
 | 6 | 2026-10-13 | 原版双人七角色联机、特效与独立发布 | `0f6a273`, `5dfb8de` | `feat/flash-versus-gameplay-effects` |
 | 5 | 2026-10-13 | 原版 Flash 全量下载与完整性归档 | `89e217d` | `main` |

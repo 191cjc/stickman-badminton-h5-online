@@ -227,3 +227,25 @@ Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`
 ### Status
 
 [OK] **Completed**
+
+
+## Session 8: 首次加载进度、分批预热与公网发布
+<!-- trellis-session: v=2 fp=a57550feed7a254d -->
+
+**Date**: 2026-10-14
+**Task**: 首次加载进度、分批预热与公网发布
+**Branch**: `feat/loading-screen`
+
+### Summary
+
+加入球场内静态加载层、CSS动画、真实阶段完成数、6路图片加载/15秒超时和失败重试；分批预热当前首屏原滤镜缓存，单像素读取完成延迟绘制，保持缓存预算、玩法与服务器权威。196测试、lint/typecheck/build、独立复核和HTTP通过；隔离浏览器验证加载门槛/提前idle/失败重试/320及短横屏/原Cookie房间刷新/失焦/再匹配，69对应快照一致。冷DPR2人为延迟场景仍有308ms单SVG长任务，发生在加载层内，不承诺完全无卡顿。已发布20261014T060938Z-loading并于14:10:34重启本项目服务，公网HTML/JS/CSS逐字节和507素材检查通过；旧入口、其他服务及生产env保持。回滚目标20261014T041900Z-smoothness，临时验证服务已停止，任务归档；真人双机/触屏/其他浏览器待外部验收。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `26cf23a` | feat: show loading progress and prepare the first court |
+
+### Status
+
+[OK] **Completed**
