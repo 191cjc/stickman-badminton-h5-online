@@ -204,3 +204,26 @@ Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`
 ### Next Steps
 
 - 用户用真实两台公网电脑验收对战手感、连续回击和视听表现
+
+
+## Session 7: 联网卡顿测量、优化与独立发布
+<!-- trellis-session: v=2 fp=355b6f28a41bd10b -->
+
+**Date**: 2026-10-14
+**Task**: 联网卡顿测量、优化与独立发布
+**Branch**: `feat/network-smoothness`
+
+### Summary
+
+保留原版七角色双人玩法、滤镜与服务器权威，加入有界栅格缓存、单调自适应插值、独立输入计时及本地诊断；修复服务测试收包与时钟竞态。14文件185测试、lint/typecheck/build及隔离浏览器、保序弱网验证通过；同条件无头浏览器帧间隔p95普通屏116.7→16.8ms、高DPR433.3/450.1→50ms，冷栅格与主线程限制仍在。已发布20261014T041900Z-smoothness并重启本项目服务，公网507素材检查、双游客695对应状态一致及再匹配/退出通过，其他入口与服务保持运行；上一release作为回滚目标。任务已归档，真实双机手感、物理按键延迟和其他浏览器待外部验收。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `299b207` | perf: smooth online rendering and input delivery |
+| `d15099e` | docs: record network smoothness verification and release |
+
+### Status
+
+[OK] **Completed**
