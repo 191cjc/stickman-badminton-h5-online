@@ -6,12 +6,36 @@ import type { GameState, PlayerState } from "../shared/state";
 import type { Viewport } from "../shared/types";
 import type { Effects, Particle, Spark } from "./effects";
 import { ConfettiImages } from "./confetti-images";
+import { RasterCache, deviceRasterScale } from "./raster-cache";
+
+export function drawCachedFrame(
+  ctx: CanvasRenderingContext2D,
+  frame: DrawFrame,
+  image: HTMLImageElement,
+  cache: RasterCache,
+  key = frame.path,
+): void {
+  const scale = deviceRasterScale(ctx.getTransform());
+  ctx.drawImage(
+    cache.get(key, image, frame.width, frame.height, scale),
+    frame.x,
+    frame.y,
+    frame.width,
+    frame.height,
+  );
+}
 
 /** All draw entries share original registration with numeric authority. */
 export class Renderer {
   private manifest?: AssetManifest;
   private images = new Map<string, HTMLImageElement>();
   private colors?: ConfettiImages;
+  private rasters = new RasterCache();
+  // Unique result colors must not evict the hot court/actor raster working set.
+  private confettiRasters = new RasterCache(undefined, {
+    entries: 768,
+    bytes: 32 * 1024 * 1024,
+  });
   async load(): Promise<AssetManifest> {
     const response = await fetch(`${BASE_PATH}classic/manifest.json`, {
       cache: "no-store",
@@ -49,6 +73,15 @@ export class Renderer {
   }
   clearEffectsImages(): void {
     this.colors?.reset();
+    this.confettiRasters.clear();
+    this.rasters.clear();
+  }
+  diagnostics() {
+    return {
+      raster: this.rasters.diagnostics(),
+      confettiRaster: this.confettiRasters.diagnostics(),
+      colors: this.colors?.diagnostics(),
+    };
   }
   render(
     ctx: CanvasRenderingContext2D,
@@ -136,8 +169,7 @@ export class Renderer {
   ): void {
     if (!frame) return;
     const image = this.images.get(frame.path);
-    if (image)
-      ctx.drawImage(image, frame.x, frame.y, frame.width, frame.height);
+    if (image) drawCachedFrame(ctx, frame, image, this.rasters);
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerState): void {
     const art = this.manifest!;
@@ -172,7 +204,13 @@ export class Renderer {
     if (p.kind === "confetti") {
       const image = this.colors?.get(p);
       if (image)
-        ctx.drawImage(image, frame.x, frame.y, frame.width, frame.height);
+        drawCachedFrame(
+          ctx,
+          frame,
+          image,
+          this.confettiRasters,
+          `confetti:${p.color}`,
+        );
     } else this.draw(ctx, frame);
     ctx.restore();
   }

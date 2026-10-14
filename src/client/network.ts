@@ -18,6 +18,7 @@ export class Network {
     private readonly onMessage: (message: ServerMessage) => void,
     private readonly onStatus: (connected: boolean, text: string) => void,
     private readonly onRtt: (rtt: number) => void,
+    private readonly onSnapshot?: (at: number, bytes: number) => void,
   ) {}
   get refreshRequired(): boolean {
     return this.incompatible;
@@ -28,8 +29,12 @@ export class Network {
   send(message: ClientMessage): boolean {
     if (!this.connected || this.socket!.bufferedAmount > 64 * 1024)
       return false;
-    this.socket!.send(JSON.stringify(message));
-    return true;
+    try {
+      this.socket!.send(JSON.stringify(message));
+      return true;
+    } catch {
+      return false;
+    }
   }
   private requireRefresh(): void {
     this.incompatible = true;
@@ -82,6 +87,11 @@ export class Network {
       });
       ws.addEventListener("message", (event) => {
         const message = JSON.parse(event.data as string) as ServerMessage;
+        if (message.type === "snapshot" && this.onSnapshot)
+          this.onSnapshot(
+            performance.now(),
+            new TextEncoder().encode(event.data as string).byteLength,
+          );
         if (
           (message.type === "hello" && message.protocol !== PROTOCOL) ||
           (message.type === "error" && message.code === "protocol_mismatch")

@@ -15,6 +15,8 @@ import { Prediction, Interpolation } from "./prediction";
 import { Renderer } from "./renderer";
 import { Effects } from "./effects";
 import { Audio } from "./audio";
+import { InputScheduler } from "./input-scheduler";
+import { Diagnostics } from "./diagnostics";
 
 function el<T extends HTMLElement>(id: string): T {
   const value = document.getElementById(id);
@@ -45,8 +47,23 @@ let selected: CharacterId = "joe",
   seq = 0,
   scene: "idle" | "queued" | "online" | "result" = "idle";
 let backdrop = new Simulation().snapshot(),
-  accumulated = 0,
   lastTime = 0;
+let inputFocused = !document.hidden;
+const diagnostics =
+  new URLSearchParams(location.search).get("debug") === "1"
+    ? new Diagnostics(() => ({
+        renderer: renderer.diagnostics(),
+        interpolation: interpolation.diagnostics(),
+        prediction: prediction?.diagnostics(performance.now()),
+        scheduler: scheduler.diagnostics(),
+      }))
+    : undefined;
+if (diagnostics)
+  Object.defineProperty(window, "badmintonDiagnostics", {
+    value: Object.freeze({ snapshot: () => diagnostics.snapshot() }),
+    configurable: false,
+    writable: false,
+  });
 const characterButtons = new Map<CharacterId, HTMLButtonElement>();
 for (const id of CHARACTER_IDS) {
   const button = document.createElement("button");
@@ -109,6 +126,7 @@ function buttons(): void {
   updateSelection();
 }
 function clearInput(notify = true): void {
+  scheduler.setActive(false);
   input.release(false);
   prediction?.clear();
   if (notify) network.send({ type: "release" });
@@ -127,6 +145,8 @@ function leaveMatch(): void {
 }
 const input = new Input(
   () => {
+    inputFocused = false;
+    scheduler.setActive(false);
     prediction?.clear();
     network.send({ type: "release" });
     effects.suspend();
@@ -159,8 +179,47 @@ const network = new Network(
   },
   (rtt) => {
     el("rtt").textContent = `RTT ${rtt} ms`;
+    diagnostics?.rtt(rtt);
   },
+  diagnostics ? (at, bytes) => diagnostics.received(at, bytes) : undefined,
 );
+const scheduler = new InputScheduler(() => {
+  if (!canSampleInput()) {
+    scheduler.setActive(false);
+    return;
+  }
+  const command = input.peek(seq + 1);
+  const accepted = network.send(command);
+  diagnostics?.input(performance.now(), accepted);
+  if (!accepted) return;
+  input.commit(command);
+  seq++;
+  if (latest!.state.phase === "playing")
+    prediction?.apply(command, true, performance.now());
+});
+function canSampleInput(): boolean {
+  return (
+    assetsReady &&
+    scene === "online" &&
+    latest?.status === "playing" &&
+    network.connected &&
+    !document.hidden &&
+    inputFocused
+  );
+}
+function syncInputClock(): void {
+  scheduler.setActive(canSampleInput());
+}
+window.addEventListener("focus", () => {
+  inputFocused = true;
+  syncInputClock();
+});
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    inputFocused = true;
+    syncInputClock();
+  }
+});
 function idle(reason?: string): void {
   clearInput(false);
   scene = "idle";
@@ -170,6 +229,7 @@ function idle(reason?: string): void {
   prediction = undefined;
   seq = 0;
   interpolation = new Interpolation();
+  diagnostics?.resetTransport();
   effects.reset();
   renderer.clearEffectsImages();
   audio.setMatch(false);
@@ -246,6 +306,7 @@ function handleMessage(message: ServerMessage): void {
     latest = undefined;
     prediction = undefined;
     interpolation = new Interpolation();
+    diagnostics?.resetTransport();
     effects.reset(room, message.resumed);
     renderer.clearEffectsImages();
     audio.stop();
@@ -262,14 +323,16 @@ function handleMessage(message: ServerMessage): void {
   if (message.type === "snapshot") {
     if ((scene !== "online" && scene !== "result") || message.room !== room)
       return;
+    if (!interpolation.push(message, performance.now())) return;
     const wasPaused = latest?.status === "reconnecting";
     latest = message;
     seq = Math.max(seq, message.ack);
     if (side) {
       prediction ??= new Prediction(side, message.state.players[side]);
       prediction.reconcile(message);
+      const reading = prediction.diagnostics(performance.now());
+      diagnostics?.reconcile(reading.correction, reading.ackAgeMs);
     }
-    interpolation.push(message, performance.now());
     if (document.hidden) {
       effects.suspend();
       audio.setMatch(false);
@@ -294,6 +357,7 @@ function handleMessage(message: ServerMessage): void {
       }
     }
     updateHud(message.state);
+    syncInputClock();
     return;
   }
   if (message.type === "result") {
@@ -370,31 +434,13 @@ for (const event of ["pointerleave", "blur"])
     if (rematchUp) rematchArt.src = rematchUp;
   });
 function frame(time: number): void {
+  const began = diagnostics ? performance.now() : 0;
   requestAnimationFrame(frame);
   const dt = lastTime
     ? Math.max(0, Math.min((time - lastTime) / 1000, 0.1))
     : 1 / INPUT_HZ;
   lastTime = time;
   audio.advance(dt);
-  accumulated += dt;
-  let steps = 0;
-  while (accumulated >= 1 / INPUT_HZ && steps < 6) {
-    accumulated -= 1 / INPUT_HZ;
-    steps++;
-    if (
-      assetsReady &&
-      scene === "online" &&
-      latest?.status === "playing" &&
-      network.connected &&
-      !document.hidden
-    ) {
-      const command = input.read(seq + 1);
-      if (network.send(command)) {
-        seq++;
-        if (latest.state.phase === "playing") prediction?.apply(command);
-      }
-    }
-  }
   let state = backdrop;
   if (latest) {
     state = interpolation.sample(time) ?? latest.state;
@@ -440,6 +486,7 @@ function frame(time: number): void {
     state,
     scene === "online" || scene === "result" ? effects : undefined,
   );
+  diagnostics?.frame(time, performance.now() - began);
 }
 buttons();
 overlay("准备球场", "正在加载画面", "加载完成后即可选择角色并匹配。");

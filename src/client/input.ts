@@ -85,6 +85,13 @@ export class Input {
     if (notify) this.onRelease();
   }
   read(seq: number): InputFrame {
+    const input = this.peek(seq);
+    this.commit(input);
+    return input;
+  }
+  /** Peek/commit is synchronous around Network.send. A rejected send must not
+   * consume either pending edge or advance the caller's sequence/history. */
+  peek(seq: number): InputFrame {
     const input: InputFrame = {
       type: "input",
       seq,
@@ -95,9 +102,11 @@ export class Input {
       hitHeld: this.has("hit"),
       hitPressed: this.hitPressed,
     };
-    this.jumpPressed = false;
-    this.hitPressed = false;
     return input;
+  }
+  commit(input: InputFrame): void {
+    if (input.jumpPressed) this.jumpPressed = false;
+    if (input.hitPressed) this.hitPressed = false;
   }
 }
 export const toIntent = (input: InputFrame): PlayerIntent => ({

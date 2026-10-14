@@ -67,3 +67,15 @@ node scripts/http-check.mjs https://www.firesoul.cn
 - 正常结束的结算保留 30 秒，可提前再次匹配释放旧席位；主动结束视为弃权。队列 120 秒未匹配移除；单场最长 20 分钟。
 - 会话最多 5000，房间最多 100；HTTP 初始化按真实 IP 每分钟 120 次；WS 最多 1024 字节、每秒 180 消息，输入积压最多 120 帧。序号必须连续，移动仅 -1/0/1，状态/席位字段禁止。以上是资源限制，不代表已完成 100 房间并发压测。
 - Cookie 为 30 天、HttpOnly、SameSite=Lax、生产 Secure、Path 限定本入口。空闲内存会话 24 小时回收，下一次 HTTP 初始化可用签名 Cookie 重新建立会话。没有数据库或 Redis。
+
+## 联网卡顿诊断
+
+正常入口默认关闭诊断。需要本地测量时打开`https://www.firesoul.cn/badminton-h5-online/?debug=1`，在浏览器控制台执行：
+
+```javascript
+window.badmintonDiagnostics.snapshot()
+```
+
+只导出当前页面的有界统计，无上报：`frame`（帧间隔、CPU、长任务）、`network`（快照间隔/字节、RTT）、`predictionSamples`（位置校正/待确认输入年龄）、`input`（接受/拒绝数和节奏）、`scheduler`、`renderer`（缓存）、`interpolation`（缓冲/停顿/回跳）。每个滚动摘要为`{samples,mean,p95,max}`，最多240样本；未进房时prediction缺失、未采样时renderTick为null。计数可累计，缓存bytes为RGBA估算。
+
+帧间隔/长任务需一起判断；RAF中的CPU时长不包含所有浏览器延迟栅格工作。RTT和插值delayMs均不等于按键到画面延迟。计时器独立于RAF但仍运行在主线程；真实弱网停顿无法靠客户端虚构球路消除。此次优化的回滚目标为`20261013T110500Z-versus`，协议仍为3，前后端一起切回。

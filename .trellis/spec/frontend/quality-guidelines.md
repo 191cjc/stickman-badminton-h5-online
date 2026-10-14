@@ -28,3 +28,9 @@ Record manual two-computer, focus-loss, touch, browser compatibility, and weak-n
 ## Review constraints
 
 Preserve the logical input contract, local-only player prediction, authority over ball/score/result, release rules, accessible actions, and exclusive base path. Use the [Flash core/asset evidence](../shared/simulation.md) for intentional mechanics refactors and [deployment guidance](../deployment/index.md) when publishing changes.
+
+## Smoothness and diagnostics
+
+Timing/cache/input changes require tests for monotonic authority presentation, bounded memory, paced input and edge retention under actual send rejection. Run code/build/HTTP before authorized browser checks. Compare the same two-page workload atDPR1/2 with original filters intact; filter-removal response rewriting is attribution-only, never release acceptance. Ordered WebSocket delay/stall injection models TCP stream behavior; arbitrary message drops are not TCP packet-loss testing.
+
+Only `?debug=1` installs the frozen, read-only `window.badmintonDiagnostics.snapshot()` API. Default pages must not expose it or collect diagnostic observers. Snapshots contain detached local numeric/boolean summaries: frame gap/CPU/long tasks, snapshot gap/bytes/RTT, correction/pending-input age, input cadence, scheduler, raster and interpolation stats. Rolling summaries bound240 finite nonnegative samples and return zero for empty series. No identity/Cookie/IP/room ID, upload, authority mutation or gameplay command. Before room sampling renderTick may be null and prediction absent; cache bytes are RGBA estimates. Test bounded summaries and export isolation; browser verifies default absence/debug presence and finite values. Record actual measurements and the headless/shared-host limitation in validation docs.

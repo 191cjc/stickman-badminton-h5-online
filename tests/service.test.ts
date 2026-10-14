@@ -18,6 +18,10 @@ import type {
   Snapshot,
 } from "../src/shared/protocol";
 
+// Keep network polling independent when a fixture controls the service's
+// imported perf_hooks clock. Binding now captures the unmocked native method.
+const pollingNow = performance.now.bind(performance);
+
 class Peer {
   messages: ServerMessage[] = [];
   seq = 0;
@@ -46,8 +50,8 @@ class Peer {
       true,
     timeout = 5000,
   ): Promise<Extract<ServerMessage, { type: T }>> {
-    const end = performance.now() + timeout;
-    while (performance.now() < end) {
+    const end = pollingNow() + timeout;
+    while (pollingNow() < end) {
       const index = this.messages.findIndex(
         (message) =>
           message.type === type &&
@@ -89,6 +93,7 @@ describe("real HTTP / WebSocket rooms", () => {
       peers.splice(0).forEach((peer) => peer.ws.terminate());
       await service.close();
     } finally {
+      vi.restoreAllMocks();
       vi.useRealTimers();
     }
   });
@@ -316,7 +321,21 @@ describe("real HTTP / WebSocket rooms", () => {
     expect((await left.wait("matched")).room).not.toBe(l.room);
   });
   it("samples packet bursts once using the latest held motion and preserving action edges", async () => {
+    await service.close();
+    // ws.send calls can arrive across simulation ticks. Freeze only the service
+    // clock/intervals; HTTP, WS, setTimeout and bound polling remain real.
+    vi.useFakeTimers({
+      toFake: ["Date", "setInterval", "clearInterval"],
+    });
+    const clockOrigin = Date.now();
+    // The service imports perf_hooks.performance rather than global.performance;
+    // replacing only the global clock would leave its accumulator nondeterministic.
+    vi.spyOn(performance, "now").mockImplementation(
+      () => Date.now() - clockOrigin,
+    );
+    await startService();
     const [left] = await pair();
+    const initial = await left.wait("snapshot", (s) => s.tick === 0);
     for (let seq = 1; seq <= 30; seq++) {
       left.send({
         type: "input",
@@ -328,12 +347,29 @@ describe("real HTTP / WebSocket rooms", () => {
         hitPressed: seq === 2,
       });
     }
+    // WS messages are ordered. Receiving this pong proves the authority has
+    // handled all30 inputs before we permit its first simulation step.
+    left.send({ type: "ping", time: 123 });
+    await left.wait("pong", (message) => message.time === 123);
+    expect(
+      left.messages.some(
+        (message) => message.type === "snapshot" && message.ack > 0,
+      ),
+    ).toBe(false);
+    expect(performance.now()).toBe(0);
+    vi.advanceTimersByTime(40); // Five8ms callbacks produce exactly two60Hz steps.
+    expect(performance.now()).toBe(40);
     const state = await left.wait("snapshot", (s) => s.ack === 30);
+    expect(state.tick).toBe(initial.tick + 2);
     expect(state.state.players.left.x).toBe(150);
     expect(state.state.players.left.y).toBeLessThan(CLASSIC_WORLD.groundY);
     expect(state.state.players.left.swingKind).toBe("serve");
     expect(state.state.players.left.swinging).toBe(true);
+    vi.advanceTimersByTime(40);
+    expect(performance.now()).toBe(80);
     const next = await left.wait("snapshot", (s) => s.tick > state.tick);
+    expect(next.tick).toBe(state.tick + 2);
+    expect(next.ack).toBe(30);
     // Thirty packets do not advance thirty input frames; one press starts one
     // original timeline, and its held latch clears on the newest released state.
     expect(next.state.players.left.x).toBe(150);

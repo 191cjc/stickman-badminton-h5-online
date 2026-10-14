@@ -38,8 +38,10 @@ npm start
 
 `src/shared/classic/` 是无 DOM 的原版模拟及动作数据，`src/shared/` 提供协议和适配；`src/server/` 负责游客 Cookie、内存匹配、房间和权威循环；`src/client/` 负责输入、预测/校正、插值与 Canvas；`public/classic/` 是原版可见图层。`reference/` 和 `upstream/` 不进入公网静态目录。
 
-模拟与输入为 60 Hz，快照为 30 Hz，按原版 60 fps 动作时间轴推进。积压输入合并为最新持有状态和按下沿，不额外运行模拟帧。客户端只预测自己的角色，按 ack 恢复权威状态并重放未确认操作；羽毛球、比分和结果由服务器裁决。对手和球按快照插值，效果使用去重事件和独立呈现时钟。RTT 不等于按键动作延迟，实体双机与弱网手感须另行验收。
+模拟与输入为 60 Hz，快照为 30 Hz，按原版 60 fps 动作时间轴推进。积压输入合并为最新持有状态和按下沿，不额外运行模拟帧。客户端只预测自己的角色，按 ack 恢复权威状态并重放未确认操作；羽毛球、比分和结果由服务器裁决。对手和球按单调自适应时间轴插值，断档保持最新权威状态；输入独立于RAF按60Hz采样，发送成功后才消费边沿。原SVG滤镜通过有界栅格缓存复用，效果使用去重事件和独立呈现时钟。RTT 不等于按键动作延迟，实体双机与弱网手感须另行验收。
 
 协议为 v3（`badminton-v3`），旧页面须刷新。角色选择在排队和房间内锁定；断线清键并暂停，原 Cookie 的席位保留 15 秒。重连建立效果事件基线，不重播旧声音；服务重启会清空内存比赛。
 
 设计：[docs/design.md](docs/design.md)。发布、日志和回滚：[docs/deployment.md](docs/deployment.md)。实际验证与外部双机验收：[docs/validation.md](docs/validation.md)。
+
+卡顿诊断可显式使用`?debug=1`和`window.badmintonDiagnostics.snapshot()`；默认关闭且不上报。实际测量与限制见[验证记录](docs/validation.md)，诊断字段见[部署文档](docs/deployment.md)。

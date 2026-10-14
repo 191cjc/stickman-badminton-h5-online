@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { Network } from "../src/client/network";
+import { Input } from "../src/client/input";
+import { InputScheduler } from "../src/client/input-scheduler";
+import { Prediction } from "../src/client/prediction";
+import { Simulation } from "../src/shared/simulation";
 import { PROTOCOL, SUBPROTOCOL } from "../src/shared/protocol";
 
 class Socket extends EventTarget {
@@ -100,3 +104,71 @@ it.each(["hello", "error"])(
     expect(fetcher).toHaveBeenCalledTimes(1);
   },
 );
+it("paced sends retain edges and consecutive sequence through disconnection, backpressure and a throwing socket", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ protocol: PROTOCOL, connected: false }),
+    }),
+  );
+  const win = new EventTarget();
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", {
+    querySelectorAll: () => [],
+    addEventListener: () => {},
+  });
+  vi.stubGlobal("HTMLElement", class {});
+  const network = new Network(
+    () => {},
+    () => {},
+    () => {},
+  );
+  const input = new Input(() => {});
+  const prediction = new Prediction("left", new Simulation().players.left);
+  const key = (type: string, code: string) => {
+    const event = new Event(type, { cancelable: true });
+    Object.assign(event, { code, repeat: false });
+    win.dispatchEvent(event);
+  };
+  for (const code of ["KeyW", "Space"]) {
+    key("keydown", code);
+    key("keyup", code);
+  }
+  let seq = 0;
+  const scheduler = new InputScheduler(
+    () => {
+      const frame = input.peek(seq + 1);
+      if (!network.send(frame)) return;
+      input.commit(frame);
+      seq++;
+      prediction.apply(frame, true, Date.now());
+    },
+    () => Date.now(),
+  );
+  scheduler.setActive(true);
+  await vi.advanceTimersByTimeAsync(17); // No socket yet.
+  await network.connect();
+  const socket = sockets[0];
+  socket.open();
+  socket.bufferedAmount = 64 * 1024 + 1;
+  await vi.advanceTimersByTimeAsync(17);
+  socket.bufferedAmount = 0;
+  vi.spyOn(socket, "send").mockImplementationOnce(() => {
+    throw new Error("transport_failure");
+  });
+  await vi.advanceTimersByTimeAsync(17);
+  expect(seq).toBe(0);
+  expect(prediction.diagnostics(Date.now()).pendingInputs).toBe(0);
+  expect(input.peek(1)).toMatchObject({ jumpPressed: true, hitPressed: true });
+  expect(socket.sent).toEqual([]);
+  await vi.advanceTimersByTimeAsync(34);
+  const frames = socket.sent.map((raw) => JSON.parse(raw));
+  expect(frames.map(({ seq }) => seq)).toEqual([1, 2]);
+  expect(frames[0]).toMatchObject({ jumpPressed: true, hitPressed: true });
+  expect(frames[1]).toMatchObject({ jumpPressed: false, hitPressed: false });
+  expect(prediction.diagnostics(Date.now()).pendingInputs).toBe(2);
+  scheduler.setActive(false);
+  await vi.advanceTimersByTimeAsync(100);
+  expect(socket.sent).toHaveLength(2);
+});

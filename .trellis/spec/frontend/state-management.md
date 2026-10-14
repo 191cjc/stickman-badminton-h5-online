@@ -23,7 +23,7 @@ Online rendering replaces only the local player in a sampled authoritative state
 
 ## Remote interpolation
 
-`Interpolation` retains up to 12 snapshots, targets four60-Hz ticks behind estimated server time, interpolates x/y/vx/vy while selecting discrete action fields from a real snapshot, and holds the latest available sample if packets stop. It clears the buffer on room changes or non-playing status/phase; it does not interpolate across a score/phase boundary.
+`Interpolation` retains up to32 snapshots and60 arrival-jitter samples. Its continuous render tick advances monotonically with a rate clamped0.85..1.15, and remains at or behind latest authority. Receive/server interval variation p90 adapts delay from4 to12ticks (66.7..200ms at60Hz); increase coefficient0.2, decrease0.025. Clock estimate corrections per arrival clamp-0.5..2ticks. These are configuration bounds, not measured physical latency. Stale same-room ticks are rejected before semantic resets; duplicate continuous ticks are ignored. Room/status/phase/score/either-character changes reset immediately; non-playing samples return the latest actual state. No interpolation crosses those boundaries. Starvation holds latest authority without ball extrapolation.
 
 Test replay, rally reset, authority boundaries, and hold-last behavior using [prediction.test.ts](../../../tests/prediction.test.ts). Remote animation smoothness and real network feel are not established by these headless tests.
 
@@ -70,3 +70,40 @@ Effects tests: cursor duplicates/gaps/late events, result ordering, resume basel
 ### 7. Wrong vs Correct
 
 Wrong: recolor the entire filtered image or let late image.onload resurrect a cleared scene. Correct: tint only nested body through bounded Blob images and retain lifecycle generation checks/URL revocation.
+
+## Monotonic presentation contract
+
+### 1. Scope / Trigger
+
+Network receive timing crosses interpolation, prediction, effects and rendering. Arrival jitter must not rewind a continuous rally or create contacts.
+
+### 2. Signatures
+
+`Interpolation.push(snapshot: Snapshot, at: number): boolean`, `sample(now: number): GameState | undefined`, `diagnostics()`. `Prediction.apply(input, remember = true, at = 0)`, `diagnostics(now)` adds accepted-input age and actual correction magnitude.
+
+### 3. Contracts
+
+Receipt/sample times use monotonic performance.now(). Reject non-finite receipt times and stale/duplicate gameplay snapshots. Main returns before updating latest/prediction/effects for rejected snapshots. Sample x/y/vx/vy within two compatible authority snapshots; discrete fields choose a real endpoint. Attachment/last-toucher transitions choose actual shuttle state. `renderTick` may reset across semantic boundaries, never within a continuous one. Sample dt is capped0.25s for bounded catch-up. Diagnostics expose target delay, available authority buffer, starvation entries and rewinds; no wire change or client ball stepping.
+
+### 4. Validation & Error Matrix
+
+| Condition | Expected |
+| --- | --- |
+| Uniform cadence | Four-tick minimum delay, bounded samples |
+| Ordered jitter/burst | Adapt within bounds; render tick does not rewind |
+| No next snapshot | Hold latest; do not extrapolate ball |
+| Old tick from earlier score/phase | Ignore before resetting current segment |
+| Same tick on reconnect/status boundary | Accept new semantic state |
+| Either role/score/room/status/phase change | Clear old interpolation segment; own-role/score/room/status/phase changes also clear prediction history |
+
+### 5. Good / Base / Bad Cases
+
+Good: ordered450ms stream pause holds authority and resumes monotonically. Base: healthy30Hz snapshots interpolate at render cadence. Bad: reanchor every frame to latest packet arrival or extrapolate a guessed shuttle through the net.
+
+### 6. Tests Required
+
+Deterministic uniform/jitter/same-time bursts/stall recovery must assert no same-segment rewind, no beyond-latest sample, bounded32/60 histories, stale/duplicate rejection and immediate semantic reset. Compare old/new held frames on a fixed trace; browser checks both received states per tick under ordered TCP delays, natural result and reconnect. Real network feel remains separate.
+
+### 7. Wrong vs Correct
+
+Wrong: `target = latest.tick + (now - latest.at) * SIM_HZ / 1000 - 4` recomputed as the cursor on every packet. Correct: advance a persistent cursor with bounded rate, slew clock estimates, cap at latest authority and reset only on semantic boundaries.

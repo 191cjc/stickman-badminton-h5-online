@@ -63,3 +63,48 @@ it("preserves native button Space activation while releasing any previously held
   }
   expect(input.read(2).hitHeld).toBe(false);
 });
+it.each(["blur", "pagehide", "hidden"])(
+  "failed sends retain jump/hit edges once until accepted; %s discards pending edges",
+  (releaseEvent) => {
+    const win = new EventTarget(),
+      doc = new EventTarget();
+    Object.assign(doc, { hidden: false, querySelectorAll: () => [] });
+    vi.stubGlobal("window", win);
+    vi.stubGlobal("document", doc);
+    vi.stubGlobal("HTMLElement", Element);
+    const released = vi.fn();
+    const input = new Input(released);
+    const key = (type: string, code: string) => {
+      const event = new Event(type, { cancelable: true });
+      Object.assign(event, { code, repeat: false });
+      win.dispatchEvent(event);
+    };
+    key("keydown", "KeyW");
+    key("keydown", "Space");
+    key("keyup", "KeyW");
+    key("keyup", "Space");
+    // A press/release between sends survives output backpressure. A failed send
+    // performs no commit and uses the same consecutive sequence on retry.
+    const rejected = input.peek(1);
+    expect(rejected.jumpPressed).toBe(true);
+    expect(rejected.hitPressed).toBe(true);
+    expect(input.peek(1)).toEqual(rejected);
+    input.commit(input.peek(1));
+    expect(input.peek(2).jumpPressed).toBe(false);
+    expect(input.peek(2).hitPressed).toBe(false);
+    key("keydown", "KeyW");
+    key("keydown", "Space");
+    if (releaseEvent === "hidden") {
+      Object.assign(doc, { hidden: true });
+      doc.dispatchEvent(new Event("visibilitychange"));
+    } else win.dispatchEvent(new Event(releaseEvent));
+    expect(released).toHaveBeenCalledOnce();
+    expect(input.peek(2)).toMatchObject({
+      move: 0,
+      jump: false,
+      jumpPressed: false,
+      hitHeld: false,
+      hitPressed: false,
+    });
+  },
+);

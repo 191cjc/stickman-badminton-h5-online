@@ -140,3 +140,88 @@ it("does not blend across a score, phase or shuttle contact transition", () => {
   buffer.push(point, 2000 / 30);
   expect(buffer.sample(2000 / 30)).toEqual(point.state);
 });
+it("ordered jitter/bursts and a450ms stream pause never rewind presentation or extrapolate authoritative motion", () => {
+  const game = new Simulation();
+  const buffer = new Interpolation();
+  let lastAt = 0;
+  const packets = Array.from({ length: 180 }, (_, i) => {
+    const tick = i * 2;
+    const delay =
+      70 +
+      [0, 28, 2, 68, 8, 0, 14, 75][i % 8] +
+      (tick >= 100 && tick <= 130 ? 450 : 0);
+    lastAt = Math.max(lastAt, (tick * 1000) / SIM_HZ + delay);
+    const value = snapshot(game, tick, tick);
+    value.state.elapsed = tick / SIM_HZ;
+    value.state.players.right.x = 400 + tick * 0.25;
+    value.state.shuttle.state = "flying";
+    value.state.shuttle.lastTouchedBy = "left";
+    value.state.shuttle.x = 100 + tick;
+    return { at: lastAt, value };
+  });
+  let delivered = 0,
+    previous = -Infinity,
+    holds = 0;
+  for (let now = 0; now < packets.at(-1)!.at; now += 1000 / 60) {
+    while (delivered < packets.length && packets[delivered].at <= now) {
+      buffer.push(packets[delivered].value, packets[delivered].at);
+      delivered++;
+    }
+    const state = buffer.sample(now);
+    if (!state) continue;
+    const tick = (state.players.right.x - 400) / 0.25;
+    expect(tick).toBeGreaterThanOrEqual(previous - 1e-6);
+    expect(tick).toBeLessThanOrEqual(packets[delivered - 1].value.tick + 1e-6);
+    expect(state.shuttle.x).toBeCloseTo(100 + tick);
+    if (Math.abs(tick - previous) < 1e-6) holds++;
+    previous = tick;
+  }
+  // Frozen baseline arrival-anchor trace holds47frames and rewinds1.32ticks;
+  // prove an observable reduction on that reproducible stream, not assignments.
+  expect(holds).toBeLessThan(47);
+  expect(buffer.diagnostics().rewinds).toBe(0);
+  expect(buffer.diagnostics().delayMs).toBeGreaterThanOrEqual(1000 / 15);
+  expect(buffer.diagnostics().delayMs).toBeLessThanOrEqual(200);
+  expect(buffer.diagnostics().snapshots).toBeLessThanOrEqual(32);
+});
+it("stale/duplicate ticks cannot replace a newer rally but same-tick status and new-room resets apply immediately", () => {
+  const game = new Simulation();
+  const buffer = new Interpolation();
+  const current = snapshot(game, 20, 20);
+  current.state.players.right.x = 540;
+  buffer.push(current, 100);
+  buffer.sample(100);
+  const stale = snapshot(game, 18, 18);
+  stale.state.phase = "point";
+  stale.state.score.left = 1;
+  expect(buffer.push(stale, 110)).toBe(false);
+  expect(buffer.push(current, 111)).toBe(false);
+  expect(buffer.sample(120)!.score.left).toBe(0);
+  const paused = { ...current, status: "reconnecting" as const };
+  expect(buffer.push(paused, 120)).toBe(true);
+  expect(buffer.sample(120)).toBe(paused.state);
+  expect(buffer.push(current, 130)).toBe(true);
+  expect(buffer.diagnostics().resets).toBe(3);
+  const newRoom = snapshot(game, 0, 0);
+  newRoom.room = "second-room";
+  newRoom.state.players.right.x = 570;
+  buffer.push(newRoom, 140);
+  expect(buffer.sample(140)!.players.right.x).toBe(570);
+});
+it("diagnostics measure actual small corrections and large snaps and pending input age", () => {
+  const game = new Simulation();
+  const prediction = new Prediction("left", game.players.left);
+  prediction.reconcile(snapshot(game));
+  prediction.apply(command(1, { move: -1 }), true, 100);
+  expect(prediction.diagnostics(150).ackAgeMs).toBe(50);
+  const authority = snapshot(game, 1, 2);
+  authority.state.players.left.x -= 10;
+  prediction.reconcile(authority);
+  expect(prediction.diagnostics(150).correction).toBeGreaterThan(0);
+  expect(prediction.diagnostics(150).snapped).toBe(false);
+  authority.state.players.left.x += 200;
+  prediction.reconcile(authority);
+  expect(prediction.diagnostics(150).correction).toBeGreaterThan(40);
+  expect(prediction.diagnostics(150).snapped).toBe(true);
+  expect(prediction.diagnostics(150).pendingInputs).toBe(0);
+});
