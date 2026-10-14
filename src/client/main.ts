@@ -8,7 +8,7 @@ import {
 import { Simulation } from "../shared/simulation";
 import { INPUT_HZ, BASE_PATH } from "../shared/protocol";
 import type { Snapshot, ServerMessage } from "../shared/protocol";
-import type { Side } from "../shared/types";
+import type { Side, Viewport } from "../shared/types";
 import { Input } from "./input";
 import { Network } from "./network";
 import { Prediction, Interpolation } from "./prediction";
@@ -17,6 +17,7 @@ import { Effects } from "./effects";
 import { Audio } from "./audio";
 import { InputScheduler } from "./input-scheduler";
 import { Diagnostics } from "./diagnostics";
+import { LoadingError, type LoadingProgress } from "./loading";
 
 function el<T extends HTMLElement>(id: string): T {
   const value = document.getElementById(id);
@@ -24,6 +25,9 @@ function el<T extends HTMLElement>(id: string): T {
   return value as T;
 }
 const canvas = el<HTMLCanvasElement>("game");
+const loadingScreen = el("loading-screen"),
+  loadingProgress = el<HTMLProgressElement>("loading-progress"),
+  loadingRetry = el<HTMLButtonElement>("loading-retry");
 const ctx = canvas.getContext("2d", { alpha: false });
 if (!ctx) throw new Error("浏览器不支持 Canvas 2D");
 const start = el<HTMLButtonElement>("start"),
@@ -78,6 +82,7 @@ for (const id of CHARACTER_IDS) {
   name.textContent = CHARACTERS[id].name;
   button.append(picture, name);
   button.addEventListener("click", () => {
+    if (!assetsReady) return;
     if (scene !== "idle" && scene !== "result") return;
     selected = id;
     updateSelection();
@@ -88,7 +93,7 @@ for (const id of CHARACTER_IDS) {
 function updateSelection(): void {
   for (const [id, button] of characterButtons) {
     button.setAttribute("aria-pressed", String(selected === id));
-    button.disabled = scene !== "idle" && scene !== "result";
+    button.disabled = !assetsReady || (scene !== "idle" && scene !== "result");
   }
   const p = CHARACTERS[selected];
   el("character-detail").textContent =
@@ -138,7 +143,7 @@ function toggleMute(): void {
   mute.textContent = muted ? "开启声音" : "静音";
 }
 function leaveMatch(): void {
-  if (scene !== "online") return;
+  if (!assetsReady || scene !== "online") return;
   clearInput();
   audio.play("press");
   network.send({ type: "leave" });
@@ -221,6 +226,9 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 function idle(reason?: string): void {
+  // The initial WS idle can arrive after startup preparation. An already-empty
+  // idle scene has no old room resources and must keep its warmed first screen.
+  const alreadyIdle = scene === "idle" && room === undefined;
   clearInput(false);
   scene = "idle";
   latest = undefined;
@@ -231,7 +239,7 @@ function idle(reason?: string): void {
   interpolation = new Interpolation();
   diagnostics?.resetTransport();
   effects.reset();
-  renderer.clearEffectsImages();
+  if (!alreadyIdle) renderer.clearEffectsImages();
   audio.setMatch(false);
   overlay(
     "即刻开打",
@@ -317,7 +325,7 @@ function handleMessage(message: ServerMessage): void {
     );
     labels();
     buttons();
-    canvas.focus();
+    if (assetsReady) canvas.focus();
     return;
   }
   if (message.type === "snapshot") {
@@ -345,7 +353,7 @@ function handleMessage(message: ServerMessage): void {
     if (scene === "online") {
       if (message.status === "reconnecting") {
         clearInput(false);
-        renderer.clearEffectsImages();
+        if (!wasPaused) renderer.clearEffectsImages();
         overlay(
           "对手断线",
           "比赛已暂停",
@@ -400,6 +408,7 @@ function updateHud(state: typeof backdrop): void {
           : `回合击球 ${state.rallyHits} 次 · 先到 7 分获胜`;
 }
 start.addEventListener("click", () => {
+  if (!assetsReady || start.hidden) return;
   void audio.unlock();
   audio.play("press");
   if (network.refreshRequired) {
@@ -417,6 +426,7 @@ start.addEventListener("click", () => {
   start.disabled = true;
 });
 cancel.addEventListener("click", () => {
+  if (!assetsReady || cancel.hidden) return;
   audio.play("press");
   network.send({ type: "cancel" });
 });
@@ -433,6 +443,23 @@ for (const event of ["pointerleave", "blur"])
   start.addEventListener(event, () => {
     if (rematchUp) rematchArt.src = rematchUp;
   });
+function viewport(): Viewport {
+  const width = canvas.clientWidth,
+    height = canvas.clientHeight,
+    dpr = Math.min(devicePixelRatio || 1, 2);
+  const scale = Math.min(
+    width / worldConfig.width,
+    height / worldConfig.height,
+  );
+  return {
+    width,
+    height,
+    scale,
+    offsetX: (width - worldConfig.width * scale) / 2,
+    offsetY: (height - worldConfig.height * scale) / 2,
+    dpr,
+  };
+}
 function frame(time: number): void {
   const began = diagnostics ? performance.now() : 0;
   requestAnimationFrame(frame);
@@ -440,6 +467,9 @@ function frame(time: number): void {
     ? Math.max(0, Math.min((time - lastTime) / 1000, 0.1))
     : 1 / INPUT_HZ;
   lastTime = time;
+  // Loading owns raster preparation. Do not start cold Canvas drawing or
+  // presentation clocks underneath the independent startup cover.
+  if (!assetsReady) return;
   audio.advance(dt);
   let state = backdrop;
   if (latest) {
@@ -459,40 +489,71 @@ function frame(time: number): void {
     backdrop = state;
   } else if (scene === "result")
     effects.advance(state.elapsed * 60, dt, (sound) => audio.play(sound));
-  const width = canvas.clientWidth,
-    height = canvas.clientHeight,
-    dpr = Math.min(devicePixelRatio || 1, 2);
-  const pixelWidth = Math.max(1, Math.round(width * dpr)),
-    pixelHeight = Math.max(1, Math.round(height * dpr));
+  const view = viewport();
+  const pixelWidth = Math.max(1, Math.round(view.width * view.dpr)),
+    pixelHeight = Math.max(1, Math.round(view.height * view.dpr));
   if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
     canvas.width = pixelWidth;
     canvas.height = pixelHeight;
   }
-  const scale = Math.min(
-    width / worldConfig.width,
-    height / worldConfig.height,
-  );
-  ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx!.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
   renderer.render(
     ctx!,
-    {
-      width,
-      height,
-      scale,
-      offsetX: (width - worldConfig.width * scale) / 2,
-      offsetY: (height - worldConfig.height * scale) / 2,
-      dpr,
-    },
+    view,
     state,
     scene === "online" || scene === "result" ? effects : undefined,
   );
   diagnostics?.frame(time, performance.now() - began);
 }
-buttons();
-overlay("准备球场", "正在加载画面", "加载完成后即可选择角色并匹配。");
+function loading(progress: LoadingProgress): void {
+  const labels = {
+    manifest: "读取资源清单",
+    images: "加载原版画面",
+    confetti: "准备原版效果",
+    prewarm: "准备球场画面",
+  };
+  loadingScreen.dataset.stage = progress.stage;
+  const status = el("loading-status");
+  // Announce stage changes, not each of the hundreds of individual images.
+  if (status.textContent !== labels[progress.stage])
+    status.textContent = labels[progress.stage];
+  if (progress.total === undefined) {
+    loadingProgress.removeAttribute("value");
+    el("loading-count").textContent = "正在读取画面资源";
+  } else {
+    loadingProgress.max = Math.max(1, progress.total);
+    loadingProgress.value = progress.completed;
+    el("loading-count").textContent =
+      `${progress.completed} / ${progress.total} ${progress.stage === "images" ? "张画面" : "项"}`;
+  }
+}
+async function prepareCourt(): Promise<void> {
+  // Room messages can replace or clear the scene during a slow load. Restart
+  // only for an actual cache reset/viewport change, with a finite retry bound.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const view = viewport();
+    const prepared = await renderer.prepare(
+      view,
+      latest?.state ?? backdrop,
+      scene === "online" || scene === "result" ? effects : undefined,
+      loading,
+    );
+    const currentView = viewport();
+    if (
+      prepared &&
+      view.width === currentView.width &&
+      view.height === currentView.height &&
+      view.dpr === currentView.dpr
+    )
+      return;
+  }
+  throw new LoadingError("prewarm", "changed");
+}
+loadingRetry.addEventListener("click", () => location.reload());
+idle();
 void renderer
-  .load()
-  .then((manifest) => {
+  .load(loading)
+  .then(async (manifest) => {
     for (const [id, button] of characterButtons)
       button.querySelector("img")!.src =
         `${BASE_PATH}classic/${manifest.characters[id].preview.path}?v=${manifest.files[manifest.characters[id].preview.path]}`;
@@ -501,20 +562,38 @@ void renderer
     rematchArt.src = rematchUp;
     // Audio downloads/decoding cannot hold up a playable court.
     void audio.load(manifest);
+    await prepareCourt();
     assetsReady = true;
-    if (scene === "idle") {
-      idle();
-      if (network.refreshRequired)
-        overlay(
-          "版本更新",
-          "请刷新页面",
-          "版本已更新，请点击「刷新页面」继续。",
-        );
-    }
+    loadingScreen.hidden = true;
+    document.querySelector(".court")!.setAttribute("aria-busy", "false");
+    for (const element of document.querySelectorAll<HTMLElement>(
+      "#overlay, .court-actions, .touch-controls",
+    ))
+      element.inert = false;
+    canvas.tabIndex = 0;
+    // Keys pressed during preparation must not become gameplay at reveal.
+    input.release(false);
     buttons();
+    if (scene === "online") canvas.focus();
+    syncInputClock();
   })
-  .catch(() => {
-    overlay("加载失败", "画面资源未能加载", "请刷新页面后重试。");
+  .catch((error: unknown) => {
+    loadingScreen.dataset.stage = "failed";
+    el("loading-status").textContent = "球场准备失败";
+    loadingProgress.hidden = true;
+    el("loading-count").textContent = "请重新加载后重试";
+    const reasons = {
+      timeout: "画面资源加载超时，请检查网络后重试。",
+      request: "画面资源未能加载，请检查网络后重试。",
+      incompatible: "画面资源版本不兼容，请重新加载。",
+      changed: "球场状态发生变化，请重新加载后继续。",
+    };
+    el("loading-detail").textContent =
+      error instanceof LoadingError
+        ? reasons[error.reason]
+        : "画面准备失败，请重新加载后重试。";
+    loadingRetry.hidden = false;
+    document.querySelector(".court")!.setAttribute("aria-busy", "false");
     buttons();
   });
 void network.connect();

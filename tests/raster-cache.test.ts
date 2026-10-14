@@ -122,6 +122,32 @@ it("failed allocations preserve original images without repeating expensive fail
   cache.get("source", image, 100, 100, 1);
   expect(create).toHaveBeenCalledTimes(2);
 });
+it("preparation flushes a cached raster once and retains the original-image fallback when readback fails", () => {
+  const flush = vi.fn();
+  const canvas = {
+    width: 0,
+    height: 0,
+    getContext: () => ({ drawImage: vi.fn(), getImageData: flush }),
+  } as unknown as HTMLCanvasElement;
+  const cache = new RasterCache(() => canvas);
+  const image = {} as HTMLImageElement;
+  cache.prepare("court", image, 100, 80, 2);
+  cache.prepare("court", image, 100, 80, 2);
+  expect(flush).toHaveBeenCalledExactlyOnceWith(0, 0, 1, 1);
+  expect(cache.get("court", image, 100, 80, 2)).toBe(canvas);
+  cache.clear();
+  flush.mockImplementation(() => {
+    throw new Error("readback");
+  });
+  cache.prepare("court", image, 100, 80, 2);
+  expect(cache.diagnostics()).toMatchObject({
+    entries: 0,
+    bytes: 0,
+    failures: 1,
+  });
+  expect(canvas.width).toBe(0);
+  expect(cache.get("court", image, 100, 80, 2)).toBe(image);
+});
 it.each(["context", "draw"])(
   "a failed %s releases the temporary backing store and bounds remembered failures",
   (failure) => {

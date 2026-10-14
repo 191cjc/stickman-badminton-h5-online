@@ -52,18 +52,18 @@ Renderer caches unchanged source SVGs including original filters. Repeated filte
 
 ### 3. Contracts
 
-Half-octave scale buckets0.25..4. Floor-round backing dimensions; maximum side4096, one entry24MiB (RGBA estimate). Main raster LRU256entries/64MiB; separate tinted-confetti raster LRU768entries/32MiB protects the court working set. Oversized sources reduce backing density, retaining source dimensions/origin/filter padding at destination. Estimates exclude browser/GPU copies and loaded source SVGs. Main calls Renderer.clearEffectsImages on idle/queue/matched and reconnect pause, clearing both rasters and old Blob ownership; results retain their current court/actors until the next reset. Menu role previews are DOM images; the next queue/room resets the raster scene. Cache IDs combine source identity and actual backing size. Draw layers and source frames are unchanged.
+Half-octave scale buckets0.25..4. Floor-round backing dimensions; maximum side4096, one entry24MiB (RGBA estimate). Main raster LRU256entries/64MiB; separate tinted-confetti raster LRU768entries/32MiB protects the court working set. Oversized sources reduce backing density, retaining source dimensions/origin/filter padding at destination. Estimates exclude browser/GPU copies and loaded source SVGs. Main calls Renderer.clearEffectsImages when a prior scene returns to idle, on queue/matched and on entering reconnect pause, clearing both rasters and old Blob ownership. Repeated empty idle and paused snapshots keep the current cache; results retain their current court/actors until the next reset. Menu role previews are DOM images; the next queue/room resets the raster scene. Cache IDs combine source identity and actual backing size. Draw layers and source frames are unchanged.
 
 ### 4. Validation & Error Matrix
 
-| Condition | Expected |
-| --- | --- |
-| Same source/size bucket | Cache hit; no repeated SVG filtering |
-| Changed transform/bucket | New bounded backing size |
-| Byte/count pressure | Evict least-recently-used entry and zero its Canvas |
-| Oversized source | Lower bounded raster density, original destination registration |
+| Condition                         | Expected                                                                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Same source/size bucket           | Cache hit; no repeated SVG filtering                                                                                               |
+| Changed transform/bucket          | New bounded backing size                                                                                                           |
+| Byte/count pressure               | Evict least-recently-used entry and zero its Canvas                                                                                |
+| Oversized source                  | Lower bounded raster density, original destination registration                                                                    |
 | Allocation/context/draw exception | Return original SVG; suppress retries while its ID remains in the bounded failure set; clear or failure-set eviction permits retry |
-| Room/role/result exit | Release backing stores and stale tinted scene resources |
+| Room/role/result exit             | Release backing stores and stale tinted scene resources                                                                            |
 
 ### 5. Good / Base / Bad Cases
 
@@ -76,3 +76,62 @@ Raster tests assert original source filtering/reuse, registration/padding under 
 ### 7. Wrong vs Correct
 
 Wrong: remove SVG filters or repeatedly draw the SVG during every RAF. Correct: lazily rasterize the unchanged image at a bounded transform bucket, draw at source x/y/width/height, and clean up on scene transitions.
+
+## Startup loading and first-court preparation
+
+### Scope and signatures
+
+A static `#loading-screen` inside the court covers startup before JavaScript runs.
+[loading.ts](../../../src/client/loading.ts) exports `LoadingProgress { stage:
+"manifest" | "images" | "confetti" | "prewarm", completed: number, total?: number }`,
+`loadImages(sources, onCount)`, `fetchAsset(url, read, stage)`, and `yieldForPaint()`.
+`Renderer.load(onProgress)` loads source art; `Renderer.prepare(viewport, state,
+effects, onProgress): Promise<boolean>` prepares the current first-draw set.
+`RasterCache.prepare(key, image, width, height, scale): void` reuses the normal
+cache plan and reads one pixel to materialize deferred SVG/filter drawing.
+
+### Contracts
+
+Show an indeterminate manifest stage then exact completed/total counts for each
+named stage. Never invent a timed percentage or keep a minimum fake wait. Six
+image workers bound concurrent requests; each image and fetch/body has a15s
+request deadline. Failure aborts active image jobs and suppresses late progress.
+Audio continues independently and does not gate readiness.
+
+Deduplicate only current court/actor/score/net/overlay frames using the same
+frame selectors as render. Use viewport DPR × world scale and the additional
+1.25actor transform. Yield before each raster and after the last: RAF followed by
+a task provides a paint opportunity, with a50ms fallback when RAF is suspended.
+The one-pixel readback synchronizes raster work without allocating a second full
+image. Original filters, registration,64/32MiB budgets and allocation fallback
+remain intact. One expensive SVG can still produce a main-thread long task; a
+loading animation does not promise zero blocking or preload every animation.
+
+Main owns `assetsReady` separately from idle/queued/online/result. While unready,
+keep the cover above all scene overlays, underlying controls inert, roster/start
+handlers gated, input sampling stopped and ordinary Canvas drawing skipped.
+WS remains connected and may restore a retained-Cookie room. Initialize idle
+before loading, never call idle at readiness and clear the newly warm cache or a
+restored room. Cache generation changes invalidate preparation; allow at most
+three preparation attempts for the current scene/viewport, then show reload
+rather than loop forever.
+At reveal, release keys pressed during loading, restore the current menu or
+online scene, focus an existing match and synchronize its input clock.
+
+### Errors and verification
+
+| Condition                                     | UI / behavior                                                                      |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- |
+| WS idle or resumed room arrives before art    | Keep loading cover and input gate; update real scene underneath                    |
+| Image/fetch timeout or request failure        | Stop preparation, readable failure category, enabled reload button                 |
+| Incompatible manifest                         | Show version failure; no partial court or queue                                    |
+| Cache reset / viewport changes during prepare | Up to three preparation attempts total; explicit failure if unstable               |
+| Raster allocation/readback fails              | Reuse original source fallback; bound failure IDs, avoid repeated retries          |
+| Ready                                         | Hide cover, clear aria-busy/inert, enable current-scene controls and neutral input |
+
+Tests cover bounded concurrency, exact progress, request/body timeout, cancellation
+and late events, visible/background yields, first-frame scale/dedup, generation
+invalidation and materialization/fallback. Browser checks static-before-script
+cover, delayed art/early idle, failure/reload, compact layouts, no game draws or
+inputs before reveal and retained-Cookie room restoration. Example: prepare then
+reveal the current scene; do not `assetsReady = true; idle()` after prewarming.

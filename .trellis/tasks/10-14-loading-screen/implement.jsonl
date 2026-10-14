@@ -1,0 +1,9 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend loading and UI ownership"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Module boundaries"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Accessible DOM, original filters and raster budget"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Focus/visibility/input/reset behavior"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Scenes, authority and readiness"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Typed progress boundaries"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Checks and browser evidence limits"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Reuse raster/render frame mapping"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Preserve protocol and source ownership"}

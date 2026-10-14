@@ -53,6 +53,7 @@ export function rasterPlan(width: number, height: number, scale: number) {
 interface Entry {
   canvas: HTMLCanvasElement;
   bytes: number;
+  prepared?: boolean;
 }
 export class RasterCache {
   private entries = new Map<string, Entry>();
@@ -114,6 +115,35 @@ export class RasterCache {
       if (this.failed.size > this.limits.entries)
         this.failed.delete(this.failed.values().next().value!);
       return image;
+    }
+  }
+  /** Flush deferred SVG/filter drawing before the loading cover is removed. */
+  prepare(
+    key: string,
+    image: CanvasImageSource,
+    width: number,
+    height: number,
+    scale: number,
+  ): void {
+    this.get(key, image, width, height, scale);
+    const plan = rasterPlan(width, height, scale);
+    if (!plan) return;
+    const id = `${key}:${plan.width}x${plan.height}`;
+    const entry = this.entries.get(id);
+    if (!entry || entry.prepared) return;
+    try {
+      // A read synchronizes this backing canvas's drawing queue. Reading one
+      // pixel avoids retaining a second full-size RGBA allocation.
+      entry.canvas.getContext("2d")!.getImageData(0, 0, 1, 1);
+      entry.prepared = true;
+    } catch {
+      this.entries.delete(id);
+      this.bytes -= entry.bytes;
+      entry.canvas.width = entry.canvas.height = 0;
+      this.failures++;
+      this.failed.add(id);
+      if (this.failed.size > this.limits.entries)
+        this.failed.delete(this.failed.values().next().value!);
     }
   }
   private evict(): void {
