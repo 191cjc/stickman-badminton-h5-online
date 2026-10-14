@@ -506,20 +506,12 @@ function frame(time: number): void {
   diagnostics?.frame(time, performance.now() - began);
 }
 function loading(progress: LoadingProgress): void {
-  const labels = {
-    manifest: "读取资源清单",
-    images: "加载原版画面",
-    confetti: "准备原版效果",
-    prewarm: "准备球场画面",
-  };
   loadingScreen.dataset.stage = progress.stage;
   const status = el("loading-status");
-  // Announce stage changes, not each of the hundreds of individual images.
-  if (status.textContent !== labels[progress.stage])
-    status.textContent = labels[progress.stage];
+  if (status.textContent !== "加载中") status.textContent = "加载中";
   if (progress.total === undefined) {
     loadingProgress.removeAttribute("value");
-    el("loading-count").textContent = "正在读取画面资源";
+    el("loading-count").textContent = "";
   } else {
     loadingProgress.max = Math.max(1, progress.total);
     loadingProgress.value = progress.completed;
