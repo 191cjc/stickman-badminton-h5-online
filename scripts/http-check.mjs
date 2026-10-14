@@ -6,6 +6,7 @@ const base = new URL("/badminton-h5-online/", origin);
 const page = await fetch(base);
 assert.equal(page.status, 200);
 const html = await page.text();
+assert.ok(html.includes("<title>FisoOnline</title>"));
 assert.ok(html.includes("火柴人羽毛球"));
 const assets = [
   ...html.matchAll(/(?:src|href)="(\/badminton-h5-online\/assets\/[^\"]+)"/g),
