@@ -22,8 +22,12 @@
 - [x] Publish independent release after successful validation, preserve secret,
   restart only this project, check public assets/WS/health/logs and prior entrances/
   other services. Keep `20261013T110500Z-versus` as rollback target.
-- [ ] Commit recognized current-task changes under existing Git authorization,
-  then archive task and record journal; stop isolated validation servers.
+- [x] Commit recognized current-task changes under existing Git authorization:
+  runtime/specs `299b207`, verification/release evidence `d15099e`.
+  Isolated validation servers stopped.
+
+Task archival and the session journal use `trellis-finish-work`; their management
+commits follow the two implementation/evidence commits above.
 
 ## Verification
 
