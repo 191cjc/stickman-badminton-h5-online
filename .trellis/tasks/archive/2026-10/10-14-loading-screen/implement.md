@@ -6,7 +6,9 @@
 - [x] Independent Trellis check sub-agent reviews complete changes, repairs findings and runs full required checks.
 - [x] Main runs final-build HTTP then authorized cold/slow/failure/retry/compact/resumed-room browser checks plus short two-guest gameplay regression. Record actual limits.
 - [x] Update specs and validation docs, publish independent release preserving old services/env, verify public HTTP/health/source assets.
-- [ ] Commit current-task changes; archive and record journal.
+- [x] Commit current-task code/spec/docs/evidence as26cf23a; isolated verification services stopped.
+
+Archival and journal recording use trellis-finish-work management commits after the work commit.
 
 ## Validation
 
