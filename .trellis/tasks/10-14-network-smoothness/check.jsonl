@@ -1,0 +1,16 @@
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Keep shared source mechanics and state owners"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Input/ack/tick/effects and release data flow"}
+{"file": ".trellis/spec/shared/simulation.md", "reason": "Frozen Flash source rules and authority boundary"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Wire-compatible v3, strict consecutive input and timing"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend conventions"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Focused page-owned modules"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Prediction/interpolation/effects and lifecycle"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Key edges, backpressure, blur and reconnect"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Canvas mapping, original visuals and native controls"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Typed diagnostic/cache/timing boundaries"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Meaningful tests and browser authority"}
+{"file": ".trellis/spec/backend/architecture.md", "reason": "Preserve fixed scheduler and no service changes without evidence"}
+{"file": ".trellis/spec/backend/rooms.md", "reason": "Ack coalescing/seat/result/expiry regression"}
+{"file": ".trellis/spec/backend/identity-and-input.md", "reason": "Cookie/Origin/input/seat checks"}
+{"file": ".trellis/spec/deployment/operations.md", "reason": "Independent publication and source limits"}
+{"file": ".trellis/tasks/10-14-network-smoothness/research/baseline.md", "reason": "Measured filtered raster bottleneck and initial netcode hot paths"}
