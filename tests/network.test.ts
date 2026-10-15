@@ -142,7 +142,7 @@ it("paced sends retain edges and consecutive sequence through disconnection, bac
       if (!network.send(frame)) return;
       input.commit(frame);
       seq++;
-      prediction.apply(frame, true, Date.now());
+      prediction.accept(frame, Date.now());
     },
     () => Date.now(),
   );
@@ -171,4 +171,87 @@ it("paced sends retain edges and consecutive sequence through disconnection, bac
   scheduler.setActive(false);
   await vi.advanceTimersByTimeAsync(100);
   expect(socket.sent).toHaveLength(2);
+});
+it("actual logical notifications expedite one transactional send and rejected expedited edges survive until accepted", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ protocol: PROTOCOL, connected: false }),
+    }),
+  );
+  const win = new EventTarget(),
+    touch = Object.assign(new EventTarget(), {
+      dataset: { control: "KeyW" },
+      setPointerCapture: vi.fn(),
+    });
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", {
+    querySelectorAll: () => [touch],
+    addEventListener: () => {},
+  });
+  vi.stubGlobal("HTMLElement", class {});
+  const network = new Network(
+    () => {},
+    () => {},
+    () => {},
+  );
+  await network.connect();
+  sockets[0].open();
+  const began = Date.now();
+  const now = () => Date.now() - began;
+  const prediction = new Prediction("right", new Simulation().players.right);
+  let seq = 0;
+  const scheduler = new InputScheduler(() => {
+    const frame = input.peek(seq + 1);
+    if (!network.send(frame)) return;
+    input.commit(frame);
+    seq++;
+    prediction.accept(frame, now());
+  }, now);
+  const input = new Input(
+    () => {
+      scheduler.setActive(false);
+      prediction.clear();
+    },
+    undefined,
+    undefined,
+    () => scheduler.request(),
+  );
+  const key = (type: string, code: string) =>
+    win.dispatchEvent(Object.assign(new Event(type), { code, repeat: false }));
+  scheduler.setActive(true);
+  sockets[0].bufferedAmount = 64 * 1024 + 1;
+  touch.dispatchEvent(
+    Object.assign(new Event("pointerdown"), { pointerId: 1 }),
+  );
+  touch.dispatchEvent(new Event("pointerup"));
+  key("keydown", "Space");
+  key("keyup", "Space");
+  await vi.advanceTimersByTimeAsync(1);
+  expect(seq).toBe(0);
+  expect(prediction.diagnostics(now()).pendingInputs).toBe(0);
+  sockets[0].bufferedAmount = 0;
+  key("keydown", "KeyD");
+  await vi.advanceTimersByTimeAsync(9);
+  expect(seq).toBe(1);
+  expect(JSON.parse(sockets[0].sent[0])).toMatchObject({
+    seq: 1,
+    move: 1,
+    jump: false,
+    jumpPressed: true,
+    hitHeld: false,
+    hitPressed: true,
+  });
+  expect(prediction.diagnostics(now()).fixedSteps).toBe(0); // Acceptance is not a physics tick.
+  await vi.advanceTimersByTimeAsync(17);
+  expect(JSON.parse(sockets[0].sent[1])).toMatchObject({
+    seq: 2,
+    jumpPressed: false,
+    hitPressed: false,
+  });
+  win.dispatchEvent(new Event("blur"));
+  expect(prediction.diagnostics(now()).pendingInputs).toBe(0);
+  await vi.advanceTimersByTimeAsync(100);
+  expect(sockets[0].sent).toHaveLength(2);
 });

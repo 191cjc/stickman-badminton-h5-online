@@ -15,15 +15,19 @@ Use the existing state owners. An online UI button sends a command; it must not 
 
 ## Prediction and correction
 
-Each local logical frame runs `stepClassicPlayer` once at1/60seconds. Only the local character is predicted. Its read-only authority context chooses action type; prediction never contacts or mutates the ball. Action clocks are included in reconciliation.
+`Prediction.accept(input, at)` registers only successfully sent logical commands. `advance(at)` integrates fixed1/60second steps using the last accepted held state, independent of sender/RAF frequency; old held time advances before accepting a changed command. Jump edges OR and the latest hit edge retains hit-time jump, consumed once through shared `stepClassicPlayer`. Only the local character is predicted; ball context is read-only and never contacts, launches or scores.
 
-On a snapshot, `Prediction.reconcile()` drops acknowledged frames, deep-copies the local authoritative player, and replays unacknowledged frames when playing. Score/phase/character/room-status changes reset prediction history; initialize from the first authoritative chosen-role state before local stepping. Position errors below40worldunits are smoothed with a decaying visual offset; larger errors and phase resets snap. History is bounded at 120 frames. These values describe current code, not measured latency targets.
+`reconcile(snapshot, at)` uses server ack/ackTick and the local command's first-use step to replay elapsed unconfirmed steps. If first-use step isL, the confirmed-held candidate boundary is `L + snapshot.tick - ackTick`; it is valid only with complete history and no seq>ack owner at/before that boundary. Never prune an unacknowledged command using elapsed authority time. Retain an established ack anchor after old steps are evicted so held-only snapshots do not replay confirmed movement.
+
+For null/missing/coalesced-away or overlapping anchors, one fallback generation rebases from current authority and coalesces outstanding operations into the next local step. Same-ack snapshots must not repeatedly rebase or restart an old edge; newly accepted input remains eligible. A numeric-to-null ackTick transition restores authority and clears confirmed held controls once, preserving seq>ack identities and consumed-edge markers; repeated null snapshots cannot rebase again. This bounded approximation handles unknowable asymmetric stalls, not exact rollback. History expiry suspends prediction for that ack generation; only ack progress or a real clear/reset allows recovery, never replay an expired edge every two seconds.
+
+Per advance catch-up is at most6steps/100ms. Keep at most120 simulated steps,240 accepted commands and2seconds. Room/own-role/score/phase/status/focus/release/reset clears histories and anchors. Initialize from the authoritative chosen-role player. Position errors below40worldunits smooth through a decaying visual offset; larger or semantic resets snap. Preserve source action latches, not a forced successful hit.
 
 Online rendering replaces only the local player in a sampled authoritative state. Ball flight and score remain server-owned.
 
 ## Remote interpolation
 
-`Interpolation` retains up to32 snapshots and60 arrival-jitter samples. Its continuous render tick advances monotonically with a rate clamped0.85..1.15, and remains at or behind latest authority. Receive/server interval variation p90 adapts delay from4 to12ticks (66.7..200ms at60Hz); increase coefficient0.2, decrease0.025. Clock estimate corrections per arrival clamp-0.5..2ticks. These are configuration bounds, not measured physical latency. Stale same-room ticks are rejected before semantic resets; duplicate continuous ticks are ignored. Room/status/phase/score/either-character changes reset immediately; non-playing samples return the latest actual state. No interpolation crosses those boundaries. Starvation holds latest authority without ball extrapolation.
+`Interpolation` retains up to32 snapshots and60 arrival-jitter samples. Its continuous render tick advances monotonically with a rate clamped0.85..1.15, and remains at or behind latest authority. Receive/server interval variation p90 adapts delay from2 to12ticks (33.3..200ms at60Hz); increase coefficient0.2, decrease0.025. Clock estimate corrections per arrival clamp-0.5..2ticks. These are configuration bounds, not measured physical latency. Stale same-room ticks are rejected before semantic resets; duplicate continuous ticks are ignored. Room/status/phase/score/either-character changes reset immediately; non-playing samples return the latest actual state. No interpolation crosses those boundaries. Starvation holds latest authority without ball extrapolation.
 
 Test replay, rally reset, authority boundaries, and hold-last behavior using [prediction.test.ts](../../../tests/prediction.test.ts). Remote animation smoothness and real network feel are not established by these headless tests.
 
@@ -79,7 +83,7 @@ Network receive timing crosses interpolation, prediction, effects and rendering.
 
 ### 2. Signatures
 
-`Interpolation.push(snapshot: Snapshot, at: number): boolean`, `sample(now: number): GameState | undefined`, `diagnostics()`. `Prediction.apply(input, remember = true, at = 0)`, `diagnostics(now)` adds accepted-input age and actual correction magnitude.
+`Interpolation.push(snapshot: Snapshot, at: number): boolean`, `sample(now: number): GameState | undefined`, `diagnostics()`. `Prediction.accept(input, at)`, `advance(at)`, `reconcile(snapshot, at)`, `diagnostics(now)` adds accepted-input age and actual correction magnitude.
 
 ### 3. Contracts
 
@@ -89,7 +93,7 @@ Receipt/sample times use monotonic performance.now(). Reject non-finite receipt 
 
 | Condition | Expected |
 | --- | --- |
-| Uniform cadence | Four-tick minimum delay, bounded samples |
+| Uniform cadence | Two-tick minimum delay, bounded samples |
 | Ordered jitter/burst | Adapt within bounds; render tick does not rewind |
 | No next snapshot | Hold latest; do not extrapolate ball |
 | Old tick from earlier score/phase | Ignore before resetting current segment |
@@ -107,3 +111,9 @@ Deterministic uniform/jitter/same-time bursts/stall recovery must assert no same
 ### 7. Wrong vs Correct
 
 Wrong: `target = latest.tick + (now - latest.at) * SIM_HZ / 1000 - 4` recomputed as the cursor on every packet. Correct: advance a persistent cursor with bounded rate, slew clock estimates, cap at latest authority and reset only on semantic boundaries.
+
+## Elapsed prediction verification
+
+Assert400ms held movement at60Hz and30Hz sends reaches the same authority position;120Hz logical changes cannot double speed. Test two ledgers, coalesced edge ownership, retained held anchors, null ackTick, asymmetric-uplink overlap, same-ack fallback without repeated swing, expiry without edge resurrection and eventual acknowledgement recovery. Bounds must hold under sustained sends and multi-second stalls. Diagnostics expose fixed steps, alignment/fallback reasons, stalls/expiry/suspension and confirmed-held age as detached bounded numeric/boolean state.
+
+Wrong: one predicted physics step per sent packet, or `steps.filter(step.id > candidate)` without checking unacknowledged owners. Correct: fixed elapsed-time advance, then validated server-owned replay boundary or a single bounded fallback generation.

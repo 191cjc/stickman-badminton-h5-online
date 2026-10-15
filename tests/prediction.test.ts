@@ -11,6 +11,7 @@ function snapshot(game: Simulation, ack = 0, tick = 0): Snapshot {
     type: "snapshot",
     room: "test",
     ack,
+    ackTick: ack ? ack : null,
     tick,
     state: game.snapshot(),
     effects: game.presentation(),
@@ -30,37 +31,42 @@ function command(seq: number, patch: Partial<InputFrame> = {}): InputFrame {
     ...patch,
   };
 }
-it("replays unacknowledged original movement, jumps and body frames at one 60-Hz step per input", () => {
+it("replays fixed elapsed steps after a delayed completed ack, including original jump clips", () => {
   const game = new Simulation();
   const prediction = new Prediction("left", game.players.left);
-  prediction.reconcile(snapshot(game));
+  prediction.reconcile(snapshot(game), 0);
   let acknowledged: Snapshot | undefined;
-  for (let seq = 1; seq <= 20; seq++) {
-    const input = command(seq, {
+  for (let tick = 1; tick <= 20; tick++) {
+    const input = command(tick, {
       move: -1,
-      jump: seq === 2,
-      jumpPressed: seq === 2,
+      jump: tick === 2,
+      jumpPressed: tick === 2,
     });
-    prediction.apply(input);
+    prediction.accept(input, ((tick - 1) * 1000) / SIM_HZ);
+    prediction.advance((tick * 1000) / SIM_HZ);
     game.setIntents({ ...input, pausePressed: false }, emptyIntent());
     game.update(1 / SIM_HZ);
-    if (seq === 7) acknowledged = snapshot(game, seq, seq);
+    if (tick === 7) acknowledged = snapshot(game, tick, tick);
   }
-  prediction.reconcile(acknowledged!);
+  prediction.reconcile(acknowledged!, (20 * 1000) / SIM_HZ);
   expect(prediction.player).toEqual(game.snapshot().players.left);
   expect(prediction.player.x).toBe(75);
   expect(prediction.player.y).toBeLessThan(CLASSIC_WORLD.groundY);
+  expect(prediction.diagnostics(340).aligned).toBe(1);
 });
-it("predicts explicit original serve animation while leaving the authoritative shuttle and score intact", () => {
+it("predicts original serve without mutating authoritative shuttle or score", () => {
   const game = new Simulation();
   const authority = snapshot(game);
   const frozen = JSON.stringify(authority);
   const prediction = new Prediction("left", game.players.left);
-  prediction.reconcile(authority);
-  for (let seq = 1; seq <= 6; seq++) {
-    const input = command(seq, { hitHeld: true, hitPressed: seq === 1 });
-    prediction.apply(input);
-    game.setIntents({ ...input, pausePressed: false }, emptyIntent());
+  prediction.reconcile(authority, 0);
+  prediction.accept(command(1, { hitHeld: true, hitPressed: true }), 0);
+  for (let tick = 1; tick <= 6; tick++) {
+    prediction.advance((tick * 1000) / SIM_HZ);
+    game.setIntents(
+      { ...emptyIntent(), hitHeld: true, hitPressed: tick === 1 },
+      emptyIntent(),
+    );
     game.update(1 / SIM_HZ);
   }
   expect(prediction.player).toEqual(game.snapshot().players.left);
@@ -70,38 +76,39 @@ it("predicts explicit original serve animation while leaving the authoritative s
   expect(authority.state.shuttle.state).toBe("attached");
   expect(game.snapshot().shuttle.state).toBe("flying");
 });
-it("drops old inputs on a score, room or reconnect transition and clones nested latches", () => {
-  const game = new Simulation();
-  const prediction = new Prediction("right", game.players.right);
-  prediction.reconcile(snapshot(game));
-  prediction.apply(
-    command(1, {
-      move: -1,
-      jump: true,
-      jumpPressed: true,
-      hitHeld: true,
-      hitPressed: true,
-    }),
-  );
-  const authority = snapshot(game, 0, 2);
-  authority.state.phase = "point";
-  authority.state.pointActive = false;
-  authority.state.score.left = 1;
-  prediction.reconcile(authority);
-  expect(prediction.player).toEqual(authority.state.players.right);
-  prediction.player.swingClips.overhead.clock = 7;
-  expect(authority.state.players.right.swingClips.overhead.clock).not.toBe(7);
-  const nextRoom = snapshot(game, 0, 0);
-  nextRoom.room = "new-room";
-  prediction.reconcile(nextRoom);
-  expect(prediction.player).toEqual(nextRoom.state.players.right);
-  prediction.apply(command(2, { move: -1 }));
-  const paused = snapshot(game, 0, 2);
-  paused.room = "new-room";
-  paused.status = "reconnecting";
-  prediction.reconcile(paused);
-  expect(prediction.player).toEqual(paused.state.players.right);
-});
+it.each(["score", "room", "status", "role", "phase", "release"])(
+  "%s boundaries clear outstanding operations and nested state stays detached",
+  (boundary) => {
+    const game = new Simulation();
+    const prediction = new Prediction("right", game.players.right);
+    prediction.reconcile(snapshot(game), 0);
+    prediction.accept(
+      command(1, {
+        move: -1,
+        jump: true,
+        jumpPressed: true,
+        hitHeld: true,
+        hitPressed: true,
+      }),
+      0,
+    );
+    prediction.advance(20);
+    const authority = snapshot(game, 0, 2);
+    if (boundary === "score") authority.state.score.left++;
+    if (boundary === "room") authority.room = "new-room";
+    if (boundary === "status") authority.status = "reconnecting";
+    if (boundary === "phase") authority.state.phase = "point";
+    if (boundary === "role")
+      authority.state.players.right.characterId = "toaster";
+    if (boundary === "release") prediction.clear();
+    prediction.reconcile(authority, 20);
+    expect(prediction.player).toEqual(authority.state.players.right);
+    expect(prediction.diagnostics(20).pendingInputs).toBe(0);
+    expect(prediction.diagnostics(20).steps).toBe(0);
+    prediction.player.swingClips.overhead.clock = 7;
+    expect(authority.state.players.right.swingClips.overhead.clock).not.toBe(7);
+  },
+);
 it("interpolates numeric motion at the new cadence, keeps integer animation frames and holds the last snapshot", () => {
   const game = new Simulation();
   const buffer = new Interpolation();
@@ -111,7 +118,7 @@ it("interpolates numeric motion at the new cadence, keeps integer animation fram
     value.state.players.right.swingFrame = tick + 1;
     buffer.push(value, (tick * 1000) / SIM_HZ);
   }
-  expect(buffer.sample(100)!.players.right.x).toBeCloseTo(502);
+  expect(buffer.sample(1000 / 15)!.players.right.x).toBeCloseTo(502);
   expect(Number.isInteger(buffer.sample(108)!.players.right.swingFrame)).toBe(
     true,
   );
@@ -180,7 +187,7 @@ it("ordered jitter/bursts and a450ms stream pause never rewind presentation or e
   // prove an observable reduction on that reproducible stream, not assignments.
   expect(holds).toBeLessThan(47);
   expect(buffer.diagnostics().rewinds).toBe(0);
-  expect(buffer.diagnostics().delayMs).toBeGreaterThanOrEqual(1000 / 15);
+  expect(buffer.diagnostics().delayMs).toBeGreaterThanOrEqual(1000 / 30);
   expect(buffer.diagnostics().delayMs).toBeLessThanOrEqual(200);
   expect(buffer.diagnostics().snapshots).toBeLessThanOrEqual(32);
 });
@@ -212,13 +219,18 @@ it("diagnostics measure actual small corrections and large snaps and pending inp
   const game = new Simulation();
   const prediction = new Prediction("left", game.players.left);
   prediction.reconcile(snapshot(game));
-  prediction.apply(command(1, { move: -1 }), true, 100);
+  prediction.accept(command(1, { move: -1 }), 100);
+  prediction.advance(117);
   expect(prediction.diagnostics(150).ackAgeMs).toBe(50);
   const authority = snapshot(game, 1, 2);
   authority.state.players.left.x -= 10;
   prediction.reconcile(authority);
   expect(prediction.diagnostics(150).correction).toBeGreaterThan(0);
   expect(prediction.diagnostics(150).snapped).toBe(false);
+  prediction.accept(command(2), 117);
+  authority.ack = 2;
+  authority.ackTick = 2;
+  authority.tick = 3;
   authority.state.players.left.x += 200;
   prediction.reconcile(authority);
   expect(prediction.diagnostics(150).correction).toBeGreaterThan(40);

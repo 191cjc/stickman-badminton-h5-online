@@ -51,6 +51,7 @@ interface Seat {
   current: PlayerIntent;
   received: number;
   ack: number;
+  ackTick: number | null;
   currentSeq: number;
   lastInput: number;
   reconnectUntil?: number;
@@ -163,11 +164,13 @@ export function createGameService(options: ServiceOptions) {
     handleProtocols: (protocols) =>
       protocols.has(SUBPROTOCOL)
         ? SUBPROTOCOL
-        : protocols.has("badminton-v2")
-          ? "badminton-v2"
-          : protocols.has("badminton-v1")
-            ? "badminton-v1"
-            : false,
+        : protocols.has("badminton-v3")
+          ? "badminton-v3"
+          : protocols.has("badminton-v2")
+            ? "badminton-v2"
+            : protocols.has("badminton-v1")
+              ? "badminton-v1"
+              : false,
   });
   function send(guest: Guest, message: ServerMessage): void {
     const ws = guest.socket;
@@ -190,6 +193,7 @@ export function createGameService(options: ServiceOptions) {
     seat.held = emptyIntent();
     seat.current = emptyIntent();
     seat.ack = seat.received;
+    seat.ackTick = null;
     seat.currentSeq = seat.received;
   }
   function snapshot(room: Room): void {
@@ -206,6 +210,7 @@ export function createGameService(options: ServiceOptions) {
           room: room.id,
           tick: room.tick,
           ack: room.seats[side].ack,
+          ackTick: room.seats[side].ackTick,
           status: room.status,
           reconnectRemainingMs: remaining,
           state,
@@ -266,6 +271,7 @@ export function createGameService(options: ServiceOptions) {
       current: emptyIntent(),
       received: 0,
       ack: 0,
+      ackTick: null,
       currentSeq: 0,
       lastInput: Date.now(),
     };
@@ -395,7 +401,8 @@ export function createGameService(options: ServiceOptions) {
     if (
       !offered?.includes(SUBPROTOCOL) &&
       !offered?.includes("badminton-v1") &&
-      !offered?.includes("badminton-v2")
+      !offered?.includes("badminton-v2") &&
+      !offered?.includes("badminton-v3")
     )
       return reject(400, "Bad Request");
     const id = cookieId(req);
@@ -404,7 +411,7 @@ export function createGameService(options: ServiceOptions) {
     if (guest.socket && offered.includes(SUBPROTOCOL))
       return reject(409, "Conflict");
     wss.handleUpgrade(req, socket, head, (ws) => {
-      // Previously loaded v1/v2 pages get a terminal policy close instead of
+      // Previously loaded v1/v2/v3 pages get a terminal policy close instead of
       // reconnecting repeatedly. It never acquires a guest connection or seat.
       if (ws.protocol !== SUBPROTOCOL) {
         ws.on("error", () => {});
@@ -548,7 +555,10 @@ export function createGameService(options: ServiceOptions) {
           jumpPressed: false,
           hitPressed: false,
         };
-        seat.ack = seat.currentSeq;
+        if (seat.currentSeq !== seat.ack) {
+          seat.ack = seat.currentSeq;
+          seat.ackTick = room.tick;
+        }
       }
       const state = room.simulation.snapshot();
       if (state.phase === "matchEnd") finish(room, state.winner, "score");

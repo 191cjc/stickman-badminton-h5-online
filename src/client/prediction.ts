@@ -3,71 +3,317 @@ import {
   stepClassicPlayer,
 } from "../shared/classic/player";
 import type { ClassicPlayerContext } from "../shared/classic/types";
-import { serializePlayer } from "../shared/state";
+import { emptyIntent, serializePlayer } from "../shared/state";
 import type { GameState, PlayerState } from "../shared/state";
-import { INPUT_HZ, SIM_HZ, SNAPSHOT_HZ } from "../shared/protocol";
+import { SIM_HZ, SNAPSHOT_HZ } from "../shared/protocol";
 import type { InputFrame, Snapshot } from "../shared/protocol";
-import type { Side } from "../shared/types";
+import type { PlayerIntent, Side } from "../shared/types";
 import { toIntent } from "./input";
 
+const stepMs = 1000 / SIM_HZ;
+const historyMs = 2000;
+interface Command {
+  input: InputFrame;
+  at: number;
+  firstStep?: number;
+}
+interface Step {
+  id: number;
+  intent: PlayerIntent;
+  owners: number[];
+  context: ClassicPlayerContext;
+}
+interface Anchor {
+  seq: number;
+  localStep: number;
+  authorityStep: number;
+}
+
+/** Command identity and elapsed simulation time have separate bounded ledgers.
+ * Only the own actor is stepped; shuttle/context is read-only authority data. */
 export class Prediction {
   readonly player: PlayerState;
-  private history: { input: InputFrame; at: number }[] = [];
+  private commands: Command[] = [];
+  private steps: Step[] = [];
+  private held = emptyIntent();
+  private heldSeq = 0;
+  private localStep = 0;
+  private lastAt?: number;
+  private accumulator = 0;
+  private anchor?: Anchor;
+  private fallback?: { ack: number; suspended: boolean };
+  private authority?: PlayerState;
+  private ack = 0;
+  private ackTick: number | null = null;
+  private authorityTick = 0;
+  private cleared = true;
   private offset = { x: 0, y: 0 };
   private scoreKey = "";
   private context: ClassicPlayerContext = {};
   private correction = 0;
   private snapped = false;
+  private fixedSteps = 0;
+  private aligned = 0;
+  private fallbacks = { null: 0, missing: 0, overlap: 0 };
+  private expirations = 0;
+  private stalls = 0;
   constructor(
     readonly side: Side,
     initial: PlayerState,
   ) {
     this.player = cloneClassicPlayer(initial);
   }
-  apply(input: InputFrame, remember = true, at = 0): void {
-    if (remember) {
-      this.history.push({ input, at });
-      if (this.history.length > INPUT_HZ * 2) this.history.shift();
-    }
-    // One input corresponds to one Flash 60-fps player step. The authority's
-    // latest shuttle is read only to choose a swing; prediction never hits it.
-    stepClassicPlayer(this.player, toIntent(input), 1 / INPUT_HZ, this.context);
+  /** Called only after synchronous socket acceptance, never on a rejected send. */
+  accept(input: InputFrame, at: number): void {
+    if (!Number.isFinite(at)) return;
+    this.advance(at); // Integrate the previous held state before changing it.
+    this.commands.push({ input: { ...input }, at });
+    if (this.commands.length > 240) this.expire();
   }
-  reconcile(snapshot: Snapshot): void {
+  advance(at: number): void {
+    if (!Number.isFinite(at)) return;
+    if (this.lastAt === undefined) {
+      this.lastAt = at;
+      return;
+    }
+    if (at < this.lastAt) return;
+    const elapsed = at - this.lastAt;
+    this.lastAt = at;
+    if (this.commands.some((command) => at - command.at > historyMs))
+      this.expire();
+    if (this.fallback?.suspended) return;
+    this.accumulator += Math.min(elapsed, 100);
+    let count = 0;
+    while (this.accumulator + 1e-7 >= stepMs && count < 6) {
+      this.localStep++;
+      const pending = this.commands.filter(
+        (command) => command.firstStep === undefined,
+      );
+      const latest = pending.at(-1);
+      let intent = { ...this.held };
+      let owners = [this.heldSeq];
+      if (latest) {
+        intent = toIntent(latest.input);
+        intent.jumpPressed = pending.some(
+          (command) => command.input.jumpPressed,
+        );
+        const hit = pending
+          .slice()
+          .reverse()
+          .find((command) => command.input.hitPressed);
+        intent.hitPressed = !!hit;
+        if (hit) intent.hitJump = hit.input.jump;
+        owners = [
+          latest.input.seq,
+          ...pending
+            .filter((command) => command.input.jumpPressed)
+            .map((command) => command.input.seq),
+        ];
+        if (hit) owners.push(hit.input.seq);
+        // Only the newest held command owns an independent first-use anchor.
+        // Earlier coalesced edges remain owners of this step, never fake ticks.
+        for (const command of pending) command.firstStep = this.localStep;
+        latest.firstStep = this.localStep;
+        this.heldSeq = latest.input.seq;
+        this.held = {
+          ...intent,
+          jumpPressed: false,
+          hitPressed: false,
+          hitJump: undefined,
+        };
+      }
+      const record: Step = {
+        id: this.localStep,
+        intent,
+        owners,
+        context: this.context,
+      };
+      stepClassicPlayer(this.player, intent, 1 / SIM_HZ, this.context);
+      this.steps.push(record);
+      if (this.steps.length > 120) this.steps.shift();
+      this.fixedSteps++;
+      this.accumulator = Math.max(0, this.accumulator - stepMs);
+      count++;
+    }
+    if (elapsed > 100 + 1e-7) {
+      this.stalls++;
+      this.expire();
+    }
+  }
+  private expire(): void {
+    if (!this.fallback?.suspended) this.expirations++;
+    this.fallback = { ack: this.ack, suspended: true };
+    this.anchor = undefined;
+    this.commands = [];
+    this.steps = [];
+    this.held = emptyIntent();
+    this.heldSeq = this.ack;
+    this.accumulator = 0;
+    if (this.authority)
+      Object.assign(this.player, cloneClassicPlayer(this.authority));
+    this.offset = { x: 0, y: 0 };
+  }
+  reconcile(snapshot: Snapshot, at = this.lastAt ?? 0): void {
+    this.advance(at);
     const key = `${snapshot.room}:${snapshot.state.players[this.side].characterId}:${snapshot.state.score.left}:${snapshot.state.score.right}:${snapshot.state.phase}:${snapshot.status}`;
-    const reset = key !== this.scoreKey;
-    this.scoreKey = key;
+    const reset = this.cleared || key !== this.scoreKey;
     const before = this.drawState(0);
-    this.history = reset
-      ? []
-      : this.history.filter(({ input }) => input.seq > snapshot.ack);
-    Object.assign(
-      this.player,
-      cloneClassicPlayer(snapshot.state.players[this.side]),
-    );
+    const previousAck = this.ack;
+    const previousAckTick = this.ackTick;
+    this.scoreKey = key;
+    this.authority = cloneClassicPlayer(snapshot.state.players[this.side]);
     this.context = {
       pointActive: snapshot.state.pointActive,
       shuttle: { ...snapshot.state.shuttle },
     };
-    if (snapshot.state.phase === "playing" && snapshot.status === "playing")
-      for (const { input } of this.history) this.apply(input, false);
-    const dx = before.x - this.player.x;
-    const dy = before.y - this.player.y;
+    this.ack = snapshot.ack;
+    this.ackTick = snapshot.ackTick;
+    this.authorityTick = snapshot.tick;
+    this.correction = 0;
+    this.snapped = false;
+    if (
+      reset ||
+      snapshot.state.phase !== "playing" ||
+      snapshot.status !== "playing"
+    ) {
+      this.clear();
+      this.cleared = false;
+      this.lastAt = at;
+      Object.assign(this.player, cloneClassicPlayer(this.authority));
+    } else {
+      const command = this.commands.find(
+        (command) => command.input.seq === snapshot.ack,
+      );
+      let anchor = this.anchor?.seq === snapshot.ack ? this.anchor : undefined;
+      if (
+        !anchor &&
+        command?.firstStep !== undefined &&
+        Number.isInteger(snapshot.ackTick) &&
+        snapshot.ackTick! >= 1
+      ) {
+        // If a newer command shared its step, this ack was coalesced away locally.
+        const step = this.steps.find((step) => step.id === command.firstStep);
+        if (step?.owners[0] === snapshot.ack)
+          anchor = {
+            seq: snapshot.ack,
+            localStep: command.firstStep,
+            authorityStep: snapshot.ackTick!,
+          };
+      }
+      this.commands = this.commands.filter(
+        (command) => command.input.seq > snapshot.ack,
+      );
+      // One fallback generation per ack. Continued stale downlink snapshots may
+      // refresh ball context but must not restart an old speculative swing.
+      if (this.fallback?.ack === snapshot.ack) {
+        const discarded = previousAckTick !== null && snapshot.ackTick === null;
+        if (this.fallback.suspended || discarded) {
+          Object.assign(this.player, cloneClassicPlayer(this.authority));
+          this.steps = [];
+          this.anchor = undefined;
+          this.accumulator = 0;
+          // Null invalidates the old anchor once. It cannot confirm seq>ack,
+          // nor replay already-consumed fallback edges. New pending commands
+          // still enter the ordinary next-step coalescer.
+          if (this.heldSeq <= snapshot.ack) this.held = emptyIntent();
+        }
+        if (!discarded) return;
+      } else {
+        const numeric =
+          Number.isInteger(snapshot.ackTick) &&
+          snapshot.ackTick! >= 1 &&
+          snapshot.ackTick! <= snapshot.tick;
+        const boundary =
+          anchor && numeric && anchor.authorityStep === snapshot.ackTick
+            ? anchor.localStep + snapshot.tick - snapshot.ackTick!
+            : undefined;
+        const overlap =
+          boundary !== undefined &&
+          this.steps.some(
+            (step) =>
+              step.id <= boundary &&
+              step.owners.some((seq) => seq > snapshot.ack),
+          );
+        const complete =
+          boundary !== undefined &&
+          boundary <= this.localStep &&
+          boundary >= (this.steps[0]?.id ?? this.localStep + 1) - 1;
+        Object.assign(this.player, cloneClassicPlayer(this.authority));
+        if (complete && !overlap) {
+          this.anchor = anchor;
+          this.steps = this.steps.filter((step) => step.id > boundary!);
+          for (const step of this.steps)
+            stepClassicPlayer(
+              this.player,
+              step.intent,
+              1 / SIM_HZ,
+              step.context,
+            );
+          this.fallback = undefined;
+          this.aligned++;
+        } else {
+          const reason = !numeric ? "null" : overlap ? "overlap" : "missing";
+          this.fallbacks[reason]++;
+          this.fallback = { ack: snapshot.ack, suspended: false };
+          this.anchor = undefined;
+          this.steps = [];
+          // Rebase the outstanding operation batch once, without treating it as
+          // acknowledged, resending it, or stepping once per command.
+          for (const command of this.commands) command.firstStep = undefined;
+          this.accumulator = 0;
+          if (this.heldSeq > snapshot.ack || !numeric) {
+            this.held = emptyIntent();
+            this.heldSeq = snapshot.ack;
+          }
+        }
+      }
+      // An advancing acknowledgement ends a suspended generation. Expired
+      // commands were deliberately removed and cannot resurrect their edges.
+      if (
+        snapshot.ack > previousAck &&
+        !this.commands.length &&
+        this.heldSeq < snapshot.ack
+      )
+        this.heldSeq = snapshot.ack;
+    }
+    const dx = before.x - this.player.x,
+      dy = before.y - this.player.y;
     this.correction = Math.hypot(dx, dy);
     this.snapped = reset || this.correction >= 40;
-    this.offset =
-      !reset && Math.hypot(dx, dy) < 40 ? { x: dx, y: dy } : { x: 0, y: 0 };
+    this.offset = !this.snapped ? { x: dx, y: dy } : { x: 0, y: 0 };
   }
   clear(): void {
-    this.history = [];
+    this.commands = [];
+    this.steps = [];
+    this.held = emptyIntent();
+    this.heldSeq = 0;
+    this.anchor = undefined;
+    this.fallback = undefined;
+    this.lastAt = undefined;
+    this.accumulator = 0;
     this.offset = { x: 0, y: 0 };
+    this.cleared = true;
   }
   diagnostics(now: number) {
     return {
       correction: this.correction,
       snapped: this.snapped,
-      pendingInputs: this.history.length,
-      ackAgeMs: this.history.length ? Math.max(0, now - this.history[0].at) : 0,
+      pendingInputs: this.commands.length,
+      ackAgeMs: this.commands.length
+        ? Math.max(0, now - this.commands[0].at)
+        : 0,
+      steps: this.steps.length,
+      fixedSteps: this.fixedSteps,
+      aligned: this.aligned,
+      fallbacks: { ...this.fallbacks },
+      suspended: this.fallback?.suspended ?? false,
+      expirations: this.expirations,
+      stalls: this.stalls,
+      ackTick: this.ackTick,
+      confirmedHeldTicks:
+        this.ackTick === null
+          ? 0
+          : Math.max(0, this.authorityTick - this.ackTick),
     };
   }
   drawState(dt: number): PlayerState {
@@ -82,6 +328,7 @@ export class Prediction {
   }
 }
 
+const minimumDelayTicks = SIM_HZ / SNAPSHOT_HZ;
 /** Monotonic authority presentation time. All positional interpolation stays
  * inside real snapshots; no extrapolated shuttle contact/collision is invented. */
 export class Interpolation {
@@ -91,7 +338,7 @@ export class Interpolation {
   private lastSample?: number;
   private clockTick = 0;
   private clockAt = 0;
-  private delay = (2 * SIM_HZ) / SNAPSHOT_HZ;
+  private delay = minimumDelayTicks;
   private jitter: number[] = [];
   private underruns = 0;
   private ignored = 0;
@@ -121,7 +368,7 @@ export class Interpolation {
       this.lastSample = undefined;
       this.clockTick = snapshot.tick;
       this.clockAt = at;
-      this.delay = (2 * SIM_HZ) / SNAPSHOT_HZ;
+      this.delay = minimumDelayTicks;
       this.jitter = [];
       this.starved = false;
       this.resets++;
@@ -139,9 +386,9 @@ export class Interpolation {
       if (this.jitter.length > 60) this.jitter.shift();
       const sorted = [...this.jitter].sort((a, b) => a - b);
       const p90 = sorted[Math.floor((sorted.length - 1) * 0.9)];
-      // Healthy data keeps the original two-snapshot delay. Adapt up to200ms;
+      // Healthy data keeps one snapshot of delay. Adapt up to200ms;
       // a slow decrease avoids repeatedly exhausting the buffer after a burst.
-      const wanted = Math.min(12, 4 + (p90 * SIM_HZ) / 1000);
+      const wanted = Math.min(12, minimumDelayTicks + (p90 * SIM_HZ) / 1000);
       this.delay += (wanted - this.delay) * (wanted > this.delay ? 0.2 : 0.025);
       const estimate =
         this.clockTick + (Math.max(0, at - this.clockAt) * SIM_HZ) / 1000;

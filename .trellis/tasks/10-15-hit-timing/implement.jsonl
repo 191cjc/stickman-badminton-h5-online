@@ -1,0 +1,12 @@
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Exact wire fields, seq/tick/ack semantics, versioned atomic release and input authority."}
+{"file": ".trellis/spec/shared/simulation.md", "reason": "Preserve source-valued Flash mechanics and local-only actor prediction."}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Prediction/interpolation ownership, source contact boundaries and effect timing."}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Transactional sending, edge retention, one scheduler and release/reset paths."}
+{"file": ".trellis/spec/backend/architecture.md", "reason": "Fixed service clock, real HTTP/WS tests and deterministic clock control."}
+{"file": ".trellis/spec/backend/rooms.md", "reason": "Held input, completed-step acknowledgements and lifecycle clearing."}
+{"file": ".trellis/spec/backend/identity-and-input.md", "reason": "Cookie/Origin/seat ownership, strict ranges and rate/backlog bounds."}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace protocol producers/consumers and atomic compatibility changes."}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Reuse shared player stepping and preserve frozen source boundaries."}
+{"file": ".trellis/tasks/10-15-hit-timing/research/local-prediction.md", "reason": "Reduced-cadence discrepancy and replay-anchor constraints."}
+{"file": ".trellis/tasks/10-15-hit-timing/research/authority-timing.md", "reason": "Contact timing fixtures, safe first-release scope and deferred rollback hazards."}
+{"file": ".trellis/tasks/10-15-hit-timing/research/replay-anchor-review.md", "reason": "Prevent ackTick mapping from dropping pending edges; bounded idempotent fallback under asymmetric stalls."}

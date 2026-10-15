@@ -26,6 +26,7 @@ function snapshot(
     room: "r",
     tick,
     ack: 0,
+    ackTick: null,
     status: "playing",
     reconnectRemainingMs: 0,
     state: game.snapshot(),

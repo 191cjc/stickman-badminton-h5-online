@@ -8,7 +8,7 @@ async function connect() {
   assert.equal(session.status, 200);
   const url = new URL("ws", base);
   url.protocol = base.protocol === "https:" ? "wss:" : "ws:";
-  const ws = new WebSocket(url, "badminton-v3", {
+  const ws = new WebSocket(url, "badminton-v4", {
     headers: {
       Origin: new URL(origin).origin,
       Cookie: session.headers.get("set-cookie").split(";")[0],

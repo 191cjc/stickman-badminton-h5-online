@@ -113,3 +113,64 @@ it("a future grid less than a quarter-period away is skipped rather than creatin
   expect(accepted).toEqual([49, 67]);
   scheduler.setActive(false);
 });
+it("logical-change requests coalesce, retime periodic work and share an8.33ms minimum spacing", async () => {
+  vi.useFakeTimers();
+  const began = Date.now();
+  const times: number[] = [];
+  const scheduler = new InputScheduler(
+    () => times.push(Date.now() - began),
+    () => Date.now() - began,
+  );
+  scheduler.request();
+  expect(vi.getTimerCount()).toBe(0);
+  scheduler.setActive(true);
+  scheduler.request();
+  scheduler.request();
+  expect(vi.getTimerCount()).toBe(1);
+  await vi.advanceTimersByTimeAsync(1);
+  expect(times).toEqual([1]);
+  for (let i = 0; i < 1000; i++) {
+    scheduler.request();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(vi.getTimerCount()).toBe(1);
+  }
+  expect(times.length).toBeLessThanOrEqual(121);
+  expect(times.length).toBeGreaterThan(100);
+  for (let i = 1; i < times.length; i++)
+    expect(times[i] - times[i - 1]).toBeGreaterThanOrEqual(1000 / 120);
+  // Let the one outstanding expedited request run, then periodic resumes.
+  await vi.advanceTimersByTimeAsync(9);
+  const last = times.at(-1)!;
+  await vi.advanceTimersByTimeAsync(17);
+  expect(times.at(-1)! - last).toBeGreaterThanOrEqual(16);
+  expect(scheduler.diagnostics().expedited).toBeGreaterThan(0);
+  scheduler.setActive(false);
+  scheduler.request();
+  expect(vi.getTimerCount()).toBe(0);
+});
+it("stop/restart inside callback creates one fresh chain and stopping with pending expedited work cancels it", async () => {
+  vi.useFakeTimers();
+  let calls = 0;
+  const scheduler = new InputScheduler(
+    () => {
+      calls++;
+      if (calls === 1) {
+        scheduler.setActive(false);
+        scheduler.setActive(true);
+      }
+    },
+    () => Date.now(),
+  );
+  scheduler.setActive(true);
+  scheduler.request();
+  await vi.advanceTimersByTimeAsync(1);
+  expect(calls).toBe(1);
+  expect(vi.getTimerCount()).toBe(1);
+  await vi.advanceTimersByTimeAsync(17);
+  expect(calls).toBe(2);
+  scheduler.request();
+  scheduler.setActive(false);
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(calls).toBe(2);
+  expect(vi.getTimerCount()).toBe(0);
+});

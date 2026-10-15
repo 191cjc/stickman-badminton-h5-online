@@ -7,7 +7,7 @@ Current online flow:
 ```text
 Keyboard/pointer -> InputFrame -> same-origin authenticated WS
 -> parseClientMessage -> authenticated room seat -> input sampling
--> shared Simulation -> Snapshot(tick, ack, state)
+-> shared Simulation -> Snapshot(tick, ack, ackTick, state)
 -> local player correction + remote interpolation -> DOM/Canvas
 ```
 
@@ -16,7 +16,7 @@ Keyboard/pointer -> InputFrame -> same-origin authenticated WS
 ## Contracts to preserve
 
 - Guest Cookie is the bearer identity; active socket/seat are server-derived. Room/side/score/position fields from a client are not accepted.
-- `seq` follows the guest's current room input scope. `ack` identifies incorporated/discarded logical input; `tick` identifies authoritative simulation time. Burst coalescing means they do not advance at a fixed ratio.
+- `seq` follows the guest's current room input scope. `ack` identifies incorporated/discarded logical input; `tick` identifies authoritative simulation time. Burst coalescing means they do not advance at a fixed ratio. Server-owned ackTick anchors the first completed consumption tick and becomes null on clear/discard.
 - Press edges are sampled once in each60Hz simulation frame; movement uses the latest held direction, while the recent hit edge can preserve its jump state. Keep internal hitJump for that edge; obsolete hitMove is removed.
 - Online ball flight/collision/score/result are authoritative. Client prediction changes only local player presentation.
 - Release, close, reconnect deadlines, normal result retention, and queue expiry are separate lifecycle transitions.

@@ -21,7 +21,7 @@ const health = await fetch(new URL("api/health", base));
 assert.equal(health.status, 200);
 const status = await health.json();
 assert.equal(status.ok, true);
-assert.equal(status.protocol, 3);
+assert.equal(status.protocol, 4);
 assert.equal(status.simulationHz, 60);
 assert.equal(status.snapshotHz, 30);
 const artResponse = await fetch(new URL("classic/manifest.json", base));
@@ -59,7 +59,7 @@ assert.ok(setCookie.includes("SameSite=Lax"));
 if (base.protocol === "https:") assert.ok(setCookie.includes("Secure"));
 const wsUrl = new URL("ws", base);
 wsUrl.protocol = base.protocol === "https:" ? "wss:" : "ws:";
-const ws = new WebSocket(wsUrl, "badminton-v3", {
+const ws = new WebSocket(wsUrl, "badminton-v4", {
   headers: { Cookie: setCookie.split(";")[0], Origin: new URL(origin).origin },
 });
 const greeting = await new Promise((resolve, reject) => {
@@ -77,7 +77,7 @@ const greeting = await new Promise((resolve, reject) => {
   });
 });
 assert.equal(greeting.type, "hello");
-assert.equal(greeting.protocol, 3);
+assert.equal(greeting.protocol, 4);
 ws.close();
 const existing = [];
 for (const path of [
@@ -99,7 +99,7 @@ console.log(
       classicArt:
         "source record, 640x426, 60 fps, 24 net frames and 4 SVG hashes checked",
       cookie: "HttpOnly/SameSite checked",
-      websocket: "hello protocol=3",
+      websocket: "hello protocol=4",
       existing,
     },
     null,

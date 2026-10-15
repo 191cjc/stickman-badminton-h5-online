@@ -10,9 +10,9 @@ GET health is public and reports status/cadence/room/queue counts. Non-GET reque
 
 ## WebSocket seat binding
 
-An upgrade must target the exact WS route, have an allowed Origin, offer `badminton-v3`, and contain a valid Cookie mapped to an initialized guest. Missing identity returns 401; foreign Origin 403; missing subprotocol 400; an existing guest socket 409.
+An upgrade must target the exact WS route, have an allowed Origin, offer `badminton-v4`, and contain a valid Cookie mapped to an initialized guest. Missing identity returns 401; foreign Origin 403; missing subprotocol 400; an existing guest socket 409.
 
-Legacy `badminton-v1`/`badminton-v2` are accepted only to send protocol_mismatch and1008close before binding a guest or seat. It cannot occupy or replace an active connection.
+Legacy `badminton-v1`/`badminton-v2`/`badminton-v3` are accepted only to send protocol_mismatch and1008close before binding a guest or seat. It cannot occupy or replace an active connection.
 
 Guest.socket is assigned on successful current-version upgrade. New connections do not replace an active socket. Seat lookup uses the authenticated Guest object in the room, never a room/side/guest field submitted by the client. Reconnect reuses the same signed guest and the existing retained seat.
 

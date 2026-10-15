@@ -4,7 +4,7 @@ import { isCharacterId, type CharacterId } from "./classic/characters";
 import type { PresentationJournal } from "./classic/presentation";
 
 export const BASE_PATH = "/badminton-h5-online/";
-export const PROTOCOL = 3;
+export const PROTOCOL = 4;
 export const SUBPROTOCOL = `badminton-v${PROTOCOL}`;
 export const SIM_HZ = 60;
 export const INPUT_HZ = 60;
@@ -33,6 +33,8 @@ export interface Snapshot {
   room: string;
   tick: number;
   ack: number;
+  /** First completed authority tick using ack; null means cleared/discarded. */
+  ackTick: number | null;
   status: RoomStatus;
   reconnectRemainingMs: number;
   state: GameState;

@@ -159,6 +159,7 @@ const input = new Input(
   },
   toggleMute,
   leaveMatch,
+  () => scheduler.request(),
 );
 const network = new Network(
   handleMessage,
@@ -200,7 +201,7 @@ const scheduler = new InputScheduler(() => {
   input.commit(command);
   seq++;
   if (latest!.state.phase === "playing")
-    prediction?.apply(command, true, performance.now());
+    prediction?.accept(command, performance.now());
 });
 function canSampleInput(): boolean {
   return (
@@ -337,7 +338,7 @@ function handleMessage(message: ServerMessage): void {
     seq = Math.max(seq, message.ack);
     if (side) {
       prediction ??= new Prediction(side, message.state.players[side]);
-      prediction.reconcile(message);
+      prediction.reconcile(message, performance.now());
       const reading = prediction.diagnostics(performance.now());
       diagnostics?.reconcile(reading.correction, reading.ackAgeMs);
     }
@@ -470,6 +471,8 @@ function frame(time: number): void {
   // Loading owns raster preparation. Do not start cold Canvas drawing or
   // presentation clocks underneath the independent startup cover.
   if (!assetsReady) return;
+  if (canSampleInput() && latest?.state.phase === "playing")
+    prediction?.advance(time);
   audio.advance(dt);
   let state = backdrop;
   if (latest) {

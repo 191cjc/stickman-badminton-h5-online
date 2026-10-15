@@ -20,6 +20,7 @@ export class Input {
     private readonly onRelease: () => void,
     onMute: () => void = () => {},
     onLeave: () => void = () => {},
+    private readonly onChange: () => void = () => {},
   ) {
     window.addEventListener("keydown", (event) => {
       if (
@@ -46,7 +47,7 @@ export class Input {
           )
         )
           event.preventDefault();
-        this.down.delete(event.code);
+        this.lift(event.code);
       }
     });
     window.addEventListener("blur", () => this.release());
@@ -64,16 +65,27 @@ export class Input {
           this.press(key);
         });
         for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
-          button.addEventListener(type, () => this.down.delete(key));
+          button.addEventListener(type, () => this.lift(key));
       });
   }
   private press(key: string): void {
+    const before = this.logicalKey();
     const action = bindings[key];
     if (!this.has(action)) {
       if (action === "jump") this.jumpPressed = true;
       if (action === "hit") this.hitPressed = true;
     }
     this.down.add(key);
+    if (before !== this.logicalKey()) this.onChange();
+  }
+  private lift(key: string): void {
+    const before = this.logicalKey();
+    this.down.delete(key);
+    if (before !== this.logicalKey()) this.onChange();
+  }
+  private logicalKey(): string {
+    const { move, jump, jumpPressed, hitHeld, hitPressed } = this.peek(1);
+    return `${move}:${jump}:${jumpPressed}:${hitHeld}:${hitPressed}`;
   }
   private has(action: string): boolean {
     return [...this.down].some((key) => bindings[key] === action);

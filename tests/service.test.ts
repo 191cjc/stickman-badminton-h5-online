@@ -170,7 +170,7 @@ describe("real HTTP / WebSocket rooms", () => {
     await rejected(identity, 409);
     expect((await fetch(`${base}${BASE_PATH}api/health`)).status).toBe(200);
   });
-  it.each(["badminton-v1", "badminton-v2"])(
+  it.each(["badminton-v1", "badminton-v2", "badminton-v3"])(
     "negotiates the new cadence and closes a legacy page before it can claim a connection or match (%s)",
     async (legacyProtocol) => {
       const identity = await cookie();
@@ -242,6 +242,12 @@ describe("real HTTP / WebSocket rooms", () => {
     expect(a.state.shuttle.state).toBe("flying");
     expect(a.state).toEqual(b.state);
     expect(b.ack).toBe(0);
+    expect(b.ackTick).toBeNull();
+    // This serve snapshot may follow the short fixture input timeout.
+    if (a.ackTick !== null) {
+      expect(a.ackTick).toBeGreaterThanOrEqual(1);
+      expect(a.ackTick).toBeLessThanOrEqual(a.tick);
+    }
   });
   it.each([
     { type: ["queue"] },
@@ -291,6 +297,7 @@ describe("real HTTP / WebSocket rooms", () => {
         message.tick > l.tick + SIM_HZ / 3,
     );
     expect(stopped.state.players.left.x).toBeLessThan(190);
+    expect(stopped.ackTick).toBeNull();
     const outsider = await connect(await cookie());
     outsider.input(1);
     expect((await outsider.wait("error")).code).toBe("not_in_match");
@@ -360,7 +367,9 @@ describe("real HTTP / WebSocket rooms", () => {
     vi.advanceTimersByTime(40); // Five8ms callbacks produce exactly two60Hz steps.
     expect(performance.now()).toBe(40);
     const state = await left.wait("snapshot", (s) => s.ack === 30);
+    expect(initial.ackTick).toBeNull();
     expect(state.tick).toBe(initial.tick + 2);
+    expect(state.ackTick).toBe(1);
     expect(state.state.players.left.x).toBe(150);
     expect(state.state.players.left.y).toBeLessThan(CLASSIC_WORLD.groundY);
     expect(state.state.players.left.swingKind).toBe("serve");
@@ -370,6 +379,7 @@ describe("real HTTP / WebSocket rooms", () => {
     const next = await left.wait("snapshot", (s) => s.tick > state.tick);
     expect(next.tick).toBe(state.tick + 2);
     expect(next.ack).toBe(30);
+    expect(next.ackTick).toBe(state.ackTick);
     // Thirty packets do not advance thirty input frames; one press starts one
     // original timeline, and its held latch clears on the newest released state.
     expect(next.state.players.left.x).toBe(150);
@@ -377,6 +387,27 @@ describe("real HTTP / WebSocket rooms", () => {
     expect(next.state.players.left.swingFrame).toBeGreaterThan(
       state.state.players.left.swingFrame,
     );
+    left.seq = 30;
+    left.input(1);
+    left.send({ type: "release" });
+    left.send({ type: "ping", time: 124 });
+    await left.wait("pong", (s) => s.time === 124);
+    vi.advanceTimersByTime(40);
+    const released = await left.wait("snapshot", (s) => s.ack === 31);
+    expect(released.ackTick).toBeNull();
+    expect(released.state.players.left.x).toBe(150);
+    left.input(1);
+    left.send({ type: "ping", time: 125 });
+    await left.wait("pong", (s) => s.time === 125);
+    vi.advanceTimersByTime(40);
+    const consumed = await left.wait("snapshot", (s) => s.ack === 32);
+    expect(consumed.ackTick).toBeGreaterThan(released.tick);
+    vi.advanceTimersByTime(160);
+    const timedOut = await left.wait(
+      "snapshot",
+      (s) => s.tick > consumed.tick + 6 && s.ackTick === null,
+    );
+    expect(timedOut.ack).toBe(32);
   });
   it("freezes validated queue choices, allows identical roles, and restores retained seat character", async () => {
     const identity = await cookie(),
@@ -408,6 +439,7 @@ describe("real HTTP / WebSocket rooms", () => {
       matched.characters,
     );
     const state = await resumed.wait("snapshot");
+    expect(state.ackTick).toBeNull();
     expect(state.state.players.left.characterId).toBe("toaster");
     resumed.send({ type: "leave" });
     await b.wait("result");
@@ -455,9 +487,17 @@ describe("real HTTP / WebSocket rooms", () => {
       "snapshot",
       (s) => s.status === "reconnecting",
     );
+    right.input(1);
+    const discarded = await right.wait(
+      "snapshot",
+      (s) => s.status === "reconnecting" && s.ack === 1,
+    );
+    expect(discarded.ackTick).toBeNull();
     const resumed = await connect(identity);
     expect((await resumed.wait("matched")).resumed).toBe(true);
     const state = await resumed.wait("snapshot", (s) => s.status === "playing");
+    expect(paused.ackTick).toBeNull();
+    expect(state.ackTick).toBeNull();
     resumed.seq = state.ack;
     resumed.input(0);
     const stopped = await resumed.wait(

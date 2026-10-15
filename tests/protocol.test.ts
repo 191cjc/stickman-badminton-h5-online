@@ -75,3 +75,40 @@ it("accepts only the seven immutable role choices in queue and no injected autho
     ).toBeNull();
   expect(parseClientMessage('{"type":"queue"}')).toBeNull();
 });
+
+it("keeps input logical-only and rejects invented clock/contact authority and invalid ranges", () => {
+  const input = {
+    type: "input",
+    seq: 1,
+    move: 0,
+    jump: false,
+    jumpPressed: false,
+    hitHeld: false,
+    hitPressed: false,
+  };
+  expect(parseClientMessage(JSON.stringify(input))).toEqual(input);
+  for (const extra of [
+    { ackTick: 1 },
+    { tick: 1 },
+    { time: 1 },
+    { contact: true },
+    { hitJump: true },
+    { x: 500 },
+    { side: "left" },
+    { score: 7 },
+  ])
+    expect(
+      parseClientMessage(JSON.stringify({ ...input, ...extra })),
+    ).toBeNull();
+  for (const patch of [
+    { seq: 0 },
+    { seq: 1.5 },
+    { seq: 2_000_000_001 },
+    { move: 2 },
+    { jump: 1 },
+    { hitPressed: "true" },
+  ])
+    expect(
+      parseClientMessage(JSON.stringify({ ...input, ...patch })),
+    ).toBeNull();
+});

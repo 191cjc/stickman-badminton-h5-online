@@ -108,3 +108,49 @@ it.each(["blur", "pagehide", "hidden"])(
     });
   },
 );
+it("notifies only after logical changes, preserving aliases, rapid edges and pointer cancellation", () => {
+  const win = new EventTarget(),
+    doc = new EventTarget();
+  const touch = Object.assign(new EventTarget(), {
+    dataset: { control: "KeyW" },
+    setPointerCapture: vi.fn(),
+  });
+  Object.assign(doc, { hidden: false, querySelectorAll: () => [touch] });
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", doc);
+  vi.stubGlobal("HTMLElement", Element);
+  const changes: ReturnType<Input["peek"]>[] = [];
+  const input = new Input(
+    () => {},
+    undefined,
+    undefined,
+    () => changes.push(input.peek(1)),
+  );
+  const key = (type: string, code: string, repeat = false) => {
+    const event = Object.assign(new Event(type, { cancelable: true }), {
+      code,
+      repeat,
+    });
+    win.dispatchEvent(event);
+  };
+  key("keydown", "Space");
+  key("keydown", "Space", true);
+  key("keydown", "KeyS");
+  key("keyup", "Space"); // Alias still holds hit; no logical change.
+  key("keydown", "KeyX");
+  expect(changes).toHaveLength(1);
+  expect(changes[0]).toMatchObject({ hitPressed: true, hitHeld: true });
+  key("keyup", "KeyS");
+  expect(changes).toHaveLength(2);
+  expect(changes[1]).toMatchObject({ hitPressed: true, hitHeld: false });
+  touch.dispatchEvent(
+    Object.assign(new Event("pointerdown"), { pointerId: 1 }),
+  );
+  expect(changes.at(-1)).toMatchObject({ jump: true, jumpPressed: true });
+  touch.dispatchEvent(new Event("pointercancel"));
+  touch.dispatchEvent(new Event("lostpointercapture"));
+  expect(changes).toHaveLength(4);
+  expect(changes.at(-1)).toMatchObject({ jump: false, jumpPressed: true });
+  input.commit(input.peek(1));
+  expect(changes).toHaveLength(4); // Committing edges is not a new user operation.
+});
