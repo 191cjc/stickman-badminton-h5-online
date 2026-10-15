@@ -60,7 +60,7 @@
 - [x] Record the actual production release and relevant config/service checks before any authorized project-only publish; do not touch other entrances/services/routes.
 - [x] Build/publish only after quality gates; run HTTP/health/legacy/current handshake checks and inspect project logs. Public match smoke only when production queue/rooms permit isolated guests.
 - [x] Record new release, restart outcome and atomic rollback command; old protocol pages refresh. Do not claim a code change is already public before this succeeds.
-- [ ] Review dirty ownership, obtain any required commit confirmation, commit only recognized task changes, then archive/journal through finish-work. No remote push or amend.
+- [x] Review dirty ownership, obtain any required commit confirmation, commit only recognized task changes, then archive/journal through finish-work. No remote push or amend.
 
 ## Rollback and scope stops
 
