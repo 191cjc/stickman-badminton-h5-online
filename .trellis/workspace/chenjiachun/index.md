@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 8
-- **Last Active**: 2026-10-14
+- **Total Sessions**: 9
+- **Last Active**: 2026-10-15
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~251 | Active |
+| `journal-1.md` | ~287 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 9 | 2026-10-15 | Hit timing optimization and protocol 4 release | `4f7889a` | `feat/hit-timing` |
 | 8 | 2026-10-14 | 首次加载进度、分批预热与公网发布 | `26cf23a` | `feat/loading-screen` |
 | 7 | 2026-10-14 | 联网卡顿测量、优化与独立发布 | `299b207`, `d15099e` | `feat/network-smoothness` |
 | 6 | 2026-10-13 | 原版双人七角色联机、特效与独立发布 | `0f6a273`, `5dfb8de` | `feat/flash-versus-gameplay-effects` |

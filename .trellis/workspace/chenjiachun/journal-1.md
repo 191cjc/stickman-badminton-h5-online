@@ -249,3 +249,39 @@ Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`
 ### Status
 
 [OK] **Completed**
+
+
+## Session 9: Hit timing optimization and protocol 4 release
+<!-- trellis-session: v=2 fp=e75af2b348fd00d6 -->
+
+**Date**: 2026-10-15
+**Task**: Hit timing optimization and protocol 4 release
+**Branch**: `feat/hit-timing`
+
+### Summary
+
+完成固定时间预测、ackTick校正、有界异常回放和操作变化提前发送，缩短健康插值缓冲；通过独立复核、229测试、隔离浏览器及公网对战，已发布并重启独立服务。
+
+### Main Changes
+
+- Protocol4 snapshots add ackTick; fixed60Hz local prediction uses separate bounded command/step ledgers and one-generation fallback; expedited inputs share one timer.
+- Released 20261015T065916Z-hit-timing; service restarted 15:00:30CST. Final publish HTTP request initially closed after switching; independent HTTP/legacy/current/match checks all passed. Previous protocol3 release retained.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `4f7889a` | fix: align online prediction and hit timing |
+
+### Testing
+
+- [OK] Full18files/229tests, lint/typecheck/build and review passed; actual interpolation-led seven-role mirrored return fixtures; native browser legal return48 identical states; routed lifecycle match732 states; public protocol match614 states, natural7:0/rematch/leave.
+- [OK] Original filters retained atDPR1/2; highDPR stalls and heavy-route input28..29Hz remain. Cloud/flash service lifetimes and old route/config/credential fingerprints unchanged.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Refresh both public pages and verify physical two-computer return rhythm, rare corrections, touch and other browsers; no public latency guarantee.
