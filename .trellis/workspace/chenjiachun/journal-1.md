@@ -285,3 +285,39 @@ Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`
 ### Next Steps
 
 - Refresh both public pages and verify physical two-computer return rhythm, rare corrections, touch and other browsers; no public latency guarantee.
+
+
+## Session 10: 持续运行卡顿优化与公网发布
+<!-- trellis-session: v=2 fp=b5a3b44c0d0cce77 -->
+
+**Date**: 2026-10-16
+**Task**: 持续运行卡顿优化与公网发布
+**Branch**: `feat/sustained-smoothness`
+
+### Summary
+
+完成原滤镜同内容缓存共享、自适应内部密度、停顿后权威呈现恢复、输入尝试间隔及特效静音生命周期修复；独立复核与269测试通过，600秒双页对比后发布20261016T061913Z-sustained-smoothness。
+
+### Main Changes
+
+- 客户端优化保持原版规则、特效和协议4；规范与测量证据已归档。
+- 服务于2026-10-16 14:20:54重启；公网检查远端关闭后独立重试通过，其他服务和凭据指纹不变，上一版可回滚。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `80b84ac` | perf: stabilize sustained online rendering and timing |
+
+### Testing
+
+- [OK] Lint/typecheck/build、20文件269测试、HTTP/资源逐字节检查全部通过。
+- [OK] 相同600s双端DPR2后段帧间隔p95约133→33ms，15855组对应权威状态一致，零浏览器错误；默认debug-off降档、原特效音频、DPR1/2、弱网重连及重赛退出通过。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 两台真实电脑刷新网页后验证持续手感与降档清晰度；其他浏览器、触屏和物理输入延迟仍待外部验收。

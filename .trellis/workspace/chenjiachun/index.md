@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 9
-- **Last Active**: 2026-10-15
+- **Total Sessions**: 10
+- **Last Active**: 2026-10-16
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~287 | Active |
+| `journal-1.md` | ~323 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 10 | 2026-10-16 | 持续运行卡顿优化与公网发布 | `80b84ac` | `feat/sustained-smoothness` |
 | 9 | 2026-10-15 | Hit timing optimization and protocol 4 release | `4f7889a` | `feat/hit-timing` |
 | 8 | 2026-10-14 | 首次加载进度、分批预热与公网发布 | `26cf23a` | `feat/loading-screen` |
 | 7 | 2026-10-14 | 联网卡顿测量、优化与独立发布 | `299b207`, `d15099e` | `feat/network-smoothness` |
