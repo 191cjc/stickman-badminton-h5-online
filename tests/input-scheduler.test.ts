@@ -75,6 +75,23 @@ it("rounds the initial fractional delay upward and does not schedule an early re
   expect(scheduled).toHaveBeenCalledTimes(4);
   scheduler.setActive(false);
 });
+it("an early timer wakeup reschedules the one deadline without attempting input", async () => {
+  vi.useFakeTimers();
+  const began = Date.now();
+  let offset = 0;
+  const attempts: number[] = [];
+  const now = () => Date.now() - began + offset;
+  const scheduler = new InputScheduler(() => attempts.push(now()), now);
+  scheduler.setActive(true);
+  offset = -4;
+  await vi.advanceTimersByTimeAsync(17);
+  expect(attempts).toEqual([]);
+  expect(vi.getTimerCount()).toBe(1);
+  await vi.advanceTimersByTimeAsync(4);
+  expect(attempts).toEqual([17]);
+  expect(vi.getTimerCount()).toBe(1);
+  scheduler.setActive(false);
+});
 it("late callbacks preserve the first future phase grid instead of restarting another full interval", async () => {
   vi.useFakeTimers();
   const began = Date.now();
@@ -94,7 +111,7 @@ it("late callbacks preserve the first future phase grid instead of restarting an
   expect(scheduler.diagnostics().skipped).toBe(2);
   scheduler.setActive(false);
 });
-it("a future grid less than a quarter-period away is skipped rather than creating an adjacent input burst", async () => {
+it("a too-near future grid is retimed to safe attempt-start spacing without losing a full period", async () => {
   vi.useFakeTimers();
   const began = Date.now();
   let offset = 0;
@@ -105,12 +122,90 @@ it("a future grid less than a quarter-period away is skipped rather than creatin
   offset = 32;
   await vi.advanceTimersByTimeAsync(17);
   expect(accepted).toEqual([49]);
-  // The50ms grid is just1ms away: skip it and wait for66.67ms instead.
-  expect(scheduler.diagnostics().skipped).toBe(2);
+  // The50ms grid is just1ms away: retime to49+8.33ms instead.
+  expect(scheduler.diagnostics().skipped).toBe(1);
   await vi.advanceTimersByTimeAsync(5);
   expect(accepted).toEqual([49]);
-  await vi.advanceTimersByTimeAsync(13);
-  expect(accepted).toEqual([49, 67]);
+  await vi.advanceTimersByTimeAsync(4);
+  expect(accepted).toEqual([49, 58]);
+  await vi.advanceTimersByTimeAsync(9);
+  expect(accepted).toEqual([49, 58]);
+  // Continue the retimed periodic grid instead of emitting an adjacent catch-up.
+  await vi.advanceTimersByTimeAsync(8);
+  expect(accepted).toEqual([49, 58, 74]);
+  scheduler.setActive(false);
+});
+
+it.each([4, 8, 9, 12, 20])(
+  "counts %ims of callback work toward spacing between attempt starts",
+  async (cost) => {
+    vi.useFakeTimers();
+    const began = Date.now();
+    let work = 0;
+    const accepted: number[] = [];
+    const now = () => Date.now() - began + work;
+    const scheduler = new InputScheduler(() => {
+      accepted.push(now());
+      work += cost;
+    }, now);
+    scheduler.setActive(true);
+    while (now() < 1000) {
+      await vi.advanceTimersToNextTimerAsync();
+      expect(vi.getTimerCount()).toBe(1);
+    }
+    scheduler.setActive(false);
+    // Work<=12ms leaves the next60Hz grid usable.20ms cannot fit60Hz,
+    // but still emits one frame/callback and preserves global safe spacing.
+    expect(accepted.length).toBeGreaterThanOrEqual(cost < 17 ? 59 : 29);
+    expect(accepted.length).toBeLessThanOrEqual(60);
+    for (let i = 1; i < accepted.length; i++)
+      expect(accepted[i] - accepted[i - 1]).toBeGreaterThanOrEqual(1000 / 120);
+    expect(vi.getTimerCount()).toBe(0);
+  },
+);
+
+it.each([5, 9, 10])(
+  "retimes %ims late dispatches while preserving one attempt and minimum spacing",
+  async (lateness) => {
+    vi.useFakeTimers();
+    const began = Date.now();
+    let offset = 0;
+    const accepted: number[] = [];
+    const now = () => Date.now() - began + offset;
+    const scheduler = new InputScheduler(() => accepted.push(now()), now);
+    scheduler.setActive(true);
+    while (now() < 1000) {
+      offset += lateness;
+      const before = accepted.length;
+      await vi.advanceTimersToNextTimerAsync();
+      expect(accepted.length).toBe(before + 1);
+      expect(vi.getTimerCount()).toBe(1);
+    }
+    scheduler.setActive(false);
+    //9–10ms lateness used to halve the nominal cadence to30Hz. Timer
+    // dispatch still costs time; this is recovery, not a promised60Hz wire.
+    expect(accepted.length).toBeGreaterThanOrEqual(lateness < 9 ? 58 : 46);
+    for (let i = 1; i < accepted.length; i++)
+      expect(accepted[i] - accepted[i - 1]).toBeGreaterThanOrEqual(1000 / 120);
+  },
+);
+
+it("expedited callbacks count work once and continue from their attempt start", async () => {
+  vi.useFakeTimers();
+  const began = Date.now();
+  let work = 0;
+  const accepted: number[] = [];
+  const now = () => Date.now() - began + work;
+  const scheduler = new InputScheduler(() => {
+    accepted.push(now());
+    work += 10;
+  }, now);
+  scheduler.setActive(true);
+  scheduler.request();
+  await vi.advanceTimersToNextTimerAsync();
+  await vi.advanceTimersToNextTimerAsync();
+  expect(accepted).toEqual([1, 18]);
+  expect(scheduler.diagnostics().expedited).toBe(1);
   scheduler.setActive(false);
 });
 it("logical-change requests coalesce, retime periodic work and share an8.33ms minimum spacing", async () => {

@@ -27,7 +27,7 @@ Online rendering replaces only the local player in a sampled authoritative state
 
 ## Remote interpolation
 
-`Interpolation` retains up to32 snapshots and60 arrival-jitter samples. Its continuous render tick advances monotonically with a rate clamped0.85..1.15, and remains at or behind latest authority. Receive/server interval variation p90 adapts delay from2 to12ticks (33.3..200ms at60Hz); increase coefficient0.2, decrease0.025. Clock estimate corrections per arrival clamp-0.5..2ticks. These are configuration bounds, not measured physical latency. Stale same-room ticks are rejected before semantic resets; duplicate continuous ticks are ignored. Room/status/phase/score/either-character changes reset immediately; non-playing samples return the latest actual state. No interpolation crosses those boundaries. Starvation holds latest authority without ball extrapolation.
+`Interpolation` retains up to32 snapshots and60 arrival-jitter samples. On ordinary samples its continuous render tick advances monotonically with a rate clamped0.85..1.15, and remains at or behind latest authority. Receive/server interval variation p90 adapts delay from2 to12ticks (33.3..200ms at60Hz); increase coefficient0.2, decrease0.025. Clock estimate corrections per arrival clamp-0.5..2ticks. These are configuration bounds, not measured physical latency. Stale same-room ticks are rejected before semantic resets; duplicate continuous ticks are ignored. Room/status/phase/score/either-character changes reset immediately; non-playing samples return the latest actual state. No interpolation crosses those boundaries. Starvation holds latest authority without ball extrapolation.
 
 Test replay, rally reset, authority boundaries, and hold-last behavior using [prediction.test.ts](../../../tests/prediction.test.ts). Remote animation smoothness and real network feel are not established by these headless tests.
 
@@ -87,7 +87,7 @@ Network receive timing crosses interpolation, prediction, effects and rendering.
 
 ### 3. Contracts
 
-Receipt/sample times use monotonic performance.now(). Reject non-finite receipt times and stale/duplicate gameplay snapshots. Main returns before updating latest/prediction/effects for rejected snapshots. Sample x/y/vx/vy within two compatible authority snapshots; discrete fields choose a real endpoint. Attachment/last-toucher transitions choose actual shuttle state. `renderTick` may reset across semantic boundaries, never within a continuous one. Sample dt is capped0.25s for bounded catch-up. Diagnostics expose target delay, available authority buffer, starvation entries and rewinds; no wire change or client ball stepping.
+Receipt/sample times use monotonic performance.now(). Reject non-finite receipt times and stale/duplicate gameplay snapshots. Main returns before updating latest/prediction/effects for rejected snapshots. Sample x/y/vx/vy within compatible authority snapshots; discrete fields choose a real endpoint. Attachment/last-toucher transitions choose actual shuttle state. `renderTick` may reset across semantic boundaries, never within a continuous one. Normal samples up to250ms retain0.85..1.15 slew. A gap greater than250ms rebases the authority clock to the latest actual snapshot tick **and receipt time**, then recovers forward toward that clock minus current delay, clamped to oldest/latest and never behind the old cursor. Without fresh authority, hold the latest real state. Do not reanchor ordinary packets. Diagnostics expose target delay, actual latest-to-render gap, starvation/rewinds and scalar `recoveries`, `lastRecoveryPauseMs`, `lastRecoveryAdvanceTicks`; no wire change or client ball stepping.
 
 ### 4. Validation & Error Matrix
 
@@ -111,6 +111,12 @@ Deterministic uniform/jitter/same-time bursts/stall recovery must assert no same
 ### 7. Wrong vs Correct
 
 Wrong: `target = latest.tick + (now - latest.at) * SIM_HZ / 1000 - 4` recomputed as the cursor on every packet. Correct: advance a persistent cursor with bounded rate, slew clock estimates, cap at latest authority and reset only on semantic boundaries.
+
+For blocked sampling, `interpolation-recovery.test.ts` queues compatible snapshots while neither receipt nor sample callbacks run, drains them in order at the same resume time, and asserts recent authority, monotonic cursor, no beyond-latest/contact invention, repeated-stall non-accumulation and semantic resets. Stream-only starvation with live RAF retains ordinary slew; it is a different failure model.
+
+### Pending effect suppression
+
+Each retained pending event owns its `suppressSound` flag; there is no independent Set of discarded IDs. Truncation/drain/reset/suspend releases it, keeping `suppressedSounds <= pending <= 128`. Catch-up assesses sound freshness against the final presentation target as well as the historical processing tick: only events within the inclusive6tick window may sound. Preserve whole-batch silence for jumps over120ticks and restore fresh audio afterward. Particle stepping/order remains source-derived. Tests force late journals and historical catch-up, then assert metadata cleanup, unchanged particle outcomes and exactly-once fresh sounds. Stress retention evidence does not establish a normal-play user-device leak.
 
 ## Elapsed prediction verification
 

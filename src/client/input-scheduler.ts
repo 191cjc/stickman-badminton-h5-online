@@ -74,8 +74,7 @@ export class InputScheduler {
           return;
         }
         const afterStep = this.now();
-        if (expedited)
-          this.deadline = Math.max(at + periodMs, afterStep + minSpacingMs);
+        if (expedited) this.deadline = Math.max(at + periodMs, afterStep);
         else {
           const periods = Math.max(
             1,
@@ -83,10 +82,10 @@ export class InputScheduler {
           );
           this.deadline = due + periods * periodMs;
           this.skipped += periods - 1;
-          if (this.deadline - afterStep < minSpacingMs) {
-            this.deadline += periodMs;
-            this.skipped++;
-          }
+          // Spacing is between attempt STARTS. Synchronous work already counts
+          // toward it; a near grid can be safely retimed without losing another
+          // full period or reserving a second spacing window after callback work.
+          this.deadline = Math.max(this.deadline, at + minSpacingMs);
         }
         this.schedule();
       },

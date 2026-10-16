@@ -16,6 +16,7 @@ import { Renderer } from "./renderer";
 import { Effects } from "./effects";
 import { Audio } from "./audio";
 import { InputScheduler } from "./input-scheduler";
+import { RenderQuality } from "./render-quality";
 import { Diagnostics } from "./diagnostics";
 import { LoadingError, type LoadingProgress } from "./loading";
 
@@ -40,7 +41,8 @@ let rematchUp = "",
   rematchOver = "";
 const renderer = new Renderer(),
   effects = new Effects(),
-  audio = new Audio();
+  audio = new Audio(),
+  quality = new RenderQuality();
 let assetsReady = false,
   interpolation = new Interpolation(),
   prediction: Prediction | undefined,
@@ -49,6 +51,7 @@ let assetsReady = false,
   room: string | undefined;
 let selected: CharacterId = "joe",
   seq = 0,
+  naturalResult = false,
   scene: "idle" | "queued" | "online" | "result" = "idle";
 let backdrop = new Simulation().snapshot(),
   lastTime = 0;
@@ -60,6 +63,7 @@ const diagnostics =
         interpolation: interpolation.diagnostics(),
         prediction: prediction?.diagnostics(performance.now()),
         scheduler: scheduler.diagnostics(),
+        quality: quality.diagnostics(),
       }))
     : undefined;
 if (diagnostics)
@@ -151,6 +155,7 @@ function leaveMatch(): void {
 const input = new Input(
   () => {
     inputFocused = false;
+    quality.resetObservation(performance.now());
     scheduler.setActive(false);
     prediction?.clear();
     network.send({ type: "release" });
@@ -167,6 +172,7 @@ const network = new Network(
     el("connection").textContent = text;
     el("connection-dot").classList.toggle("online", connected);
     if (!connected) {
+      quality.resetObservation(performance.now());
       clearInput(false);
       effects.suspend();
       audio.setMatch(false);
@@ -218,9 +224,11 @@ function syncInputClock(): void {
 }
 window.addEventListener("focus", () => {
   inputFocused = true;
+  quality.resetObservation(performance.now());
   syncInputClock();
 });
 document.addEventListener("visibilitychange", () => {
+  quality.resetObservation(performance.now());
   if (!document.hidden) {
     inputFocused = true;
     syncInputClock();
@@ -230,8 +238,10 @@ function idle(reason?: string): void {
   // The initial WS idle can arrive after startup preparation. An already-empty
   // idle scene has no old room resources and must keep its warmed first screen.
   const alreadyIdle = scene === "idle" && room === undefined;
+  if (!alreadyIdle) quality.resetObservation(performance.now());
   clearInput(false);
   scene = "idle";
+  naturalResult = false;
   latest = undefined;
   side = undefined;
   room = undefined;
@@ -286,8 +296,10 @@ function handleMessage(message: ServerMessage): void {
     return;
   }
   if (message.type === "queued") {
+    quality.resetObservation(performance.now());
     clearInput(false);
     scene = "queued";
+    naturalResult = false;
     latest = undefined;
     prediction = undefined;
     side = undefined;
@@ -306,8 +318,10 @@ function handleMessage(message: ServerMessage): void {
     return;
   }
   if (message.type === "matched") {
+    quality.resetObservation(performance.now());
     clearInput(false);
     scene = "online";
+    naturalResult = false;
     side = message.side;
     room = message.room;
     selected = message.characters[side];
@@ -354,14 +368,20 @@ function handleMessage(message: ServerMessage): void {
     if (scene === "online") {
       if (message.status === "reconnecting") {
         clearInput(false);
-        if (!wasPaused) renderer.clearEffectsImages();
+        if (!wasPaused) {
+          quality.resetObservation(performance.now());
+          renderer.clearEffectsImages();
+        }
         overlay(
           "对手断线",
           "比赛已暂停",
           `等待重连，剩余 ${Math.ceil(message.reconnectRemainingMs / 1000)} 秒。`,
         );
       } else {
-        if (wasPaused) clearInput(false);
+        if (wasPaused) {
+          quality.resetObservation(performance.now());
+          clearInput(false);
+        }
         overlay("", "", "", false);
       }
     }
@@ -370,9 +390,11 @@ function handleMessage(message: ServerMessage): void {
     return;
   }
   if (message.type === "result") {
+    quality.resetObservation(performance.now());
     clearInput(false);
     scene = "result";
-    effects.finish(message.reason === "score");
+    naturalResult = message.reason === "score";
+    effects.finish(naturalResult);
     const reason = {
       score: "比赛正常结束",
       leave: "有玩家主动结束比赛",
@@ -446,8 +468,7 @@ for (const event of ["pointerleave", "blur"])
   });
 function viewport(): Viewport {
   const width = canvas.clientWidth,
-    height = canvas.clientHeight,
-    dpr = Math.min(devicePixelRatio || 1, 2);
+    height = canvas.clientHeight;
   const scale = Math.min(
     width / worldConfig.width,
     height / worldConfig.height,
@@ -458,7 +479,7 @@ function viewport(): Viewport {
     scale,
     offsetX: (width - worldConfig.width * scale) / 2,
     offsetY: (height - worldConfig.height * scale) / 2,
-    dpr,
+    dpr: quality.dpr(devicePixelRatio || 1, scale),
   };
 }
 function frame(time: number): void {
@@ -470,7 +491,10 @@ function frame(time: number): void {
   lastTime = time;
   // Loading owns raster preparation. Do not start cold Canvas drawing or
   // presentation clocks underneath the independent startup cover.
-  if (!assetsReady) return;
+  if (!assetsReady) {
+    quality.resetObservation(time);
+    return;
+  }
   if (canSampleInput() && latest?.state.phase === "playing")
     prediction?.advance(time);
   audio.advance(dt);
@@ -492,7 +516,25 @@ function frame(time: number): void {
     backdrop = state;
   } else if (scene === "result")
     effects.advance(state.elapsed * 60, dt, (sound) => audio.play(sound));
-  const view = viewport();
+  let view = viewport();
+  if (
+    quality.observe(time, {
+      ready: assetsReady,
+      visible: !document.hidden,
+      focused: inputFocused,
+      presenting:
+        (scene === "online" &&
+          latest?.status === "playing" &&
+          latest.state.phase === "playing" &&
+          network.connected) ||
+        (scene === "result" && naturalResult),
+      nativeDpr: devicePixelRatio || 1,
+      scale: view.scale,
+    })
+  ) {
+    renderer.invalidateRasters();
+    view = viewport();
+  }
   const pixelWidth = Math.max(1, Math.round(view.width * view.dpr)),
     pixelHeight = Math.max(1, Math.round(view.height * view.dpr));
   if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
@@ -559,6 +601,7 @@ void renderer
     void audio.load(manifest);
     await prepareCourt();
     assetsReady = true;
+    quality.resetObservation(performance.now());
     loadingScreen.hidden = true;
     document.querySelector(".court")!.setAttribute("aria-busy", "false");
     for (const element of document.querySelectorAll<HTMLElement>(

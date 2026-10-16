@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import type { AssetManifest } from "../src/shared/classic/manifest";
 import { Simulation } from "../src/shared/simulation";
 import { Renderer } from "../src/client/renderer";
+import { Effects, createParticle } from "../src/client/effects";
 import type { LoadingProgress } from "../src/client/loading";
 import type { Viewport } from "../src/shared/types";
 
@@ -17,8 +18,9 @@ const view: Viewport = {
   offsetY: 0,
   dpr: 2,
 };
-function fixture() {
+function fixture(art = manifest) {
   const events: string[] = [];
+  const urls: string[] = [];
   const canvases: HTMLCanvasElement[] = [];
   const flushes = vi.fn(() => {
     events.push("flush");
@@ -31,6 +33,7 @@ function fixture() {
     private url = "";
     set src(value: string) {
       this.url = value;
+      urls.push(value);
       queueMicrotask(() => this.onload?.());
     }
     get src() {
@@ -45,7 +48,7 @@ function fixture() {
     Promise.resolve(
       new Response(
         url.endsWith("manifest.json")
-          ? JSON.stringify(manifest)
+          ? JSON.stringify(art)
           : readFileSync(
               `public/classic/${manifest.effects.confetti.frames[0].path}`,
               "utf8",
@@ -84,7 +87,7 @@ function fixture() {
     return 1;
   });
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
-  return { events, rasters, flushes, canvases };
+  return { events, rasters, flushes, canvases, urls };
 }
 function drawContext(viewport: Viewport) {
   const stack: Array<[number, number]> = [];
@@ -206,4 +209,143 @@ it("rejects incompatible manifest data before any image workers begin", async ()
     reason: "incompatible",
   });
   expect(image).not.toHaveBeenCalled();
+});
+
+it("shares byte-identical source paths in preparation and draw while retaining each alias's destination", async () => {
+  const art = structuredClone(manifest);
+  const normal = art.characters.toaster.body.normal[0];
+  const alias = art.characters.toaster.body.forward[0];
+  expect(alias.path).not.toBe(normal.path);
+  expect(art.files[alias.path]).toBe(art.files[normal.path]);
+  expect(readFileSync(`public/classic/${alias.path}`)).toEqual(
+    readFileSync(`public/classic/${normal.path}`),
+  );
+  // Registration is metadata, independent of identical image bytes/backings.
+  alias.x += 7;
+  alias.y -= 9;
+  alias.width += 0.001;
+  alias.height += 0.001;
+  const { rasters } = fixture(art);
+  const renderer = new Renderer();
+  await renderer.load();
+  const state = new Simulation({
+    characters: { left: "toaster", right: "toaster" },
+  }).snapshot();
+  state.players.left.bodyFrame = "normal";
+  state.players.right.bodyFrame = "forward";
+  state.players.left.swingKind = state.players.right.swingKind = "serve";
+  state.players.left.swingFrame = 1;
+  state.players.right.swingFrame = 2;
+  await renderer.prepare(view, state, undefined, () => {});
+  expect(
+    rasters.filter((item) => item.src.includes("body/toaster/")),
+  ).toHaveLength(1);
+  expect(
+    rasters.filter((item) => item.src.includes("swings/toaster/serve-")),
+  ).toHaveLength(1);
+  const before = renderer.diagnostics().raster;
+  const ctx = drawContext(view);
+  renderer.render(ctx, view, state);
+  const draws = vi.mocked(ctx.drawImage).mock.calls;
+  const normalDraw = draws.find(
+    (args) => args[1] === normal.x && args[2] === normal.y,
+  )!;
+  const aliasDraw = draws.find(
+    (args) => args[1] === alias.x && args[2] === alias.y,
+  )!;
+  expect(normalDraw.slice(1)).toEqual([
+    normal.x,
+    normal.y,
+    normal.width,
+    normal.height,
+  ]);
+  expect(aliasDraw.slice(1)).toEqual([
+    alias.x,
+    alias.y,
+    alias.width,
+    alias.height,
+  ]);
+  expect(aliasDraw[0]).toBe(normalDraw[0]);
+  expect(renderer.diagnostics().raster.misses).toBe(before.misses);
+});
+
+it("does not share distinct SVG hashes or backing sizes, and reset preserves preparation/draw identity", async () => {
+  const { rasters } = fixture();
+  const renderer = new Renderer();
+  await renderer.load();
+  const state = new Simulation().snapshot();
+  state.net.frame = 1;
+  await renderer.prepare(view, state, undefined, () => {});
+  const first = renderer.diagnostics().raster.misses;
+  state.net.frame = 2;
+  renderer.render(drawContext(view), view, state);
+  expect(renderer.diagnostics().raster.misses).toBe(first);
+  state.net.frame = 3;
+  renderer.render(drawContext(view), view, state);
+  expect(renderer.diagnostics().raster.misses).toBe(first + 1);
+  expect(manifest.files[manifest.netFrames[2].path]).not.toBe(
+    manifest.files[manifest.netFrames[0].path],
+  );
+  const lowerView = { ...view, dpr: 0.7 };
+  const beforeLower = renderer.diagnostics().raster.misses;
+  await renderer.prepare(lowerView, state, undefined, () => {});
+  expect(renderer.diagnostics().raster.misses).toBeGreaterThan(beforeLower);
+  const afterPrepare = renderer.diagnostics().raster.misses;
+  renderer.render(drawContext(lowerView), lowerView, state);
+  expect(renderer.diagnostics().raster.misses).toBe(afterPrepare);
+  renderer.clearEffectsImages();
+  expect(renderer.diagnostics().raster.entries).toBe(0);
+  await renderer.prepare(lowerView, state, undefined, () => {});
+  const afterReset = renderer.diagnostics().raster.misses;
+  renderer.render(drawContext(lowerView), lowerView, state);
+  expect(renderer.diagnostics().raster.misses).toBe(afterReset);
+  expect(rasters.every((item) => item.src.includes("?v="))).toBe(true);
+});
+
+it("raster-only invalidation releases both backing stores while retaining live color images and original effects", async () => {
+  const { canvases, urls } = fixture();
+  const renderer = new Renderer();
+  await renderer.load();
+  const state = new Simulation().snapshot();
+  const effects = new Effects();
+  const particle = createParticle("confetti", 100, 20, () => 0.3);
+  effects.particles.push(
+    particle,
+    createParticle("tail", 100, 20, () => 0.3),
+  );
+  renderer.render(drawContext(view), view, state, effects);
+  await Promise.resolve(); // Complete the original tinted SVG image's load.
+  renderer.render(drawContext(view), view, state, effects);
+  expect(renderer.diagnostics().confettiRaster.entries).toBe(1);
+  expect(renderer.diagnostics().colors).toEqual({ cached: 1, pending: 0 });
+  const images = urls.length;
+  const particles = [...effects.particles];
+  renderer.invalidateRasters();
+  expect(renderer.diagnostics().raster.entries).toBe(0);
+  expect(renderer.diagnostics().confettiRaster.entries).toBe(0);
+  expect(
+    canvases.every((canvas) => canvas.width === 0 && canvas.height === 0),
+  ).toBe(true);
+  expect(renderer.diagnostics().colors).toEqual({ cached: 1, pending: 0 });
+  expect(effects.particles).toEqual(particles);
+  renderer.render(drawContext(view), view, state, effects);
+  expect(renderer.diagnostics().confettiRaster.entries).toBe(1);
+  expect(urls).toHaveLength(images); // No source reload or color regeneration.
+});
+
+it("a raster-density invalidation cancels an in-flight preparation generation", async () => {
+  fixture();
+  const renderer = new Renderer();
+  await renderer.load();
+  expect(
+    await renderer.prepare(
+      view,
+      new Simulation().snapshot(),
+      undefined,
+      (progress) => {
+        if (progress.completed === 1) renderer.invalidateRasters();
+      },
+    ),
+  ).toBe(false);
+  expect(renderer.diagnostics().raster.entries).toBe(0);
 });

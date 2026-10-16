@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend ownership and required guidelines"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Source filters, Canvas/world geometry, cache and loading contracts"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Local-only prediction, monotonic authority and effect lifetime"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Attempt spacing, transactional input, focus and reconnect"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Required checks, diagnostics privacy and browser acceptance limits"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Unchanged protocol4 and authority ownership"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace ownership and preserve isolated service boundaries"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Preserve shared simulation and avoid duplicated mechanics"}
+{"file": ".trellis/tasks/10-16-sustained-smoothness/research/rendering.md", "reason": "Raster inventories, exact content aliases, boundedness and density trade-offs"}
+{"file": ".trellis/tasks/10-16-sustained-smoothness/research/timing.md", "reason": "Deterministic blocked-main-thread and scheduler reproductions"}
+{"file": ".trellis/tasks/10-16-sustained-smoothness/research/baseline.md", "reason": "Completed600s baseline, actual metrics and measurement limitations"}

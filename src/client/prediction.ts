@@ -329,6 +329,7 @@ export class Prediction {
 }
 
 const minimumDelayTicks = SIM_HZ / SNAPSHOT_HZ;
+const maxSampleGapMs = 250;
 /** Monotonic authority presentation time. All positional interpolation stays
  * inside real snapshots; no extrapolated shuttle contact/collision is invented. */
 export class Interpolation {
@@ -346,6 +347,9 @@ export class Interpolation {
   private starved = false;
   private rewinds = 0;
   private continuous = false;
+  private recoveries = 0;
+  private lastRecoveryPauseMs = 0;
+  private lastRecoveryAdvanceTicks = 0;
   push(snapshot: Snapshot, at: number): boolean {
     if (!Number.isFinite(at)) return false;
     const last = this.frames.at(-1);
@@ -404,12 +408,23 @@ export class Interpolation {
     return true;
   }
   sample(now: number): GameState | undefined {
+    if (!Number.isFinite(now)) return;
     const last = this.frames.at(-1);
     if (!last) return;
     if (!this.continuous) {
       this.renderTick = last.snapshot.tick;
       this.lastSample = now;
       return last.snapshot.state;
+    }
+    const sampleGapMs = Math.max(0, now - (this.lastSample ?? now));
+    const recovering =
+      this.renderTick !== undefined && sampleGapMs > maxSampleGapMs;
+    if (recovering) {
+      // Queued receipts may all run at the same timestamp after a blocked
+      // main thread. Anchor to the latest actual packet, not the clock slewed
+      // through its obsolete intermediate packets. Ordinary samples keep slew.
+      this.clockTick = last.snapshot.tick;
+      this.clockAt = last.at;
     }
     const desired =
       this.clockTick +
@@ -421,17 +436,28 @@ export class Interpolation {
         Math.min(last.snapshot.tick, desired),
       );
     else {
-      const seconds = Math.min(
-        0.25,
-        Math.max(0, now - (this.lastSample ?? now)) / 1000,
-      );
       const error = desired - this.renderTick;
       const rate = Math.max(0.85, Math.min(1.15, 1 + error * 0.025));
       const before = this.renderTick;
       this.renderTick = Math.max(
         before,
-        Math.min(last.snapshot.tick, before + seconds * SIM_HZ * rate),
+        Math.min(
+          last.snapshot.tick,
+          recovering
+            ? Math.max(this.frames[0].snapshot.tick, desired)
+            : before + (sampleGapMs / 1000) * SIM_HZ * rate,
+        ),
       );
+      if (recovering) {
+        // Skip obsolete presentation once, remaining within actual authority.
+        // Without a new packet, the receipt-age term simply holds the latest.
+        this.recoveries = Math.min(
+          Number.MAX_SAFE_INTEGER,
+          this.recoveries + 1,
+        );
+        this.lastRecoveryPauseMs = sampleGapMs;
+        this.lastRecoveryAdvanceTicks = this.renderTick - before;
+      }
       if (this.renderTick < before) this.rewinds++;
     }
     this.renderTick = Math.max(this.frames[0].snapshot.tick, this.renderTick);
@@ -493,6 +519,9 @@ export class Interpolation {
       ignored: this.ignored,
       resets: this.resets,
       rewinds: this.rewinds,
+      recoveries: this.recoveries,
+      lastRecoveryPauseMs: this.lastRecoveryPauseMs,
+      lastRecoveryAdvanceTicks: this.lastRecoveryAdvanceTicks,
     };
   }
 }

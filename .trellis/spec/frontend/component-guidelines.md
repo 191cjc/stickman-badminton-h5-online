@@ -20,7 +20,7 @@ Its generic does not validate the tag at runtime. When changing an element ID/ty
 
 [Renderer.render](../../../src/client/renderer.ts) consumes `GameState` and `Viewport`; it loads the extracted `public/classic/manifest.json` and SVG image layers. Renderer must not decide collisions, scores, room status, or gameplay input.
 
-The frame loop measures Canvas CSS dimensions, caps DPR at 2, calculates a uniform world scale, and sets the drawing transform. Preserve the640×426 world mapping from [CLASSIC_WORLD](../../../src/shared/classic/types.ts) rather than changing physics coordinates to fit the screen.
+The frame loop measures Canvas CSS dimensions, calculates a uniform world scale, and sets the drawing transform. Native DPR is capped at2; the page-owned RenderQuality policy may reduce backing DPR further under persistent overload (see below). Preserve the640×426 world mapping from [CLASSIC_WORLD](../../../src/shared/classic/types.ts) rather than changing physics coordinates to fit the screen.
 
 Draw per-role family swing/body/attachments at their source depth, mirrored at±1.25horizontal/1.25vertical and the same1-basedframe as numeric authority. Pirate depth21 attachment is above swing; Toaster uses dedicated poses. The serve layer already contains its attached shuttle; draw the standalone shuttle only after release. Manifest dimensions/fps must agree with the simulation.
 
@@ -76,6 +76,24 @@ Raster tests assert original source filtering/reuse, registration/padding under 
 ### 7. Wrong vs Correct
 
 Wrong: remove SVG filters or repeatedly draw the SVG during every RAF. Correct: lazily rasterize the unchanged image at a bounded transform bucket, draw at source x/y/width/height, and clean up on scene transitions.
+
+### Content identity and density invalidation
+
+Renderer keys source rasters by `manifest.files[frame.path]` SHA-256 plus planned backing width/height; preparation deduplicates by exactly the same identity. This is trusted release-manifest sharing, not browser verification of fetched bytes. Byte-identical Toaster/net/spark aliases share backing stores, while each `DrawFrame` keeps its own destination x/y/width/height. Different hashes or backing dimensions must not alias. Retain the existing path fallback and allocation-failure bounds.
+
+`Renderer.invalidateRasters(): void` clears both raster LRUs and invalidates preparation generation. It preserves loaded source images, live tinted-confetti images, Effects and Audio. Use it for density changes; use `clearEffectsImages()` for full scene color/raster cleanup. Never stop a live spark or revoke live confetti merely because backing resolution changed. `renderer-loading.test.ts` covers actual aliases, separate registration, distinct contents/sizes, preparation identity/generation and live-effect preservation.
+
+## Adaptive backing density
+
+[RenderQuality](../../../src/client/render-quality.ts) owns `dpr(nativeDpr, scale)`, `observe(at, QualityFrame): boolean`, `resetObservation(at)` and detached `diagnostics()`. Main composes it with viewport and lifecycle. It runs with diagnostics disabled too.
+
+- Start at native DPR capped2. After a decrease, effective DPR is `min(native capped DPR, retained world-density cap / CSS world scale)`; below1 is intentional on large CSS courts. Never change CSS size, world scale/offsets, input coordinates, effect contents or gameplay timing.
+- An eligible window completes only after both at least2s and at least4 samples, then needs at least50% gaps strictly above25ms to decrease. Do not discard a slow window merely because2s elapsed before its fourth sample. Bound counters to240, with1s grace after transition/eligibility/viewport changes and6s cooldown after each decrease. A lone stall amid healthy frames must not lower quality. No RAF execution means no policy execution.
+- Choose only a useful strictly lower world-density cap from `[4, 2.8, 2, 1.4, 1]`. Small viewports skip unnecessary levels. Lower only, at most five changes per page; no repeated invalidation at the floor or automatic upshift. Rematch retains the cap; reload resets it.
+- Observe loaded, visible, focused, connected online `playing` phase or stable natural-result presentation. Loading/menu/queue/reconnect/non-natural results reset observations. A disconnect callback also resets the window; an existing natural result can become eligible again without a live socket because its animation is local. Scene/focus/visibility/viewport changes discard partial overload windows, retaining the cap.
+- An actual decrease returns true once: main invalidates only rasters and resizes the backing through its ordinary frame owner. Finite decreases/cooldown bound cold-cache transitions.
+
+Debug `quality.stage: 0` / `worldDensityCap: 0` denotes native mode; other stages are level index+1, so skipped levels are expected. These thresholds control cost, not guaranteed FPS. Tests cover eligibility/grace/cooldown, healthy/lone/sustained stalls, below1 DPR, resize/rematch retention, finite floor and detached bounded state. Browser acceptance proves debug-off adaptation, unchanged CSS, original effects and audio. Lower density softens detail; real-device acceptance remains separate.
 
 ## Startup loading and first-court preparation
 

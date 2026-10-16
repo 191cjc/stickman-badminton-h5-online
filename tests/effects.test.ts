@@ -133,6 +133,111 @@ describe("source-triggered authority presentation", () => {
   });
 });
 describe("client event deduplication, ages and independent fixed cosmetic clocks", () => {
+  it("owns stale-sound suppression only while its bounded pending events remain retained", () => {
+    const fx = new Effects();
+    fx.reset("r");
+    let id = 0;
+    // Source-like bounded bursts: two tails + one smoke + one swing per tick,
+    // delivered8ticks late while presentation is temporarily starved.
+    for (let tick = 10; tick < 190; tick += 2) {
+      const events: ClassicPresentationEvent[] = [
+        { id: ++id, tick, kind: "tail", x: 200, y: 100, seed: id },
+        { id: ++id, tick, kind: "tail", x: 200, y: 100, seed: id },
+        { id: ++id, tick, kind: "smoke", x: 100, y: 340, seed: id },
+        { id: ++id, tick, kind: "swing", side: "left", sound: "whoosh" },
+      ];
+      fx.ingest(snapshot(tick + 8, events));
+      const d = fx.diagnostics();
+      expect(d.pending).toBeLessThanOrEqual(128);
+      expect(d.suppressedSounds).toBeLessThanOrEqual(d.pending);
+    }
+    expect(fx.diagnostics().pending).toBe(128);
+    expect(fx.diagnostics().suppressedSounds).toBeGreaterThan(0);
+    const sounds: string[] = [];
+    fx.advance(200, dt, (s) => sounds.push(s));
+    expect(sounds).toEqual([]);
+    expect(fx.diagnostics().pending).toBe(0);
+    expect(fx.diagnostics().suppressedSounds).toBe(0);
+    expect(fx.particles.length).toBeLessThanOrEqual(MAX_PARTICLES);
+    fx.ingest(
+      snapshot(210, [
+        { id: ++id, tick: 202, kind: "swing", side: "left", sound: "whoosh" },
+      ]),
+    );
+    expect(fx.diagnostics().suppressedSounds).toBe(1);
+    fx.suspend();
+    expect(fx.diagnostics().suppressedSounds).toBe(0);
+    fx.reset("other-room");
+    expect(fx.diagnostics().pending).toBe(0);
+    expect(fx.diagnostics().suppressedSounds).toBe(0);
+  });
+
+  it.each([60, 180])(
+    "a %i-tick presentation jump never replays expired queued sounds but keeps recent source events",
+    (target) => {
+      const fx = new Effects();
+      fx.reset("r");
+      fx.ingest(snapshot(0));
+      fx.advance(0, dt, () => {});
+      const sounds: string[] = [];
+      for (const [index, tick] of [2, target - 6, target].entries())
+        fx.ingest(
+          snapshot(tick, [
+            {
+              id: index + 1,
+              tick,
+              kind: "swing",
+              side: "left",
+              sound: "whoosh",
+            },
+          ]),
+        );
+      fx.advance(target, dt, (s) => sounds.push(s));
+      // Existing >120tick recovery suppresses the entire catch-up batch. A
+      // shorter jump retains only the normal inclusive6tick source window.
+      expect(sounds).toEqual(target > 120 ? [] : ["whoosh", "whoosh"]);
+      fx.advance(target, dt, (s) => sounds.push(s));
+      expect(sounds).toHaveLength(target > 120 ? 0 : 2);
+      fx.ingest(
+        snapshot(target + 1, [
+          {
+            id: 4,
+            tick: target + 1,
+            kind: "swing",
+            side: "left",
+            sound: "whoosh",
+          },
+        ]),
+      );
+      fx.advance(target + 1, dt, (s) => sounds.push(s));
+      expect(sounds.at(-1)).toBe("whoosh");
+      expect(sounds).toHaveLength(target > 120 ? 1 : 3);
+    },
+  );
+
+  it("continuous presentation consumes each source sound once without lowering emission density", () => {
+    const fx = new Effects();
+    fx.reset("r");
+    const sounds: string[] = [];
+    for (let tick = 1; tick <= 90; tick++) {
+      const s = snapshot(tick, [
+        {
+          id: tick,
+          tick,
+          kind: "swing",
+          side: "left",
+          sound: "whoosh",
+        },
+      ]);
+      fx.ingest(s);
+      fx.ingest(s);
+      fx.advance(tick, dt, (s) => sounds.push(s));
+      fx.advance(tick, dt, (s) => sounds.push(s));
+    }
+    expect(sounds).toEqual(Array<string>(90).fill("whoosh"));
+    expect(fx.diagnostics().pending).toBe(0);
+  });
+
   it("consumes a shot once at its authority time, removes at frame22, pairs tails and skips expired sounds", () => {
     const fx = new Effects();
     fx.reset("r");

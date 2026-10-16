@@ -45,15 +45,15 @@ sudo nginx -t
 
 ```bash
 bash scripts/rollback.sh
-# 或 bash scripts/rollback.sh 20261014T064853Z-fisoonline
+# 或 bash scripts/rollback.sh 20261015T065916Z-hit-timing
 curl -fsS https://www.firesoul.cn/badminton-h5-online/api/health
 ```
 
-回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。回滚到上述基线后健康协议应为3，双方刷新页面；当前工作树的HTTP检查脚本期望协议4，不能用它验证协议3回滚，完整检查应使用目标版本工作树的脚本。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
+回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。本轮持续运行优化的回滚目标为 `20261015T065916Z-hit-timing`，健康协议仍为4，双方刷新页面；若另外选择更早的协议3版本，应使用目标版本工作树的检查脚本，当前协议4检查器不适用。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
 
 ## 玩法版本与来源
 
-当前七角色双人内核使用协议 v4（`badminton-v4`、`flash-90302-v2`，快照新增 `ackTick`）。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1/v2/v3 页面会在绑定席位前被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。本次击球时序优化的回滚基线为 `20261014T064853Z-fisoonline`；协议变化须前后端一起回滚。
+当前七角色双人内核使用协议 v4（`badminton-v4`、`flash-90302-v2`，快照含 `ackTick`）。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1/v2/v3 页面会在绑定席位前被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。本轮发布 `20261016T061913Z-sustained-smoothness` 的上一版为 `20261015T065916Z-hit-timing`，均为协议4；版本切换后仍应刷新以使用对应前端。
 
 本项目 CSP 使用 `img-src 'self' blob:`，用于本地生成带原滤镜的彩屑着色 SVG。发布只安装本项目 snippet，不更改其他游戏的策略。
 
@@ -78,4 +78,6 @@ window.badmintonDiagnostics.snapshot()
 
 只导出当前页面的有界统计，无上报：`frame`（帧间隔、CPU、长任务）、`network`（快照间隔/字节、RTT）、`predictionSamples`（位置校正/待确认输入年龄）、`input`（接受/拒绝数和节奏）、`scheduler`（提前发送、跳过周期）、`prediction`（固定步、锚点对齐、近似回退/过期/暂停）、`renderer`（缓存）、`interpolation`（缓冲/停顿/回跳）。每个滚动摘要为`{samples,mean,p95,max}`，最多240样本；未进房时prediction缺失、未采样时renderTick为null。计数可累计，缓存bytes为RGBA估算。
 
-帧间隔/长任务需一起判断；RAF中的CPU时长不包含所有浏览器延迟栅格工作。RTT和插值delayMs均不等于按键到画面延迟。计时器独立于RAF但仍运行在主线程；真实弱网停顿无法靠客户端虚构球路消除。本次时序优化的回滚目标为`20261014T064853Z-fisoonline`，回滚恢复协议3，前后端一起切回并刷新页面。
+`quality`记录原生/有效DPR、世界缩放、世界密度上限、阶段和降低次数，以及有界观察计数、宽限和冷却剩余时间。stage/cap为0表示原生档，实际下降可跳过无用的较高档。此自适应功能在默认关闭诊断时同样运行，只降低内部Canvas分辨率，窗口大小和原版效果保持；页内再次匹配保留，刷新重新评估。`interpolation`同时提供实际最新权威与呈现的差距`availableMs`、恢复次数及上次恢复跨度；不要只看目标`delayMs`。
+
+帧间隔/长任务需一起判断；RAF中的CPU时长不包含所有浏览器延迟栅格工作。RTT和插值delayMs均不等于按键到画面延迟。计时器独立于RAF但仍运行在主线程；真实弱网停顿无法靠客户端虚构球路消除。每次实际发布的版本和回滚目标见[验证记录](validation.md)，前后端一起切回并刷新页面。

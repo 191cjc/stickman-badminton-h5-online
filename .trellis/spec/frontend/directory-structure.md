@@ -13,6 +13,7 @@
 | [diagnostics.ts](../../../src/client/diagnostics.ts)         | Opt-in local bounded numeric measurements                                |
 | [loading.ts](../../../src/client/loading.ts)                 | Bounded source loading, exact stage progress and paint-yield preparation |
 | [raster-cache.ts](../../../src/client/raster-cache.ts)       | Filter-preserving bounded device-scale raster LRU                        |
+| [render-quality.ts](../../../src/client/render-quality.ts)   | Pure lower-only page-lifetime adaptive backing-density policy            |
 | [renderer.ts](../../../src/client/renderer.ts)               | Extracted Flash SVG layers selected by authoritative/predicted frame     |
 | [style.css](../../../src/client/style.css)                   | Page layout, responsive court and touch controls                         |
 | [vite-env.d.ts](../../../src/client/vite-env.d.ts)           | Vite asset type declarations                                             |

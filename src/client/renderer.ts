@@ -101,14 +101,19 @@ export class Renderer {
     const art = this.manifest;
     if (!art) throw new LoadingError("prewarm", "incompatible");
     const generation = this.generation;
-    const jobs = new Map<string, { frame: DrawFrame; scale: number }>();
+    const jobs = new Map<
+      string,
+      { frame: DrawFrame; key: string; scale: number }
+    >();
     const scale = viewport.dpr * viewport.scale;
     const add = (frame: DrawFrame | undefined, density = scale) => {
       if (!frame) return;
       const plan = rasterPlan(frame.width, frame.height, density);
+      const key = this.sourceKey(frame);
       if (plan)
-        jobs.set(`${frame.path}:${plan.width}x${plan.height}`, {
+        jobs.set(`${key}:${plan.width}x${plan.height}`, {
           frame,
+          key,
           scale: density,
         });
     };
@@ -129,19 +134,13 @@ export class Renderer {
     if (effects?.finishAlpha) add(art.ui.finish);
     let completed = 0;
     onProgress({ stage: "prewarm", completed, total: jobs.size });
-    for (const { frame, scale: density } of jobs.values()) {
+    for (const { frame, key, scale: density } of jobs.values()) {
       // The progress/animation can paint before each expensive filtered raster.
       await yieldForPaint();
       if (generation !== this.generation) return false;
       const image = this.images.get(frame.path);
       if (!image) throw new LoadingError("prewarm", "incompatible");
-      this.rasters.prepare(
-        frame.path,
-        image,
-        frame.width,
-        frame.height,
-        density,
-      );
+      this.rasters.prepare(key, image, frame.width, frame.height, density);
       onProgress({
         stage: "prewarm",
         completed: ++completed,
@@ -152,8 +151,12 @@ export class Renderer {
     return generation === this.generation;
   }
   clearEffectsImages(): void {
-    this.generation++;
     this.colors?.reset();
+    this.invalidateRasters();
+  }
+  /** Backing-density changes keep loaded art, live color images and effects. */
+  invalidateRasters(): void {
+    this.generation++;
     this.confettiRasters.clear();
     this.rasters.clear();
   }
@@ -241,7 +244,12 @@ export class Renderer {
   ): void {
     if (!frame) return;
     const image = this.images.get(frame.path);
-    if (image) drawCachedFrame(ctx, frame, image, this.rasters);
+    if (image)
+      drawCachedFrame(ctx, frame, image, this.rasters, this.sourceKey(frame));
+  }
+  private sourceKey(frame: DrawFrame): string {
+    // Manifest identity, not runtime hashing. Registration stays on each draw.
+    return `svg:${this.manifest!.files[frame.path] ?? frame.path}`;
   }
   private netFrame(state: GameState): DrawFrame {
     const frames = this.manifest!.netFrames;

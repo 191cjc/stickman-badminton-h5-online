@@ -104,8 +104,8 @@ export function stepParticle(p: Particle): boolean {
 export class Effects {
   readonly particles: Particle[] = [];
   readonly sparks: Spark[] = [];
-  private pending: ClassicPresentationEvent[] = [];
-  private silent = new Set<number>();
+  private pending: (ClassicPresentationEvent & { suppressSound: boolean })[] =
+    [];
   private room = "";
   private cursor = 0;
   private clock = 0;
@@ -127,7 +127,6 @@ export class Effects {
     this.needsBaseline = resumed;
     this.paused = false;
     this.pending = [];
-    this.silent.clear();
     this.particles.length = 0;
     this.sparks.length = 0;
     this.celebration = false;
@@ -140,7 +139,6 @@ export class Effects {
   }
   suspend(): void {
     this.pending = [];
-    this.silent.clear();
     this.particles.length = 0;
     this.sparks.length = 0;
     this.paused = true;
@@ -156,7 +154,6 @@ export class Effects {
     if (this.needsBaseline) {
       this.cursor = snapshot.effects.cursor;
       this.pending = [];
-      this.silent.clear();
       this.clock = tick;
       this.needsBaseline = false;
       this.initialized = true;
@@ -173,7 +170,6 @@ export class Effects {
     if (journal.events.length && journal.events[0].id > this.cursor + 1) {
       // Journal gap: establish a new cursor. Historical sounds are never replayed.
       this.pending = [];
-      this.silent.clear();
       this.cursor = journal.cursor;
       this.clock = tick;
       return;
@@ -182,8 +178,9 @@ export class Effects {
       if (e.id <= this.cursor) continue;
       this.cursor = e.id;
       if (tick - e.tick > 30) continue;
-      if (tick - e.tick > 6) this.silent.add(e.id);
-      this.pending.push({ ...e });
+      // Suppression belongs to its retained event, so bounded queue eviction
+      // cannot leave an independent history of discarded IDs behind.
+      this.pending.push({ ...e, suppressSound: tick - e.tick > 6 });
     }
     this.cursor = Math.max(this.cursor, journal.cursor);
     if (this.pending.length > 128)
@@ -195,7 +192,6 @@ export class Effects {
       this.particles.length = 0;
       this.sparks.length = 0;
       this.pending = [];
-      this.silent.clear();
       this.needsBaseline = true;
       return;
     }
@@ -226,11 +222,11 @@ export class Effects {
       this.clock = target - 30;
       this.soundEnabled = false;
     }
-    this.applyPending(this.clock, onSound);
+    this.applyPending(this.clock, target, onSound);
     while (this.clock < target) {
       this.clock++;
       this.step();
-      this.applyPending(this.clock, onSound);
+      this.applyPending(this.clock, target, onSound);
     }
     this.soundEnabled = true;
     if (this.celebration) {
@@ -268,7 +264,11 @@ export class Effects {
       }
     }
   }
-  private applyPending(tick: number, onSound: (sound: SoundId) => void): void {
+  private applyPending(
+    tick: number,
+    presentationTick: number,
+    onSound: (sound: SoundId) => void,
+  ): void {
     const ready = this.pending.filter((e) => e.tick <= tick);
     this.pending = this.pending.filter((e) => e.tick > tick);
     for (const e of ready) {
@@ -277,11 +277,11 @@ export class Effects {
       if (
         "sound" in e &&
         age <= 6 &&
+        presentationTick - e.tick <= 6 &&
         this.soundEnabled &&
-        !this.silent.has(e.id)
+        !e.suppressSound
       )
         onSound(e.sound);
-      this.silent.delete(e.id);
       if (e.kind === "shot" && age < 21)
         this.sparks.push({
           x: e.x,
@@ -332,6 +332,9 @@ export class Effects {
       cursor: this.cursor,
       clock: this.clock,
       pending: this.pending.length,
+      suppressedSounds: this.pending.filter(
+        (e) => e.suppressSound && "sound" in e,
+      ).length,
       particles: this.particles.length,
       sparks: this.sparks.length,
       paused: this.paused,

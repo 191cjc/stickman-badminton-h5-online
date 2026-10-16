@@ -43,6 +43,8 @@ One timer owns both normal60Hz deadlines and expedited logical-change requests. 
 Run only with loaded assets, connected online scene, latest status playing, visible document and active focus. Blur/hidden/pagehide, close, leave, result and room transitions stop/reset and release. Focus/visible restoration and online snapshots restart from a fresh deadline. Main-thread blockage still blocks timers. Prediction advances elapsed time separately on RAF/accepted input/snapshot callbacks; more packets never speed physics. Protocol4 metadata does not add client coordinates/timestamps.
 
 
+The minimum spacing is between attempt **starts**, including rejected sends. Count synchronous `step()` time toward it. After normal work, pick the first future periodic grid and retime a too-near grid to `attemptStart + 1000/120`; do not discard another whole period merely because completion is near it. Expedited work resumes from `max(attemptStart + 1000/60, completion)`. Keep one timer, ceil-rounded waits and no catch-up burst. Callback-cost tests (8/9/12ms), late grids, early wakeups and expedited work assert actual attempt times and minimum spacing, not only counters.
+
 ### 4. Validation & Error Matrix
 
 | Condition | Expected |
