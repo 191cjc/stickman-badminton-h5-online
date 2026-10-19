@@ -6,7 +6,7 @@
 
 ## Logical input and release
 
-Both sides use A/D/W/S or arrows; W/↑ jumps; S/↓/space hits or serves. `Input.peek(seq)` produces an `InputFrame` without consuming jump/hit edges. Only after `Network.send(frame)` returns true does main synchronously call `Input.commit(frame)`, advance seq and register the accepted prediction command. A rejected send retains edges and sequence. `read(seq)` remains a convenience peek+commit helper; online sending must use the transactional pair. Touch input uses `data-control`, pointer capture, and pointerup/pointercancel/lostpointercapture release.
+Both sides default to A/D/W/S or arrows; W/↑ jumps; S/↓/space hits or serves. Keyboard bindings are browser-local and configurable; effective help must follow them. `Input.peek(seq)` produces an `InputFrame` without consuming jump/hit edges. Only after `Network.send(frame)` returns true does main synchronously call `Input.commit(frame)`, advance seq and register the accepted prediction command. A rejected send retains edges and sequence. `read(seq)` remains a convenience peek+commit helper; online sending must use the transactional pair. Touch input uses logical-action `data-control`, independent pointer-ID ownership/capture, and pointerup/pointercancel/lostpointercapture release. Keyboard, pointer and gamepad contributions merge under the [controls/device contract](controls-and-devices.md).
 
 Blur, hidden visibility, and pagehide call `release()`. `main.ts` clears prediction history and sends `release`; the server also owns [input timeout and disconnect cleanup](../backend/rooms.md). Do not depend on keyup or pagehide delivery as the only server release mechanism.
 

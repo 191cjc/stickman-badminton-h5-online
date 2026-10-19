@@ -86,7 +86,32 @@
               type="checkbox"
             />自己始终显示在左侧</label
           >
-          <p>左右键跟随画面方向。设置期间比赛继续，关闭后恢复操作。</p>
+          <p>左右操作跟随画面方向。设置期间比赛继续，关闭后恢复操作。</p>
+          <h3>键盘按键</h3>
+          <div id="keyboard-bindings" role="group" aria-label="比赛按键"></div>
+          <p id="binding-status" role="status" aria-live="polite">
+            每项最多三个按键；点击按键可移除。
+          </p>
+          <button id="controls-reset" type="button">恢复默认按键</button>
+          <h3>手柄</h3>
+          <label for="gamepad-enabled"
+            ><input
+              id="gamepad-enabled"
+              type="checkbox"
+              checked
+            />启用手柄</label
+          >
+          <p id="gamepad-status" role="status" aria-live="polite">
+            正在检测手柄
+          </p>
+          <button id="gamepad-detect" type="button">检测手柄</button>
+          <p>
+            自动使用首个标准布局手柄。方向键／左摇杆移动；右侧按钮组的底部按钮跳跃、左侧按钮挥拍／发球（常见
+            Xbox A／X、PlayStation ×／□）。
+          </p>
+          <p>
+            未检测到时，请在本页按一下手柄按钮，再点击检测。恢复操作前先松开按键、摇杆回中。匹配和设置菜单请用键盘、鼠标或触屏操作。
+          </p>
           <button id="settings-close" type="button">完成</button>
         </section>
         <div
@@ -99,17 +124,19 @@
         </div>
       </section>
       <section class="controls">
-        <p>
-          <kbd>A</kbd><kbd>D</kbd> 移动 <kbd>W</kbd> 跳跃 <kbd>S</kbd> 挥拍 /
-          发球 <span>也支持方向键，空格击球 · M 静音 · Esc 结束比赛</span>
+        <p id="controls-help">
+          A / ← 向左 · D / → 向右 · W / ↑ 跳跃 · 空格 / S / ↓ 挥拍／发球 · M
+          静音 · Esc 结束比赛
         </p>
-        <p id="hint">两位玩家使用相同按键，匹配后显示你的场地位置。</p>
+        <p id="hint">可在设置中修改自己的按键；匹配后显示你的场地位置。</p>
       </section>
       <div class="touch-controls" aria-label="触屏操作" inert>
-        <button data-control="KeyA" aria-label="向左移动">←</button
-        ><button data-control="KeyD" aria-label="向右移动">→</button
-        ><button data-control="KeyW">跳跃</button
-        ><button data-control="KeyS">挥拍</button>
+        <button type="button" data-control="left" aria-label="向左移动">
+          ←</button
+        ><button type="button" data-control="right" aria-label="向右移动">
+          →</button
+        ><button type="button" data-control="jump">跳跃</button
+        ><button type="button" data-control="hit">挥拍</button>
       </div>
       <footer>
         <span>游客自动识别 · 失焦时清除按键 · 断线保留席位 15 秒</span

@@ -1,0 +1,13 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend pre-development and full-scope quality checklist"}
+{"file": ".trellis/spec/frontend/controls-and-devices.md", "reason": "Executable controls schema, native capture, per-source merge and Gamepad lifecycle contracts from this feature"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Page-owned modules and client/shared/server boundaries"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Native settings controls, compact layout, loading and accessible scene actions"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Input source release, native focus, single paced sender and peek/send/commit transaction"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Authority, accepted-input prediction and local self-left mapping"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Strict runtime boundaries for preferences and browser device data"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Meaningful tests, code/build/HTTP before browser and hardware acceptance limits"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Unchanged logical InputFrame, protocol4 and authenticated authority"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Reuse existing input, prediction and shared contract owners"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace browser logical sources through send, authority and presentation"}
+{"file": ".trellis/tasks/10-19-input-settings-gamepad/research/keyboard-and-settings.md", "reason": "Observed fixed-key coupling, proposed capture UX, source merging and validation"}
+{"file": ".trellis/tasks/10-19-input-settings-gamepad/research/gamepad.md", "reason": "Verified Gamepad API references, one-shot inactive discovery, neutral rearm and physical-device limits"}

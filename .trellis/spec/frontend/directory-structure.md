@@ -6,7 +6,10 @@
 | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
 | [index.html](../../../index.html)                            | Page structure, action buttons, Canvas, status, touch controls           |
 | [main.ts](../../../src/client/main.ts)                       | Scene transitions, DOM updates, frame loop and controller composition    |
-| [input.ts](../../../src/client/input.ts)                     | Keyboard/pointer state and logical input frames                          |
+| [input.ts](../../../src/client/input.ts)                     | Logical keyboard/pointer/gamepad holds, pending edges and input frames    |
+| [controls.ts](../../../src/client/controls.ts)               | Validated browser-local bindings, defaults, conflicts and labels          |
+| [controls-settings.ts](../../../src/client/controls-settings.ts) | Native binding capture and settings DOM, separate from network sending |
+| [gamepad.ts](../../../src/client/gamepad.ts)                 | Standard pad discovery, mapping, neutral rearm and status                |
 | [perspective.ts](../../../src/client/perspective.ts)         | Browser-local self-left preference, display-side and inverse input mapping |
 | [network.ts](../../../src/client/network.ts)                 | Session initialization, WS, retries, RTT                                 |
 | [prediction.ts](../../../src/client/prediction.ts)           | Local player correction/replay and remote interpolation                  |

@@ -112,7 +112,7 @@ it("notifies only after logical changes, preserving aliases, rapid edges and poi
   const win = new EventTarget(),
     doc = new EventTarget();
   const touch = Object.assign(new EventTarget(), {
-    dataset: { control: "KeyW" },
+    dataset: { control: "jump" },
     setPointerCapture: vi.fn(),
   });
   Object.assign(doc, { hidden: false, querySelectorAll: () => [touch] });
@@ -147,8 +147,12 @@ it("notifies only after logical changes, preserving aliases, rapid edges and poi
     Object.assign(new Event("pointerdown"), { pointerId: 1 }),
   );
   expect(changes.at(-1)).toMatchObject({ jump: true, jumpPressed: true });
-  touch.dispatchEvent(new Event("pointercancel"));
-  touch.dispatchEvent(new Event("lostpointercapture"));
+  touch.dispatchEvent(
+    Object.assign(new Event("pointercancel"), { pointerId: 1 }),
+  );
+  touch.dispatchEvent(
+    Object.assign(new Event("lostpointercapture"), { pointerId: 1 }),
+  );
   expect(changes).toHaveLength(4);
   expect(changes.at(-1)).toMatchObject({ jump: false, jumpPressed: true });
   input.commit(input.peek(1));
@@ -158,7 +162,7 @@ it("settings gate ignores native presses and touch, and closing cannot resurrect
   const win = new EventTarget(),
     doc = new EventTarget();
   const touch = Object.assign(new EventTarget(), {
-    dataset: { control: "KeyS" },
+    dataset: { control: "hit" },
     setPointerCapture: vi.fn(),
   });
   Object.assign(doc, { hidden: false, querySelectorAll: () => [touch] });
@@ -200,9 +204,7 @@ it("settings gate ignores native presses and touch, and closing cannot resurrect
   expect(key("KeyA", true).defaultPrevented).toBe(true);
   expect(key("ArrowLeft", true).defaultPrevented).toBe(true);
   expect(key("Space", true).defaultPrevented).toBe(true);
-  expect(key("Space", true, new Element("INPUT")).defaultPrevented).toBe(
-    false,
-  );
+  expect(key("Space", true, new Element("INPUT")).defaultPrevented).toBe(false);
   expect(input.peek(1)).toMatchObject({
     move: 0,
     jumpPressed: false,
@@ -213,4 +215,144 @@ it("settings gate ignores native presses and touch, and closing cannot resurrect
   expect(touch.setPointerCapture).not.toHaveBeenCalled();
   key("KeyA");
   expect(input.peek(1).move).toBe(-1);
+});
+
+function mergedFixture() {
+  const win = new EventTarget(),
+    doc = new EventTarget();
+  const touch = Object.assign(new EventTarget(), {
+    dataset: { control: "hit" },
+    setPointerCapture: vi.fn(),
+  });
+  Object.assign(doc, { hidden: false, querySelectorAll: () => [touch] });
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", doc);
+  vi.stubGlobal("HTMLElement", Element);
+  const input = new Input(() => {});
+  const key = (type: string, code: string, extra = {}) => {
+    const event = Object.assign(new Event(type, { cancelable: true }), {
+      code,
+      repeat: false,
+      ...extra,
+    });
+    win.dispatchEvent(event);
+    return event;
+  };
+  const pointer = (type: string, pointerId: number) =>
+    touch.dispatchEvent(
+      Object.assign(new Event(type, { cancelable: true }), { pointerId }),
+    );
+  return { input, key, pointer };
+}
+it("custom/removal mapping changes keyboard only; pointer IDs and keyboard holds release independently", () => {
+  const { input, key, pointer } = mergedFixture();
+  input.setBindings({
+    left: ["KeyJ"],
+    right: ["KeyL"],
+    jump: ["Enter"],
+    hit: [],
+  });
+  key("keydown", "KeyA");
+  expect(input.peek(1).move).toBe(0);
+  key("keydown", "KeyJ");
+  expect(input.peek(1).move).toBe(-1);
+  pointer("pointerdown", 1);
+  pointer("pointerdown", 2);
+  expect(input.read(1)).toMatchObject({ hitHeld: true, hitPressed: true });
+  pointer("pointerup", 1);
+  expect(input.peek(2).hitHeld).toBe(true);
+  pointer("pointercancel", 2);
+  expect(input.peek(2)).toMatchObject({
+    move: -1,
+    hitHeld: false,
+    hitPressed: false,
+  });
+  input.setBindings({ left: [], right: [], jump: [], hit: ["KeyJ"] });
+  expect(input.peek(2).move).toBe(0);
+  key("keydown", "KeyJ", { repeat: true });
+  expect(input.peek(2).hitHeld).toBe(false);
+  key("keydown", "KeyJ");
+  expect(input.read(2)).toMatchObject({ hitHeld: true, hitPressed: true });
+  pointer("pointerdown", 3);
+  key("keyup", "KeyJ");
+  expect(input.peek(3)).toMatchObject({ hitHeld: true, hitPressed: false });
+  pointer("pointerup", 3);
+  expect(input.peek(3).hitHeld).toBe(false);
+});
+it("merges opposing directions and aggregate edges; unplug discards only pad-owned unsent edges", () => {
+  const { input, key, pointer } = mergedFixture();
+  input.setGamepad(["right", "hit"]);
+  key("keydown", "KeyA");
+  expect(input.peek(1)).toMatchObject({
+    move: 0,
+    hitHeld: true,
+    hitPressed: true,
+  });
+  key("keydown", "KeyS");
+  pointer("pointerdown", 1);
+  input.clearGamepad();
+  expect(input.peek(1)).toMatchObject({
+    move: -1,
+    hitHeld: true,
+    hitPressed: false,
+  });
+  key("keyup", "KeyS");
+  pointer("pointerup", 1); // No manufactured edge from surviving sources.
+  key("keydown", "KeyW");
+  key("keyup", "KeyW");
+  input.setGamepad(["hit"]);
+  input.setGamepad([]);
+  expect(input.peek(1)).toMatchObject({
+    jumpPressed: true,
+    hitHeld: false,
+    hitPressed: true,
+  });
+  input.clearGamepad();
+  expect(input.peek(1)).toMatchObject({ jumpPressed: true, hitPressed: false });
+  input.commit(input.peek(1));
+  expect(input.peek(2).jumpPressed).toBe(false);
+  input.setGamepad(["jump", "hit"]);
+  input.release(false);
+  expect(input.peek(2)).toMatchObject({
+    jump: false,
+    jumpPressed: false,
+    hitHeld: false,
+    hitPressed: false,
+  });
+});
+it("keyboard quick taps survive gamepad removal; aliases and same-action devices do not repeat edges", () => {
+  const { input, key } = mergedFixture();
+  key("keydown", "Space");
+  input.commit(input.peek(1));
+  key("keydown", "KeyS");
+  input.setGamepad(["hit"]);
+  expect(input.peek(2).hitPressed).toBe(false);
+  key("keyup", "Space");
+  key("keyup", "KeyS");
+  expect(input.peek(2).hitHeld).toBe(true);
+  input.clearGamepad();
+  key("keydown", "Space");
+  key("keyup", "Space");
+  input.setGamepad(["hit"]);
+  input.clearGamepad();
+  expect(input.peek(2)).toMatchObject({ hitPressed: true, hitHeld: false });
+});
+it("browser shortcuts, composition and consumed events never create gameplay operations", () => {
+  const { input, key } = mergedFixture();
+  for (const extra of [
+    { ctrlKey: true },
+    { altKey: true },
+    { metaKey: true },
+    { isComposing: true },
+  ]) {
+    expect(key("keydown", "KeyA", extra).defaultPrevented).toBe(false);
+  }
+  expect(input.peek(1).move).toBe(0);
+  const event = Object.assign(new Event("keydown", { cancelable: true }), {
+    code: "KeyA",
+    repeat: false,
+  });
+  event.preventDefault();
+  window.dispatchEvent(event);
+  expect(input.peek(1).move).toBe(0);
 });

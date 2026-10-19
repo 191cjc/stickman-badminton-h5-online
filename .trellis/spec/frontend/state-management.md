@@ -5,7 +5,7 @@
 | State                                                                                     | Owner                                              |
 | ----------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | Scene (`idle`, `queued`, `online`, `result`), side, sequence, latest snapshot | [main.ts](../../../src/client/main.ts)             |
-| Held keys and jump/hit edges                                                              | [Input](../../../src/client/input.ts)              |
+| Keyboard/pointer/gamepad holds and jump/hit edges                                          | [Input](../../../src/client/input.ts)              |
 | WS/retry/ping state                                                                       | [Network](../../../src/client/network.ts)          |
 | Predicted local player, pending frames, correction offset                                 | [Prediction](../../../src/client/prediction.ts)    |
 | Buffered authoritative snapshots                                                          | [Interpolation](../../../src/client/prediction.ts) |

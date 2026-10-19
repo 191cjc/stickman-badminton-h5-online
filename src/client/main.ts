@@ -9,7 +9,15 @@ import { Simulation } from "../shared/simulation";
 import { INPUT_HZ, BASE_PATH } from "../shared/protocol";
 import type { Snapshot, ServerMessage } from "../shared/protocol";
 import type { Side, Viewport } from "../shared/types";
-import { Input } from "./input";
+import { Input, isInteractiveTarget } from "./input";
+import {
+  actionKeys,
+  keyboardHelp,
+  readControls,
+  saveControls,
+} from "./controls";
+import { ControlsSettings } from "./controls-settings";
+import { GamepadController } from "./gamepad";
 import { Network } from "./network";
 import { Prediction, Interpolation } from "./prediction";
 import { Renderer } from "./renderer";
@@ -47,6 +55,7 @@ const start = el<HTMLButtonElement>("start"),
   selfLeft = el<HTMLInputElement>("self-left-view");
 let settingsOpen = false,
   selfLeftEnabled = readSelfLeft(),
+  controls = readControls(),
   result: Extract<ServerMessage, { type: "result" }> | undefined;
 selfLeft.checked = selfLeftEnabled;
 const startLabel = el("start-label"),
@@ -152,6 +161,7 @@ function buttons(): void {
 function clearInput(notify = true): void {
   scheduler.setActive(false);
   input.release(false);
+  gamepad.reset();
   prediction?.clear();
   if (notify) network.send({ type: "release" });
 }
@@ -163,13 +173,16 @@ function setSettingsOpen(open: boolean, restoreFocus = true): void {
   if (open === settingsOpen) return;
   clearInput();
   settingsOpen = open;
+  controlsSettings.setOpen(open);
   settingsPanel.hidden = !open;
   settingsPanel.inert = !open || !assetsReady;
   settings.setAttribute("aria-expanded", String(open));
   document.querySelector<HTMLElement>(".touch-controls")!.inert =
     !assetsReady || open;
-  if (open) selfLeft.focus();
-  else {
+  if (open) {
+    gamepad.refresh();
+    selfLeft.focus();
+  } else {
     if (restoreFocus) (scene === "online" ? canvas : settings).focus();
     else if (settingsPanel.contains(document.activeElement)) settings.focus();
     syncInputClock();
@@ -189,6 +202,7 @@ function leaveMatch(): void {
 }
 const input = new Input(
   () => {
+    gamepad.reset();
     inputFocused = false;
     quality.resetObservation(performance.now());
     scheduler.setActive(false);
@@ -202,6 +216,7 @@ const input = new Input(
   () => scheduler.request(),
   () => assetsReady && !settingsOpen,
 );
+input.setBindings(controls.bindings);
 const network = new Network(
   handleMessage,
   (connected, text) => {
@@ -236,6 +251,7 @@ const scheduler = new InputScheduler(() => {
     scheduler.setActive(false);
     return;
   }
+  gamepad.poll();
   const command = worldInput(input.peek(seq + 1), mirrored());
   const accepted = network.send(command);
   diagnostics?.input(performance.now(), accepted);
@@ -245,6 +261,29 @@ const scheduler = new InputScheduler(() => {
   if (latest!.state.phase === "playing")
     prediction?.accept(command, performance.now());
 });
+const gamepad = new GamepadController(
+  input,
+  (status) => {
+    el("gamepad-status").textContent = status;
+  },
+  undefined,
+  controls.gamepadEnabled,
+);
+const controlsSettings = new ControlsSettings(
+  settingsPanel,
+  controls,
+  (next) => {
+    clearInput();
+    controls = next;
+    input.setBindings(controls.bindings);
+    gamepad.setEnabled(controls.gamepadEnabled);
+    saveControls(controls);
+    labels();
+    if (latest) updateHud(latest.state);
+  },
+);
+el("gamepad-detect").addEventListener("click", () => gamepad.refresh());
+gamepad.refresh();
 function canSampleInput(): boolean {
   return (
     assetsReady &&
@@ -253,9 +292,22 @@ function canSampleInput(): boolean {
     latest?.status === "playing" &&
     network.connected &&
     !document.hidden &&
+    !isInteractiveTarget(document.activeElement) &&
     inputFocused
   );
 }
+document.addEventListener("focusin", (event) => {
+  if (isInteractiveTarget(event.target)) clearInput();
+  else syncInputClock();
+});
+document.addEventListener("focusout", () => queueMicrotask(syncInputClock));
+document
+  .querySelector(".touch-controls")!
+  .addEventListener("pointerdown", () => {
+    // Pointer gameplay resumes Canvas focus even after using a native action.
+    // Input's preventDefault keeps the touch button from taking that focus back.
+    if (assetsReady && !settingsOpen) canvas.focus();
+  });
 function syncInputClock(): void {
   scheduler.setActive(canSampleInput());
 }
@@ -305,6 +357,12 @@ function idle(reason?: string): void {
   buttons();
 }
 function labels(): void {
+  const help = keyboardHelp(controls.bindings);
+  const padHelp = controls.gamepadEnabled
+    ? "手柄方向键／左摇杆移动，底部按钮跳跃，左侧按钮挥拍。"
+    : "";
+  el("controls-help").textContent =
+    `${help} · M 静音 · Esc 结束比赛。${padHelp}`;
   const ownDisplaySide = side && displaySide(side, mirrored());
   el("left-label").textContent = ownDisplaySide
     ? ownDisplaySide === "left"
@@ -317,8 +375,8 @@ function labels(): void {
       : "对手 · 右侧"
     : "右侧";
   el("hint").textContent = ownDisplaySide
-    ? `你控制${ownDisplaySide === "left" ? "左侧" : "右侧"} · ${CHARACTERS[selected].name}。A/D 或 ←/→ 移动，W/↑ 跳跃，S/↓/空格击球与发球。M 静音，Esc 结束比赛。`
-    : "两位玩家使用相同按键，匹配后显示你的场地位置。";
+    ? `你控制${ownDisplaySide === "left" ? "左侧" : "右侧"} · ${CHARACTERS[selected].name}。${help}。${padHelp}`
+    : "可在设置中修改自己的按键；匹配后显示你的场地位置。";
 }
 function handleMessage(message: ServerMessage): void {
   if (message.type === "idle") {
@@ -486,8 +544,14 @@ function updateHud(state: typeof backdrop): void {
       : state.phase === "point"
         ? `${state.server === side ? "你" : "对手"}得分 · 下一回合准备中`
         : state.shuttle.state === "attached"
-          ? `${state.server === side ? "轮到你发球，按 S / ↓ / 空格" : "等待对手发球"} · 先到 7 分获胜`
+          ? `${state.server === side ? `轮到你发球，${serveHint()}` : "等待对手发球"} · 先到 7 分获胜`
           : `回合击球 ${state.rallyHits} 次 · 先到 7 分获胜`;
+}
+function serveHint(): string {
+  const keys = controls.bindings.hit.length
+    ? `按 ${actionKeys(controls.bindings, "hit")}`
+    : "使用挥拍操作";
+  return controls.gamepadEnabled ? `${keys} 或手柄左侧按钮` : keys;
 }
 start.addEventListener("click", () => {
   if (!assetsReady || start.hidden) return;
@@ -695,7 +759,7 @@ void renderer
       element.inert = false;
     canvas.tabIndex = 0;
     // Keys pressed during preparation must not become gameplay at reveal.
-    input.release(false);
+    clearInput(false);
     buttons();
     if (scene === "online") canvas.focus();
     syncInputClock();

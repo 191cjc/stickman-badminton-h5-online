@@ -544,7 +544,7 @@ footer a:hover {
   z-index: 4;
   top: calc(8% + 45px);
   right: 13px;
-  width: min(300px, calc(100% - 26px));
+  width: min(440px, calc(100% - 26px));
   max-height: calc(92% - 58px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -578,6 +578,38 @@ footer a:hover {
 .settings-panel button {
   padding: 8px 14px;
   font-size: 12px;
+}
+.settings-panel h3 {
+  margin: 16px 0 9px;
+  font-size: 14px;
+  color: #cef56e;
+}
+.binding-row {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  margin: 9px 0;
+  font-size: 12px;
+}
+.binding-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
+}
+.binding-row button {
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+#gamepad-status,
+#binding-status {
+  overflow-wrap: anywhere;
+}
+#settings-close {
+  display: block;
+  margin-top: 12px;
 }
 .scoreboard {
   left: 10px;
@@ -653,7 +685,7 @@ footer a:hover {
   .settings-panel {
     top: 78px;
     right: 7px;
-    width: min(300px, calc(100% - 14px));
+    width: min(440px, calc(100% - 14px));
     max-height: calc(100% - 85px);
     padding: 10px;
   }

@@ -6,6 +6,7 @@ import { Prediction } from "../src/client/prediction";
 import { Simulation } from "../src/shared/simulation";
 import { PROTOCOL, SUBPROTOCOL } from "../src/shared/protocol";
 import { worldInput } from "../src/client/perspective";
+import { GamepadController, type PadSample } from "../src/client/gamepad";
 
 class Socket extends EventTarget {
   static OPEN = 1;
@@ -176,12 +177,10 @@ it("paced sends retain edges and consecutive sequence through disconnection, bac
 it("mirrored movement reaches the actual right-side prediction only after the identical frame is accepted", async () => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ protocol: PROTOCOL, connected: false }),
-      }),
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ protocol: PROTOCOL, connected: false }),
+    }),
   );
   const win = new EventTarget();
   vi.stubGlobal("window", win);
@@ -258,7 +257,7 @@ it("actual logical notifications expedite one transactional send and rejected ex
   );
   const win = new EventTarget(),
     touch = Object.assign(new EventTarget(), {
-      dataset: { control: "KeyW" },
+      dataset: { control: "jump" },
       setPointerCapture: vi.fn(),
     });
   vi.stubGlobal("window", win);
@@ -301,7 +300,7 @@ it("actual logical notifications expedite one transactional send and rejected ex
   touch.dispatchEvent(
     Object.assign(new Event("pointerdown"), { pointerId: 1 }),
   );
-  touch.dispatchEvent(new Event("pointerup"));
+  touch.dispatchEvent(Object.assign(new Event("pointerup"), { pointerId: 1 }));
   key("keydown", "Space");
   key("keyup", "Space");
   await vi.advanceTimersByTimeAsync(1);
@@ -330,4 +329,106 @@ it("actual logical notifications expedite one transactional send and rejected ex
   expect(prediction.diagnostics(now()).pendingInputs).toBe(0);
   await vi.advanceTimersByTimeAsync(100);
   expect(sockets[0].sent).toHaveLength(2);
+});
+
+it("paced gamepad polling retains quick edges through real send failures and maps the identical accepted frame to prediction", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue({
+        ok: true,
+        json: async () => ({ protocol: PROTOCOL, connected: false }),
+      }),
+  );
+  vi.stubGlobal("window", new EventTarget());
+  vi.stubGlobal("document", {
+    querySelectorAll: () => [],
+    addEventListener: () => {},
+  });
+  vi.stubGlobal("HTMLElement", class {});
+  const pad: PadSample = {
+    index: 0,
+    id: "Standard",
+    connected: true,
+    mapping: "standard",
+    axes: [0],
+    buttons: Array.from({ length: 16 }, () => ({ pressed: false, value: 0 })),
+  };
+  const input = new Input(() => {}),
+    gamepad = new GamepadController(
+      input,
+      () => {},
+      () => [pad],
+    );
+  const network = new Network(
+    () => {},
+    () => {},
+    () => {},
+  );
+  const prediction = new Prediction("right", new Simulation().players.right);
+  const accepted = vi.spyOn(prediction, "accept");
+  const began = Date.now(),
+    now = () => Date.now() - began;
+  let seq = 0;
+  const scheduler = new InputScheduler(() => {
+    gamepad.poll();
+    const frame = worldInput(input.peek(seq + 1), true);
+    if (!network.send(frame)) return;
+    input.commit(frame);
+    seq++;
+    prediction.accept(frame, now());
+  }, now);
+  scheduler.setActive(true);
+  await vi.advanceTimersByTimeAsync(17); // First scheduler observation is neutral: arm, no transport.
+  pad.axes = [-1];
+  for (const i of [0, 2]) {
+    pad.buttons[i].pressed = true;
+    pad.buttons[i].value = 1;
+  }
+  await vi.advanceTimersByTimeAsync(17); // Press observed while disconnected.
+  for (const i of [0, 2]) {
+    pad.buttons[i].pressed = false;
+    pad.buttons[i].value = 0;
+  }
+  await network.connect();
+  const socket = sockets[0];
+  socket.open();
+  socket.bufferedAmount = 64 * 1024 + 1;
+  await vi.advanceTimersByTimeAsync(17);
+  socket.bufferedAmount = 0;
+  vi.spyOn(socket, "send").mockImplementationOnce(() => {
+    throw Error("transport_failure");
+  });
+  await vi.advanceTimersByTimeAsync(17);
+  expect(seq).toBe(0);
+  expect(accepted).not.toHaveBeenCalled();
+  expect(input.peek(1)).toMatchObject({
+    move: -1,
+    jump: false,
+    jumpPressed: true,
+    hitHeld: false,
+    hitPressed: true,
+  });
+  await vi.advanceTimersByTimeAsync(34);
+  const frames = socket.sent.map((raw) => JSON.parse(raw));
+  expect(frames.map((frame) => frame.seq)).toEqual([1, 2]);
+  expect(frames[0]).toMatchObject({
+    move: 1,
+    jump: false,
+    jumpPressed: true,
+    hitHeld: false,
+    hitPressed: true,
+  });
+  expect(frames[1]).toMatchObject({
+    move: 1,
+    jumpPressed: false,
+    hitPressed: false,
+  });
+  expect(accepted.mock.calls.map(([frame]) => frame)).toEqual(frames);
+  scheduler.setActive(false);
+  gamepad.reset();
+  await vi.advanceTimersByTimeAsync(100);
+  expect(socket.sent).toHaveLength(2);
+  expect(input.peek(3).move).toBe(0);
 });
