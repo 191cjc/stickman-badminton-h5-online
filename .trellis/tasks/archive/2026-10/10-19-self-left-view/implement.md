@@ -52,4 +52,4 @@ Cache/performance guard: same-scale perspective toggle should reuse already load
 - [x] Source-backed perspective/input/render/cache contracts written into frontend specs; links checked.
 - [x] Published20261019T070111Z-self-left-view; own service restarted; official public HTTP, public bytes and exclusive-resource audit pass. Prior release is20261016T061913Z-sustained-smoothness.
 - [x] Isolated verification servers stopped; no public matching or remote Git push.
-- [ ] Record work commit, archive task and journal.
+- Work commit: bc019b7. Task archive and session journal are handled by finish-work bookkeeping.
