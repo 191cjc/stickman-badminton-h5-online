@@ -321,3 +321,25 @@ Archive completion: `.trellis/tasks/archive/2026-10/10-13-serve-trajectory-fix/`
 ### Next Steps
 
 - 两台真实电脑刷新网页后验证持续手感与降档清晰度；其他浏览器、触屏和物理输入延迟仍待外部验收。
+
+
+## Session 11: Optional self-left view implemented and deployed
+<!-- trellis-session: v=2 fp=1832c41e59bfe480 -->
+
+**Date**: 2026-10-19
+**Task**: Optional self-left view implemented and deployed
+**Branch**: `feat/self-left-view`
+
+### Summary
+
+Added default-off browser-persisted in-court self-left setting, screen-direction input mapping and readable original art/world-only reflection while keeping actual seats, protocol4, authority and bounded rasters. Independent review fixed repeated Arrow/Space native scrolling;291 tests/21 files, lint/types/build passed. Isolated browser scenarios covered four seat/preferences,1022 matching authority states,natural7:0/original effects,settings input/reconnect,result reclaim,rematch,compact layouts/storage failures; automation timeouts and physical-device limits documented. Published20261019T070111Z-self-left-view,service restarted15:02:33CST,public HTTP/bytes/isolation audits passed;previous20261016T061913Z-sustained-smoothness;verification ports stopped.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `bc019b7` | feat: add optional self-left player perspective |
+
+### Status
+
+[OK] **Completed**
