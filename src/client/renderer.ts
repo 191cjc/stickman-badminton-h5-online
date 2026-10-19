@@ -6,6 +6,7 @@ import type { GameState, PlayerState } from "../shared/state";
 import type { Viewport } from "../shared/types";
 import type { Effects, Particle, Spark } from "./effects";
 import { ConfettiImages } from "./confetti-images";
+import { displaySide } from "./perspective";
 import { RasterCache, deviceRasterScale, rasterPlan } from "./raster-cache";
 import {
   fetchAsset,
@@ -97,6 +98,7 @@ export class Renderer {
     state: GameState,
     effects: Effects | undefined,
     onProgress: (progress: LoadingProgress) => void,
+    mirrored = false,
   ): Promise<boolean> {
     const art = this.manifest;
     if (!art) throw new LoadingError("prewarm", "incompatible");
@@ -119,7 +121,7 @@ export class Renderer {
     };
     add(art.background);
     add(this.netFrame(state));
-    add(this.scoreFrame(state));
+    add(this.scoreFrame(state, mirrored));
     add(art.markers);
     const players = effects?.frozenPlayers ?? state.players;
     for (const player of [players.left, players.right])
@@ -128,8 +130,7 @@ export class Renderer {
     add(art.courtBrand);
     if (effects?.introAlpha) {
       add(art.ui.intro);
-      add(art.introNames[`${state.players.left.characterId}-left`]);
-      add(art.introNames[`${state.players.right.characterId}-right`]);
+      for (const frame of this.introFrames(state, mirrored)) add(frame);
     }
     if (effects?.finishAlpha) add(art.ui.finish);
     let completed = 0;
@@ -172,6 +173,7 @@ export class Renderer {
     viewport: Viewport,
     state: GameState,
     effects?: Effects,
+    mirrored = false,
   ): void {
     ctx.fillStyle = "#101722";
     ctx.fillRect(0, 0, viewport.width, viewport.height);
@@ -183,9 +185,14 @@ export class Renderer {
     ctx.beginPath();
     ctx.rect(0, 0, 640, 426);
     ctx.clip();
+    ctx.save();
+    this.reflectWorld(ctx, mirrored);
     this.draw(ctx, art.background);
     this.draw(ctx, this.netFrame(state));
-    this.draw(ctx, this.scoreFrame(state));
+    ctx.restore();
+    this.draw(ctx, this.scoreFrame(state, mirrored));
+    ctx.save();
+    this.reflectWorld(ctx, mirrored);
     this.draw(ctx, art.markers);
     if (effects)
       for (const p of effects.particles)
@@ -203,7 +210,8 @@ export class Renderer {
       this.draw(ctx, art.shuttle);
       ctx.restore();
     }
-    this.draw(ctx, art.courtBrand); // Original static court logo, depth38; no external action.
+    ctx.restore();
+    this.draw(ctx, art.courtBrand); // Original static court logo, depth38; readable in either view.
     if (effects) {
       // Intro is appended at match creation, sparks later. Finish is appended at victory;
       // terminal confetti is appended last. Never blanket-separate spark from overlay.
@@ -212,18 +220,15 @@ export class Renderer {
         ctx.globalAlpha = effects.introAlpha;
         ctx.translate(320, 213);
         this.draw(ctx, art.ui.intro);
-        this.draw(
-          ctx,
-          art.introNames[`${state.players.left.characterId}-left`],
-        );
-        this.draw(
-          ctx,
-          art.introNames[`${state.players.right.characterId}-right`],
-        );
+        for (const frame of this.introFrames(state, mirrored))
+          this.draw(ctx, frame);
         ctx.restore();
       }
+      ctx.save();
+      this.reflectWorld(ctx, mirrored);
       for (const spark of effects.sparks)
         if (spark.order < effects.finishOrder) this.drawSpark(ctx, spark);
+      ctx.restore();
       if (effects.finishAlpha > 0) {
         ctx.save();
         ctx.globalAlpha = effects.finishAlpha;
@@ -231,12 +236,20 @@ export class Renderer {
         this.draw(ctx, art.ui.finish);
         ctx.restore();
       }
+      ctx.save();
+      this.reflectWorld(ctx, mirrored);
       for (const spark of effects.sparks)
         if (spark.order >= effects.finishOrder) this.drawSpark(ctx, spark);
       for (const p of effects.particles)
         if (p.kind === "confetti") this.drawParticle(ctx, p);
+      ctx.restore();
     }
     ctx.restore();
+  }
+  private reflectWorld(ctx: CanvasRenderingContext2D, mirrored: boolean): void {
+    if (!mirrored) return;
+    ctx.translate(CLASSIC_WORLD.width, 0);
+    ctx.scale(-1, 1);
   }
   private draw(
     ctx: CanvasRenderingContext2D,
@@ -257,12 +270,24 @@ export class Renderer {
       Math.max(0, Math.min(frames.length - 1, state.net.frame - 1))
     ];
   }
-  private scoreFrame(state: GameState): DrawFrame | undefined {
+  private scoreFrame(
+    state: GameState,
+    mirrored: boolean,
+  ): DrawFrame | undefined {
     const score =
       state.phase === "matchEnd" && state.winner
-        ? `${state.winner === "left" ? "p1" : "p2"}wins`
-        : `${state.score.left}-${state.score.right}`;
+        ? `${displaySide(state.winner, mirrored) === "left" ? "p1" : "p2"}wins`
+        : `${state.score[displaySide("left", mirrored)]}-${state.score[displaySide("right", mirrored)]}`;
     return this.manifest!.scores[score];
+  }
+  private introFrames(state: GameState, mirrored: boolean): DrawFrame[] {
+    const names = this.manifest!.introNames;
+    return [
+      names[`${state.players[displaySide("left", mirrored)].characterId}-left`],
+      names[
+        `${state.players[displaySide("right", mirrored)].characterId}-right`
+      ],
+    ];
   }
   private playerFrames(player: PlayerState): DrawFrame[] {
     const art = this.manifest!;

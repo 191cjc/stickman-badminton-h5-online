@@ -12,6 +12,8 @@ Blur, hidden visibility, and pagehide call `release()`. `main.ts` clears predict
 
 Keyboard handlers skip game input on focused button/input elements. Native button Space keyup must retain its browser default while clearing any held game Space state. Preserve Canvas focus after matching and normal keyboard access to action buttons.
 
+Input's optional `enabled: () => boolean` callback gates new keyboard/pointer presses during loading and settings. Keyup/pointer cancellation still release. Ignore keyboard repeat events: held controls are already tracked, and repeat after release must not recreate a stale move/hit edge. Settings Escape is intercepted in document capture before the gameplay leave shortcut; native checkbox Space remains a settings action. See the [perspective lifecycle](state-management.md#optional-self-left-perspective).
+
 ## Network lifecycle
 
 [network.ts](../../../src/client/network.ts) fetches the same-origin session with cookies, then opens a `badminton-v4` WS. `connecting` and socket-state guards prevent duplicate connection creation. Automatic retries use a bounded 15-second window; manual retries reset it. Policy close 1008, protocol mismatch, and an initial duplicate active guest stop automatic retry and display a reason.

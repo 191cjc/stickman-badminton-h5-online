@@ -123,3 +123,52 @@ Each retained pending event owns its `suppressSound` flag; there is no independe
 Assert400ms held movement at60Hz and30Hz sends reaches the same authority position;120Hz logical changes cannot double speed. Test two ledgers, coalesced edge ownership, retained held anchors, null ackTick, asymmetric-uplink overlap, same-ack fallback without repeated swing, expiry without edge resurrection and eventual acknowledgement recovery. Bounds must hold under sustained sends and multi-second stalls. Diagnostics expose fixed steps, alignment/fallback reasons, stalls/expiry/suspension and confirmed-held age as detached bounded numeric/boolean state.
 
 Wrong: one predicted physics step per sent packet, or `steps.filter(step.id > candidate)` without checking unacknowledged owners. Correct: fixed elapsed-time advance, then validated server-owned replay boundary or a single bounded fallback generation.
+
+## Optional self-left perspective
+
+### 1. Scope / Trigger
+
+Display-side preferences cross UI, input, actual-seat prediction and original-art rendering. Keep authenticated identity separate from presentation; changing a view cannot change authority or simulate another seat.
+
+### 2. Signatures
+
+[perspective.ts](../../../src/client/perspective.ts) exports `isMirrored(enabled: boolean, actualSide?: Side): boolean`, `displaySide(side: Side, mirrored: boolean): Side`, `worldInput(frame: InputFrame, mirrored: boolean): InputFrame`, `readSelfLeft(storage?): boolean`, `saveSelfLeft(enabled: boolean, storage?): void`, and `SELF_LEFT_STORAGE_KEY`. Storage is a factory returning getItem/setItem, so even access to window.localStorage is caught.
+
+`Renderer.render(ctx, viewport, state, effects?, mirrored = false)` and `Renderer.prepare(viewport, state, effects, onProgress, mirrored = false)` accept the same explicit perspective; default callers retain the ordinary view.
+
+### 3. Contracts
+
+- Default false; only stored exact `"true"` under `fiso-online:self-left:v1` enables. Persist locally, never in Cookie/WS. Invalid/missing/throwing storage defaults off; write failure retains the live choice.
+- Mirror only when enabled and actual side is right. Main's side, Snapshot, player.side, Prediction identity, winner/server comparisons, physics and protocol4 stay actual. No seat means ordinary view. Retained result keeps its side even after latest/room expire.
+- Map horizontal screen intent once before send. Commit/advance seq/accept prediction only on successful send, using that same mapped frame. Zero stays zero; jump/hit fields are unchanged. Reflection is its own inverse for side selection.
+- World reflection is x'=640-x, applied only through Canvas transforms to background/net/markers/actors/shuttle/world effects. Scores, Logo, intro/name/finish glyphs remain unmirrored at existing depths. Choose scores, p1/p2 winner and left/right role-name artwork by displayed sides. Keep original spark/finish append order and source registration.
+- Preserve authority/effect objects, interpolation clock, effect/audio cursors, adaptive quality stage and source-SHA/backing-size rasters on a toggle. No per-frame state mirror/deep copy, perspective-specific cache key, full raster invalidation or event replay. Prepare and render share displayed art selection.
+- Opening settings or changing view releases Input and clears prediction with existing best-effort release. While open, gate sampling and new keyboard/touch presses; the authoritative match continues. Close restores normal guarded sampling. Keep seq and room; release/cancel events still clear controls, and repeat cannot recreate them.
+- Display-ordered labels, matched position, accessible scores and result text agree. Retain result data for switching after room reclamation; winner/server identity remains actual. Settings obey startup readiness and compact-layout constraints.
+
+### 4. Validation & Error Matrix
+
+| Condition | Expected |
+| --- | --- |
+| Actual left, either preference | Ordinary world; own player left |
+| Actual right, disabled/enabled | Ordinary right / mirrored left; screen directions preserved |
+| Storage getter/read/write throws | Play and live toggle work; no uncaught startup error |
+| Input send rejects | Pending edges/seq/history stay transactional under mirrored mapping |
+| Held key then open/toggle/close | Release; no repeat-created movement or jump/hit leak |
+| Panel Space/Escape | Toggle checkbox / close panel; no hit or leave command |
+| Natural result then room idle | Retained side/result still yields correct displayed score/win art |
+| Mirror changes at same density | Existing source caches/effects reused within64/32MiB budgets |
+
+### 5. Good / Base / Bad Cases
+
+Good: actual right Pirate chooses self-left, sees Pirate's left intro artwork and moves screen-right using actual move-1. Base: a new browser keeps the ordinary view. Bad: assign side="left" locally, invert the entire Canvas including text, or mirror state consumed by prediction.
+
+### 6. Tests Required
+
+Perspective tests cover all seat/preference combinations, exact storage values/property/read/write errors, move mapping with unchanged authority and accepted/rejected transaction edges. Renderer tests inspect real transform/registration, readable score/win/name/Logo/finish selection, original effect order and prepare/render cache reuse without state mutation. Input tests cover gated presses/repeat after release and normal native Space behavior. Isolated two-guest Chromium checks differing views with same-tick authority, real keys/touch directions, panel focus/Space/Escape, blur/reconnect/rematch, natural result/reclaim, persistence and compact layouts. Distinguish this from real two-computer latency or other-browser acceptance.
+
+### 7. Wrong vs Correct
+
+Wrong: `side = "left"` when enabling; `canvas.style.transform = "scaleX(-1)"`; clear all effects/rasters on a preference change.
+
+Correct: keep actual side; `const command = worldInput(input.peek(seq + 1), isMirrored(enabled, side));` then preserve the existing send/commit/prediction transaction. Reflect only world layers and select readable art by display side.

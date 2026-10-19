@@ -22,6 +22,7 @@ function fixture(art = manifest) {
   const events: string[] = [];
   const urls: string[] = [];
   const canvases: HTMLCanvasElement[] = [];
+  const sources = new Map<CanvasImageSource, string>();
   const flushes = vi.fn(() => {
     events.push("flush");
     return {} as ImageData;
@@ -70,6 +71,7 @@ function fixture(art = manifest) {
             height: number,
           ) => {
             events.push("raster");
+            sources.set(canvas, image.src);
             rasters.push({ src: image.src, width, height });
           },
           getImageData: flushes,
@@ -87,7 +89,7 @@ function fixture(art = manifest) {
     return 1;
   });
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
-  return { events, rasters, flushes, canvases, urls };
+  return { events, rasters, flushes, canvases, urls, sources };
 }
 function drawContext(viewport: Viewport) {
   const stack: Array<[number, number]> = [];
@@ -349,3 +351,219 @@ it("a raster-density invalidation cancels an in-flight preparation generation", 
   ).toBe(false);
   expect(renderer.diagnostics().raster.entries).toBe(0);
 });
+
+type Matrix = [number, number, number, number, number, number];
+function recordedContext(
+  viewport: Viewport,
+  sources: Map<CanvasImageSource, string>,
+) {
+  let matrix: Matrix = [viewport.dpr, 0, 0, viewport.dpr, 0, 0];
+  const stack: Matrix[] = [];
+  const draws: Array<{ path: string; matrix: Matrix; destination: number[] }> =
+    [];
+  const context = {
+    save: () => stack.push([...matrix]),
+    restore: () => {
+      matrix = stack.pop()!;
+    },
+    translate: (x: number, y: number) => {
+      matrix[4] += matrix[0] * x + matrix[2] * y;
+      matrix[5] += matrix[1] * x + matrix[3] * y;
+    },
+    scale: (x: number, y: number) => {
+      matrix[0] *= x;
+      matrix[1] *= x;
+      matrix[2] *= y;
+      matrix[3] *= y;
+    },
+    rotate: (angle: number) => {
+      const [a, b, c, d, e, f] = matrix;
+      const cos = Math.cos(angle),
+        sin = Math.sin(angle);
+      matrix = [
+        a * cos + c * sin,
+        b * cos + d * sin,
+        c * cos - a * sin,
+        d * cos - b * sin,
+        e,
+        f,
+      ];
+    },
+    getTransform: () => {
+      const [a, b, c, d, e, f] = matrix;
+      return { a, b, c, d, e, f };
+    },
+    drawImage: (source: CanvasImageSource, ...destination: number[]) => {
+      const url = sources.get(source)!;
+      draws.push({
+        path: url.includes("/classic/")
+          ? url.split("/classic/")[1].split("?")[0]
+          : "tinted-confetti",
+        matrix: [...matrix],
+        destination,
+      });
+    },
+    fillRect: vi.fn(),
+    beginPath: vi.fn(),
+    rect: vi.fn(),
+    clip: vi.fn(),
+  } as unknown as CanvasRenderingContext2D;
+  return { context, draws };
+}
+function freezeDeep(value: object): void {
+  for (const child of Object.values(value))
+    if (child && typeof child === "object") freezeDeep(child);
+  Object.freeze(value);
+}
+
+it("reflects actual world matrices and every original effect while keeping score, Logo, names and overlays readable at their depths", async () => {
+  const { sources } = fixture();
+  const renderer = new Renderer();
+  await renderer.load();
+  const state = new Simulation({
+    characters: { left: "pirate", right: "toaster" },
+  }).snapshot();
+  state.score = { left: 1, right: 2 };
+  state.shuttle.state = "flying";
+  state.shuttle.x = 410;
+  state.shuttle.y = 145;
+  state.shuttle.rotation = 31;
+  const original = structuredClone(state);
+  freezeDeep(state);
+  const effects = new Effects();
+  effects.reset("test");
+  effects.ingest({
+    type: "snapshot",
+    room: "test",
+    tick: 0,
+    ack: 0,
+    ackTick: null,
+    status: "playing",
+    reconnectRemainingMs: 0,
+    state,
+    effects: { cursor: 0, events: [] },
+  });
+  effects.finish(true, state);
+  effects.advance(0, 1 / 60, () => {});
+  effects.finishOrder = 2;
+  effects.sparks.push(
+    { x: 221, y: 170, dir: 17, frame: 1, tick: 0, order: 1 },
+    { x: 341, y: 120, dir: -35, frame: 4, tick: 0, order: 3 },
+  );
+  effects.particles.length = 0;
+  effects.particles.push(
+    createParticle("smoke", 480, 210, () => 0.3),
+    createParticle("tail", 411, 146, () => 0.4),
+    createParticle("confetti", 73, 89, () => 0.2),
+  );
+  const offsetView = { ...view, offsetX: 17, offsetY: 11 };
+  // Materialize the asynchronously tinted original image first.
+  renderer.render(drawContext(offsetView), offsetView, state, effects);
+  await Promise.resolve();
+  const ordinary = recordedContext(offsetView, sources),
+    reflected = recordedContext(offsetView, sources);
+  renderer.render(ordinary.context, offsetView, state, effects, false);
+  const before = renderer.diagnostics();
+  const effectsBefore = effects.diagnostics();
+  renderer.render(reflected.context, offsetView, state, effects, true);
+  const readable = new Set([
+    manifest.scores["1-2"].path,
+    manifest.courtBrand.path,
+    manifest.ui.intro.path,
+    manifest.ui.finish.path,
+    manifest.introNames["pirate-left"].path,
+    manifest.introNames["toaster-right"].path,
+  ]);
+  expect(reflected.draws).toHaveLength(ordinary.draws.length);
+  ordinary.draws.forEach((normal, index) => {
+    const mirror = reflected.draws[index];
+    if (readable.has(normal.path)) {
+      expect(mirror.matrix).toEqual(normal.matrix);
+      expect(mirror.matrix[0]).toBeGreaterThan(0);
+      expect(mirror.matrix[3]).toBeGreaterThan(0);
+    } else {
+      expect(mirror.path).toBe(normal.path);
+      const [a, b, c, d, e, f] = normal.matrix;
+      const expected = [
+        -a,
+        b,
+        -c,
+        d,
+        2 * offsetView.offsetX * view.dpr + 640 * view.scale * view.dpr - e,
+        f,
+      ];
+      mirror.matrix.forEach((value, j) =>
+        expect(value).toBeCloseTo(expected[j], 9),
+      );
+      expect(mirror.destination).toEqual(normal.destination);
+    }
+  });
+  expect(reflected.draws.map(({ path }) => path)).toContain(
+    manifest.scores["2-1"].path,
+  );
+  expect(reflected.draws.map(({ path }) => path)).toContain(
+    manifest.introNames["toaster-left"].path,
+  );
+  expect(reflected.draws.map(({ path }) => path)).toContain(
+    manifest.introNames["pirate-right"].path,
+  );
+  const paths = reflected.draws.map(({ path }) => path);
+  expect(paths.indexOf(manifest.effects.spark.frames[0].path)).toBeLessThan(
+    paths.indexOf(manifest.ui.finish.path),
+  );
+  expect(paths.indexOf(manifest.effects.spark.frames[3].path)).toBeGreaterThan(
+    paths.indexOf(manifest.ui.finish.path),
+  );
+  expect(paths.at(-1)).toBe("tinted-confetti");
+  expect(state).toEqual(original);
+  expect(effects.diagnostics()).toEqual(effectsBefore);
+  expect(renderer.diagnostics().confettiRaster.misses).toBe(
+    before.confettiRaster.misses,
+  );
+  const after = renderer.diagnostics().raster;
+  expect(after.evictions).toBe(before.raster.evictions);
+  expect(after.misses - before.raster.misses).toBe(3); // Only alternate score/two readable names.
+});
+
+it.each(["left", "right"] as const)(
+  "prepares the same mirrored %s winner and intro art as render without a new world cache",
+  async (winner) => {
+    const { sources, rasters } = fixture();
+    const renderer = new Renderer();
+    await renderer.load();
+    const state = new Simulation({
+      characters: { left: "pirate", right: "toaster" },
+    }).snapshot();
+    state.phase = "matchEnd";
+    state.winner = winner;
+    state.score =
+      winner === "left" ? { left: 7, right: 2 } : { left: 2, right: 7 };
+    const effects = new Effects();
+    await renderer.prepare(view, state, effects, () => {}, true);
+    const misses = renderer.diagnostics().raster.misses;
+    const draw = recordedContext(view, sources);
+    renderer.render(draw.context, view, state, effects, true);
+    expect(renderer.diagnostics().raster.misses).toBe(misses);
+    expect(draw.draws.map(({ path }) => path)).toContain(
+      manifest.scores[winner === "left" ? "p2wins" : "p1wins"].path,
+    );
+    expect(
+      rasters.some(({ src }) =>
+        src.includes(manifest.introNames["toaster-left"].path),
+      ),
+    ).toBe(true);
+    expect(
+      rasters.some(({ src }) =>
+        src.includes(manifest.introNames["pirate-right"].path),
+      ),
+    ).toBe(true);
+    renderer.render(drawContext(view), view, state, effects, false);
+    const normalMisses = renderer.diagnostics().raster.misses;
+    renderer.render(drawContext(view), view, state, effects, true);
+    expect(renderer.diagnostics().raster.misses).toBe(normalMisses);
+    expect(renderer.diagnostics().raster.limits.bytes).toBe(64 * 1024 * 1024);
+    expect(renderer.diagnostics().confettiRaster.limits.bytes).toBe(
+      32 * 1024 * 1024,
+    );
+  },
+);

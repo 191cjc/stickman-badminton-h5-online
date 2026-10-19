@@ -21,6 +21,7 @@ export class Input {
     onMute: () => void = () => {},
     onLeave: () => void = () => {},
     private readonly onChange: () => void = () => {},
+    private readonly enabled: () => boolean = () => true,
   ) {
     window.addEventListener("keydown", (event) => {
       if (
@@ -28,6 +29,12 @@ export class Input {
         ["BUTTON", "INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)
       )
         return;
+      // After a release (settings/blur), an OS repeat is not a fresh press.
+      if (!this.enabled()) return;
+      if (event.repeat) {
+        if (bindings[event.code]) event.preventDefault();
+        return;
+      }
       if (!event.repeat && ["KeyM", "Escape"].includes(event.code)) {
         event.preventDefault();
         if (event.code === "KeyM") onMute();
@@ -60,6 +67,7 @@ export class Input {
       .forEach((button) => {
         const key = button.dataset.control!;
         button.addEventListener("pointerdown", (event) => {
+          if (!this.enabled()) return;
           event.preventDefault();
           button.setPointerCapture(event.pointerId);
           this.press(key);

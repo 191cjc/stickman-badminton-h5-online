@@ -154,3 +154,63 @@ it("notifies only after logical changes, preserving aliases, rapid edges and poi
   input.commit(input.peek(1));
   expect(changes).toHaveLength(4); // Committing edges is not a new user operation.
 });
+it("settings gate ignores native presses and touch, and closing cannot resurrect a released held key via repeat", () => {
+  const win = new EventTarget(),
+    doc = new EventTarget();
+  const touch = Object.assign(new EventTarget(), {
+    dataset: { control: "KeyS" },
+    setPointerCapture: vi.fn(),
+  });
+  Object.assign(doc, { hidden: false, querySelectorAll: () => [touch] });
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", doc);
+  vi.stubGlobal("HTMLElement", Element);
+  let enabled = true;
+  const leave = vi.fn();
+  const input = new Input(
+    () => {},
+    undefined,
+    leave,
+    undefined,
+    () => enabled,
+  );
+  const key = (code: string, repeat = false, target?: Element) => {
+    const event = Object.assign(new Event("keydown", { cancelable: true }), {
+      code,
+      repeat,
+    });
+    if (target) Object.defineProperty(event, "target", { value: target });
+    win.dispatchEvent(event);
+    return event;
+  };
+  key("KeyA");
+  expect(input.peek(1).move).toBe(-1);
+  enabled = false;
+  input.release(false);
+  expect(key("Space", false, new Element("INPUT")).defaultPrevented).toBe(
+    false,
+  );
+  key("KeyD");
+  key("KeyW");
+  key("Escape");
+  touch.dispatchEvent(
+    Object.assign(new Event("pointerdown"), { pointerId: 1 }),
+  );
+  enabled = true;
+  expect(key("KeyA", true).defaultPrevented).toBe(true);
+  expect(key("ArrowLeft", true).defaultPrevented).toBe(true);
+  expect(key("Space", true).defaultPrevented).toBe(true);
+  expect(key("Space", true, new Element("INPUT")).defaultPrevented).toBe(
+    false,
+  );
+  expect(input.peek(1)).toMatchObject({
+    move: 0,
+    jumpPressed: false,
+    hitPressed: false,
+    hitHeld: false,
+  });
+  expect(leave).not.toHaveBeenCalled();
+  expect(touch.setPointerCapture).not.toHaveBeenCalled();
+  key("KeyA");
+  expect(input.peek(1).move).toBe(-1);
+});

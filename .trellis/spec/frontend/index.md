@@ -17,7 +17,7 @@ The client uses native TypeScript, static HTML, CSS, and Canvas 2D. `main.ts` co
 | [Directory structure](directory-structure.md) | Module ownership and dependencies |
 | [Component guidelines](component-guidelines.md) | Static DOM, Canvas presentation, accessibility |
 | [Event lifecycle](event-lifecycle.md) | Keyboard/touch, focus loss, WS reconnect, timers |
-| [State management](state-management.md) | Scene state, authority, prediction, interpolation |
+| [State management](state-management.md) | Scene state, authority, prediction, interpolation, optional self-left perspective |
 | [Type safety](type-safety.md) | Shared contracts and boundary assertions |
 | [Quality guidelines](quality-guidelines.md) | Checks and browser acceptance limits |
 

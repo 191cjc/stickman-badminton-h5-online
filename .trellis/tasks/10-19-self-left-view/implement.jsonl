@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend ownership and required checks"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Client module boundary and source provenance"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Accessible court actions, original art, raster/loading/quality contracts"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Transactional input send, native focus, release and paced sampling"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Actual-seat prediction, authority, interpolation and effects ownership"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Shared types, strict TS and boundary assumptions"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Meaningful tests and isolated browser acceptance limits"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Preserve protocol4 logical input and authenticated seats"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace screen intent to actual authority and presentation"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Reuse current owners without divergent gameplay"}
+{"file": ".trellis/tasks/10-19-self-left-view/research/perspective.md", "reason": "Source-backed mirror, readable art, cache and lifecycle investigation"}

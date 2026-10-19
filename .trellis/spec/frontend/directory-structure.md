@@ -7,6 +7,7 @@
 | [index.html](../../../index.html)                            | Page structure, action buttons, Canvas, status, touch controls           |
 | [main.ts](../../../src/client/main.ts)                       | Scene transitions, DOM updates, frame loop and controller composition    |
 | [input.ts](../../../src/client/input.ts)                     | Keyboard/pointer state and logical input frames                          |
+| [perspective.ts](../../../src/client/perspective.ts)         | Browser-local self-left preference, display-side and inverse input mapping |
 | [network.ts](../../../src/client/network.ts)                 | Session initialization, WS, retries, RTT                                 |
 | [prediction.ts](../../../src/client/prediction.ts)           | Local player correction/replay and remote interpolation                  |
 | [input-scheduler.ts](../../../src/client/input-scheduler.ts) | Page-owned60Hz input timer, independent of RAF                           |

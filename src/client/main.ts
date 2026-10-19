@@ -19,6 +19,13 @@ import { InputScheduler } from "./input-scheduler";
 import { RenderQuality } from "./render-quality";
 import { Diagnostics } from "./diagnostics";
 import { LoadingError, type LoadingProgress } from "./loading";
+import {
+  displaySide,
+  isMirrored,
+  readSelfLeft,
+  saveSelfLeft,
+  worldInput,
+} from "./perspective";
 
 function el<T extends HTMLElement>(id: string): T {
   const value = document.getElementById(id);
@@ -34,7 +41,14 @@ if (!ctx) throw new Error("浏览器不支持 Canvas 2D");
 const start = el<HTMLButtonElement>("start"),
   cancel = el<HTMLButtonElement>("cancel"),
   leave = el<HTMLButtonElement>("leave"),
-  mute = el<HTMLButtonElement>("mute");
+  mute = el<HTMLButtonElement>("mute"),
+  settings = el<HTMLButtonElement>("settings"),
+  settingsPanel = el("settings-panel"),
+  selfLeft = el<HTMLInputElement>("self-left-view");
+let settingsOpen = false,
+  selfLeftEnabled = readSelfLeft(),
+  result: Extract<ServerMessage, { type: "result" }> | undefined;
+selfLeft.checked = selfLeftEnabled;
 const startLabel = el("start-label"),
   rematchArt = el<HTMLImageElement>("rematch-art");
 let rematchUp = "",
@@ -115,6 +129,7 @@ function overlay(
   el("overlay-detail").textContent = detail;
 }
 function buttons(): void {
+  settings.disabled = !assetsReady;
   start.hidden = scene === "online" || scene === "queued";
   start.disabled = !assetsReady || start.hidden;
   startLabel.textContent = network.refreshRequired
@@ -139,6 +154,26 @@ function clearInput(notify = true): void {
   input.release(false);
   prediction?.clear();
   if (notify) network.send({ type: "release" });
+}
+function mirrored(): boolean {
+  return isMirrored(selfLeftEnabled, side);
+}
+function setSettingsOpen(open: boolean, restoreFocus = true): void {
+  if (open && !assetsReady) return;
+  if (open === settingsOpen) return;
+  clearInput();
+  settingsOpen = open;
+  settingsPanel.hidden = !open;
+  settingsPanel.inert = !open || !assetsReady;
+  settings.setAttribute("aria-expanded", String(open));
+  document.querySelector<HTMLElement>(".touch-controls")!.inert =
+    !assetsReady || open;
+  if (open) selfLeft.focus();
+  else {
+    if (restoreFocus) (scene === "online" ? canvas : settings).focus();
+    else if (settingsPanel.contains(document.activeElement)) settings.focus();
+    syncInputClock();
+  }
 }
 function toggleMute(): void {
   void audio.unlock();
@@ -165,6 +200,7 @@ const input = new Input(
   toggleMute,
   leaveMatch,
   () => scheduler.request(),
+  () => assetsReady && !settingsOpen,
 );
 const network = new Network(
   handleMessage,
@@ -200,7 +236,7 @@ const scheduler = new InputScheduler(() => {
     scheduler.setActive(false);
     return;
   }
-  const command = input.peek(seq + 1);
+  const command = worldInput(input.peek(seq + 1), mirrored());
   const accepted = network.send(command);
   diagnostics?.input(performance.now(), accepted);
   if (!accepted) return;
@@ -212,6 +248,7 @@ const scheduler = new InputScheduler(() => {
 function canSampleInput(): boolean {
   return (
     assetsReady &&
+    !settingsOpen &&
     scene === "online" &&
     latest?.status === "playing" &&
     network.connected &&
@@ -241,7 +278,9 @@ function idle(reason?: string): void {
   if (!alreadyIdle) quality.resetObservation(performance.now());
   clearInput(false);
   scene = "idle";
+  setSettingsOpen(false, false);
   naturalResult = false;
+  result = undefined;
   latest = undefined;
   side = undefined;
   room = undefined;
@@ -262,21 +301,23 @@ function idle(reason?: string): void {
         : "选择角色后点击「开始匹配」，另一位玩家加入后自动开赛。",
   );
   labels();
+  updateScores(backdrop.score);
   buttons();
 }
 function labels(): void {
-  el("left-label").textContent = side
-    ? side === "left"
+  const ownDisplaySide = side && displaySide(side, mirrored());
+  el("left-label").textContent = ownDisplaySide
+    ? ownDisplaySide === "left"
       ? "你 · 左侧"
       : "对手 · 左侧"
     : "左侧";
-  el("right-label").textContent = side
-    ? side === "right"
+  el("right-label").textContent = ownDisplaySide
+    ? ownDisplaySide === "right"
       ? "你 · 右侧"
       : "对手 · 右侧"
     : "右侧";
-  el("hint").textContent = side
-    ? `你控制${side === "left" ? "左侧" : "右侧"} · ${CHARACTERS[selected].name}。A/D 或 ←/→ 移动，W/↑ 跳跃，S/↓/空格击球与发球。M 静音，Esc 结束比赛。`
+  el("hint").textContent = ownDisplaySide
+    ? `你控制${ownDisplaySide === "left" ? "左侧" : "右侧"} · ${CHARACTERS[selected].name}。A/D 或 ←/→ 移动，W/↑ 跳跃，S/↓/空格击球与发球。M 静音，Esc 结束比赛。`
     : "两位玩家使用相同按键，匹配后显示你的场地位置。";
 }
 function handleMessage(message: ServerMessage): void {
@@ -299,7 +340,9 @@ function handleMessage(message: ServerMessage): void {
     quality.resetObservation(performance.now());
     clearInput(false);
     scene = "queued";
+    setSettingsOpen(false, false);
     naturalResult = false;
+    result = undefined;
     latest = undefined;
     prediction = undefined;
     side = undefined;
@@ -314,6 +357,7 @@ function handleMessage(message: ServerMessage): void {
       `${CHARACTERS[selected].name} 已准备，另一位玩家加入后会自动开赛。`,
     );
     labels();
+    updateScores(backdrop.score);
     buttons();
     return;
   }
@@ -321,7 +365,9 @@ function handleMessage(message: ServerMessage): void {
     quality.resetObservation(performance.now());
     clearInput(false);
     scene = "online";
+    setSettingsOpen(false, false);
     naturalResult = false;
+    result = undefined;
     side = message.side;
     room = message.room;
     selected = message.characters[side];
@@ -336,7 +382,7 @@ function handleMessage(message: ServerMessage): void {
     overlay(
       "匹配成功",
       "准备开赛",
-      `你在${side === "left" ? "左侧" : "右侧"}。`,
+      `你在${displaySide(side, mirrored()) === "left" ? "左侧" : "右侧"}。`,
     );
     labels();
     buttons();
@@ -393,33 +439,46 @@ function handleMessage(message: ServerMessage): void {
     quality.resetObservation(performance.now());
     clearInput(false);
     scene = "result";
+    setSettingsOpen(false, false);
+    result = message;
     naturalResult = message.reason === "score";
     effects.finish(naturalResult);
-    const reason = {
-      score: "比赛正常结束",
-      leave: "有玩家主动结束比赛",
-      disconnect: "重连超时，比赛按弃权结算",
-      timeout: "比赛达到 20 分钟时限",
-    }[message.reason];
-    overlay(
-      "比赛结果",
-      message.winner === null
-        ? "比赛结束"
-        : message.winner === side
-          ? "你赢了！"
-          : "本场结束",
-      `${message.score.left} : ${message.score.right} · ${reason}。选择角色后可再次匹配。`,
-    );
-    el("match-status").textContent = reason;
+    showResult();
     buttons();
     return;
   }
   if (message.type === "error")
     el("match-status").textContent = `操作未完成：${message.code}`;
 }
+function showResult(): void {
+  if (!result) return;
+  const message = result;
+  const reason = {
+    score: "比赛正常结束",
+    leave: "有玩家主动结束比赛",
+    disconnect: "重连超时，比赛按弃权结算",
+    timeout: "比赛达到 20 分钟时限",
+  }[message.reason];
+  overlay(
+    "比赛结果",
+    message.winner === null
+      ? "比赛结束"
+      : message.winner === side
+        ? "你赢了！"
+        : "本场结束",
+    `${message.score[displaySide("left", mirrored())]} : ${message.score[displaySide("right", mirrored())]} · ${reason}。选择角色后可再次匹配。`,
+  );
+  el("match-status").textContent = reason;
+  updateScores(message.score);
+}
+function updateScores(score: typeof backdrop.score): void {
+  el("score-left").textContent = String(score[displaySide("left", mirrored())]);
+  el("score-right").textContent = String(
+    score[displaySide("right", mirrored())],
+  );
+}
 function updateHud(state: typeof backdrop): void {
-  el("score-left").textContent = String(state.score.left);
-  el("score-right").textContent = String(state.score.right);
+  updateScores(result?.score ?? state.score);
   if (scene === "result") return;
   el("match-status").textContent =
     latest?.status === "reconnecting"
@@ -455,6 +514,30 @@ cancel.addEventListener("click", () => {
 });
 leave.addEventListener("click", leaveMatch);
 mute.addEventListener("click", toggleMute);
+settings.addEventListener("click", () => setSettingsOpen(!settingsOpen));
+el("settings-close").addEventListener("click", () => setSettingsOpen(false));
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (!settingsOpen || event.code !== "Escape") return;
+    event.preventDefault();
+    event.stopPropagation();
+    setSettingsOpen(false);
+  },
+  true,
+);
+selfLeft.addEventListener("change", () => {
+  if (!assetsReady) return;
+  clearInput();
+  selfLeftEnabled = selfLeft.checked;
+  saveSelfLeft(selfLeftEnabled);
+  labels();
+  updateScores(result?.score ?? latest?.state.score ?? backdrop.score);
+  if (result) showResult();
+  else if (scene === "online" && !latest && side)
+    el("overlay-detail").textContent =
+      `你在${displaySide(side, mirrored()) === "left" ? "左侧" : "右侧"}。`;
+});
 for (const button of [start, cancel, leave]) {
   button.addEventListener("pointerenter", () => audio.play("hover"));
 }
@@ -547,6 +630,7 @@ function frame(time: number): void {
     view,
     state,
     scene === "online" || scene === "result" ? effects : undefined,
+    mirrored(),
   );
   diagnostics?.frame(time, performance.now() - began);
 }
@@ -574,6 +658,7 @@ async function prepareCourt(): Promise<void> {
       latest?.state ?? backdrop,
       scene === "online" || scene === "result" ? effects : undefined,
       loading,
+      mirrored(),
     );
     const currentView = viewport();
     if (

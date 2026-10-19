@@ -63,8 +63,32 @@
         </div>
         <div class="court-actions" inert>
           <button id="mute" type="button" aria-pressed="false">静音</button>
+          <button
+            id="settings"
+            type="button"
+            aria-expanded="false"
+            aria-controls="settings-panel"
+          >
+            设置
+          </button>
           <button id="leave" type="button" hidden>结束比赛</button>
         </div>
+        <section
+          id="settings-panel"
+          class="settings-panel"
+          aria-label="游戏设置"
+          hidden
+          inert
+        >
+          <label for="self-left-view"
+            ><input
+              id="self-left-view"
+              type="checkbox"
+            />自己始终显示在左侧</label
+          >
+          <p>左右键跟随画面方向。设置期间比赛继续，关闭后恢复操作。</p>
+          <button id="settings-close" type="button">完成</button>
+        </section>
         <div
           id="match-status"
           class="match-status"

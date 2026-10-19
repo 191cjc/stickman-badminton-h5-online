@@ -5,6 +5,7 @@ import { InputScheduler } from "../src/client/input-scheduler";
 import { Prediction } from "../src/client/prediction";
 import { Simulation } from "../src/shared/simulation";
 import { PROTOCOL, SUBPROTOCOL } from "../src/shared/protocol";
+import { worldInput } from "../src/client/perspective";
 
 class Socket extends EventTarget {
   static OPEN = 1;
@@ -171,6 +172,81 @@ it("paced sends retain edges and consecutive sequence through disconnection, bac
   scheduler.setActive(false);
   await vi.advanceTimersByTimeAsync(100);
   expect(socket.sent).toHaveLength(2);
+});
+it("mirrored movement reaches the actual right-side prediction only after the identical frame is accepted", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue({
+        ok: true,
+        json: async () => ({ protocol: PROTOCOL, connected: false }),
+      }),
+  );
+  const win = new EventTarget();
+  vi.stubGlobal("window", win);
+  vi.stubGlobal("document", {
+    querySelectorAll: () => [],
+    addEventListener: () => {},
+  });
+  vi.stubGlobal("HTMLElement", class {});
+  const network = new Network(
+    () => {},
+    () => {},
+    () => {},
+  );
+  await network.connect();
+  const socket = sockets[0];
+  socket.open();
+  const input = new Input(() => {});
+  const simulation = new Simulation();
+  const prediction = new Prediction("right", simulation.players.right);
+  const originalX = prediction.drawState(0).x;
+  const accepted = vi.spyOn(prediction, "accept");
+  const key = (code: string) =>
+    win.dispatchEvent(
+      Object.assign(new Event("keydown"), { code, repeat: false }),
+    );
+  key("KeyA");
+  key("KeyW");
+  key("Space");
+  let seq = 0;
+  const send = () => {
+    const frame = worldInput(input.peek(seq + 1), true);
+    if (!network.send(frame)) return;
+    input.commit(frame);
+    seq++;
+    prediction.accept(frame, seq * 17);
+  };
+  socket.bufferedAmount = 64 * 1024 + 1;
+  send();
+  expect(seq).toBe(0);
+  expect(accepted).not.toHaveBeenCalled();
+  expect(input.peek(1)).toMatchObject({
+    move: -1,
+    jumpPressed: true,
+    hitPressed: true,
+  });
+  socket.bufferedAmount = 0;
+  send();
+  send();
+  const frames = socket.sent.map((raw) => JSON.parse(raw));
+  expect(frames[0]).toMatchObject({
+    seq: 1,
+    move: 1,
+    jumpPressed: true,
+    hitPressed: true,
+  });
+  expect(frames[1]).toMatchObject({
+    seq: 2,
+    move: 1,
+    jumpPressed: false,
+    hitPressed: false,
+  });
+  expect(accepted.mock.calls.map(([frame]) => frame)).toEqual(frames);
+  prediction.advance(100);
+  expect(prediction.drawState(0).x).toBeGreaterThan(originalX);
+  expect(simulation.players.right.x).toBe(originalX); // Read-only authority context.
 });
 it("actual logical notifications expedite one transactional send and rejected expedited edges survive until accepted", async () => {
   vi.stubGlobal(
