@@ -343,3 +343,25 @@ Added default-off browser-persisted in-court self-left setting, screen-direction
 ### Status
 
 [OK] **Completed**
+
+
+## Session 12: Configurable controls and standard gamepad deployed
+<!-- trellis-session: v=2 fp=475a2b912cfd7088 -->
+
+**Date**: 2026-10-19
+**Task**: Configurable controls and standard gamepad deployed
+**Branch**: `feat/input-settings-gamepad`
+
+### Summary
+
+Added local keyboard remapping, capture/conflict/reset, standard gamepad mapping and bounded source-edge merging/rearm. Independent review and357 tests passed. Isolated Chromium main261 and natural7:0 gamepad647 same-tick authority pairs agreed; synthetic API only, physical hardware and dual-computer experience deferred. Published20261019T083234Z-controls-gamepad, service restarted16:32:36CST/PID300002. Public HTTP/WS/assets and unrelated-resource audit passed; rollback20261019T070111Z-self-left-view. Two probe-only expectation corrections retained; no product fixes. Verification ports stopped.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9b6aaeb` | feat: add configurable controls and gamepad support |
+
+### Status
+
+[OK] **Completed**

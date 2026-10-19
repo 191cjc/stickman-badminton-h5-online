@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 11
+- **Total Sessions**: 12
 - **Last Active**: 2026-10-19
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~345 | Active |
+| `journal-1.md` | ~367 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 12 | 2026-10-19 | Configurable controls and standard gamepad deployed | `9b6aaeb` | `feat/input-settings-gamepad` |
 | 11 | 2026-10-19 | Optional self-left view implemented and deployed | `bc019b7` | `feat/self-left-view` |
 | 10 | 2026-10-16 | 持续运行卡顿优化与公网发布 | `80b84ac` | `feat/sustained-smoothness` |
 | 9 | 2026-10-15 | Hit timing optimization and protocol 4 release | `4f7889a` | `feat/hit-timing` |
