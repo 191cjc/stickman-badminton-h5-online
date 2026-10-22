@@ -1,10 +1,11 @@
 import type { GameState } from "./state";
-import type { Side } from "./types";
+import type { Side, SwingChoice } from "./types";
 import { isCharacterId, type CharacterId } from "./classic/characters";
 import type { PresentationJournal } from "./classic/presentation";
+import { isShuttleSpeed, type ShuttleSpeed } from "./match-settings";
 
 export const BASE_PATH = "/badminton-h5-online/";
-export const PROTOCOL = 4;
+export const PROTOCOL = 5;
 export const SUBPROTOCOL = `badminton-v${PROTOCOL}`;
 export const SIM_HZ = 60;
 export const INPUT_HZ = 60;
@@ -21,10 +22,11 @@ export interface InputFrame {
   jumpPressed: boolean;
   hitHeld: boolean;
   hitPressed: boolean;
+  swing: SwingChoice;
 }
 export type ClientMessage =
   | InputFrame
-  | { type: "queue"; character: CharacterId }
+  | { type: "queue"; character: CharacterId; shuttleSpeed: ShuttleSpeed }
   | { type: "cancel" | "leave" | "release" }
   | { type: "ping"; time: number };
 export type RoomStatus = "playing" | "reconnecting" | "finished";
@@ -44,7 +46,7 @@ export interface Snapshot {
 export type ServerMessage =
   | Snapshot
   | { type: "hello"; protocol: number; reconnectMs: number }
-  | { type: "queued"; character: CharacterId }
+  | { type: "queued"; character: CharacterId; shuttleSpeed: ShuttleSpeed }
   | { type: "idle"; reason?: string }
   | {
       type: "matched";
@@ -52,6 +54,7 @@ export type ServerMessage =
       side: Side;
       resumed: boolean;
       characters: Record<Side, CharacterId>;
+      shuttleSpeed: ShuttleSpeed;
     }
   | {
       type: "result";
@@ -78,10 +81,15 @@ export function parseClientMessage(raw: string): ClientMessage | null {
     keys.every((k) => Object.hasOwn(v, k));
   if (
     v.type === "queue" &&
-    exactKeys(["type", "character"]) &&
-    isCharacterId(v.character)
+    exactKeys(["type", "character", "shuttleSpeed"]) &&
+    isCharacterId(v.character) &&
+    isShuttleSpeed(v.shuttleSpeed)
   )
-    return { type: "queue", character: v.character };
+    return {
+      type: "queue",
+      character: v.character,
+      shuttleSpeed: v.shuttleSpeed,
+    };
   if (["cancel", "leave", "release"].includes(v.type) && exactKeys(["type"]))
     return v as ClientMessage;
   if (
@@ -102,6 +110,7 @@ export function parseClientMessage(raw: string): ClientMessage | null {
       "jumpPressed",
       "hitHeld",
       "hitPressed",
+      "swing",
     ])
   )
     return null;
@@ -116,6 +125,11 @@ export function parseClientMessage(raw: string): ClientMessage | null {
     !["jump", "jumpPressed", "hitHeld", "hitPressed"].every(
       (k) => typeof v[k] === "boolean",
     )
+  )
+    return null;
+  if (
+    !["auto", "overhead", "underhand"].includes(v.swing as string) ||
+    (!v.hitPressed && v.swing !== "auto")
   )
     return null;
   return v as unknown as InputFrame;

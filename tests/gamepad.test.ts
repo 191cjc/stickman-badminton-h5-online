@@ -163,8 +163,8 @@ it("reset, disable, malformed samples and errors clear pad-owned holds/edges, re
   const key = (type: string, code: string) =>
     win.dispatchEvent(Object.assign(new Event(type), { code, repeat: false }));
   key("keydown", "KeyA");
-  key("keydown", "KeyW");
-  key("keyup", "KeyW");
+  key("keydown", "KeyK");
+  key("keyup", "KeyK");
   press(p, 2);
   f.controller.poll();
   f.controller.reset();

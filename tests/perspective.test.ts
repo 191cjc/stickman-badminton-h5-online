@@ -31,6 +31,7 @@ it.each([-1, 0, 1] as const)(
   (move) => {
     const frame: InputFrame = Object.freeze({
       type: "input",
+      swing: "auto",
       seq: 13,
       move,
       jump: true,

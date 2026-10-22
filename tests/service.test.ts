@@ -10,6 +10,10 @@ import {
   SUBPROTOCOL,
   parseClientMessage,
 } from "../src/shared/protocol";
+import {
+  SHUTTLE_SPEEDS,
+  type ShuttleSpeed,
+} from "../src/shared/match-settings";
 import type { CharacterId } from "../src/shared/classic/characters";
 import { CLASSIC_WORLD } from "../src/shared/classic/types";
 import type {
@@ -36,6 +40,7 @@ class Peer {
   input(move: -1 | 0 | 1, hitPressed = false): void {
     this.send({
       type: "input",
+      swing: "auto",
       seq: ++this.seq,
       move,
       jump: false,
@@ -142,12 +147,13 @@ describe("real HTTP / WebSocket rooms", () => {
   async function pair(
     leftCharacter: CharacterId = "joe",
     rightCharacter: CharacterId = "joe",
+    shuttleSpeed: ShuttleSpeed = 1,
   ): Promise<[Peer, Peer, string]> {
     const identity = await cookie();
     const left = await connect(identity);
     const right = await connect(await cookie());
-    left.send({ type: "queue", character: leftCharacter });
-    right.send({ type: "queue", character: rightCharacter });
+    left.send({ type: "queue", shuttleSpeed, character: leftCharacter });
+    right.send({ type: "queue", shuttleSpeed, character: rightCharacter });
     const l = await left.wait("matched");
     const r = await right.wait("matched");
     expect(l.side).toBe("left");
@@ -170,7 +176,7 @@ describe("real HTTP / WebSocket rooms", () => {
     await rejected(identity, 409);
     expect((await fetch(`${base}${BASE_PATH}api/health`)).status).toBe(200);
   });
-  it.each(["badminton-v1", "badminton-v2", "badminton-v3"])(
+  it.each(["badminton-v1", "badminton-v2", "badminton-v3", "badminton-v4"])(
     "negotiates the new cadence and closes a legacy page before it can claim a connection or match (%s)",
     async (legacyProtocol) => {
       const identity = await cookie();
@@ -187,13 +193,15 @@ describe("real HTTP / WebSocket rooms", () => {
         },
       );
       legacy.once("open", () =>
-        legacy.send(JSON.stringify({ type: "queue", character: "joe" })),
+        legacy.send(
+          JSON.stringify({ type: "queue", shuttleSpeed: 1, character: "joe" }),
+        ),
       );
       expect(await closed).toEqual({ code: 1008, reason: "protocol_mismatch" });
       expect(messages).toEqual([{ type: "error", code: "protocol_mismatch" }]);
       expect(service.stats()).toMatchObject({ rooms: 0, queued: 0 });
       const current = await connect(identity);
-      current.send({ type: "queue", character: "joe" });
+      current.send({ type: "queue", shuttleSpeed: 1, character: "joe" });
       await current.wait("queued");
       // Legacy pages report their version mismatch even while this guest has an
       // active current connection; they cannot replace it or change its queued role.
@@ -218,9 +226,10 @@ describe("real HTTP / WebSocket rooms", () => {
       });
       expect(current.ws.readyState).toBe(WebSocket.OPEN);
       expect(service.stats()).toMatchObject({ rooms: 0, queued: 1 });
-      current.send({ type: "queue", character: "joe" });
+      current.send({ type: "queue", shuttleSpeed: 1, character: "joe" });
       expect(await current.wait("queued")).toEqual({
         type: "queued",
+        shuttleSpeed: 1,
         character: "joe",
       });
       const health = await (
@@ -238,7 +247,7 @@ describe("real HTTP / WebSocket rooms", () => {
     left.input(0, true);
     const a = await left.wait("snapshot", (s) => s.tick >= 10 && s.ack === 1);
     const b = await right.wait("snapshot", (s) => s.tick === a.tick);
-    expect(a.state.version).toBe("flash-90302-v2");
+    expect(a.state.version).toBe("flash-90302-v3");
     expect(a.state.shuttle.state).toBe("flying");
     expect(a.state).toEqual(b.state);
     expect(b.ack).toBe(0);
@@ -304,6 +313,7 @@ describe("real HTTP / WebSocket rooms", () => {
     outsider.ws.send(
       JSON.stringify({
         type: "input",
+        swing: "auto",
         seq: 2,
         move: 1,
         jump: false,
@@ -323,10 +333,137 @@ describe("real HTTP / WebSocket rooms", () => {
     const result = await right.wait("result");
     expect(result.reason).toBe("leave");
     expect(result.winner).toBe("right");
-    left.send({ type: "queue", character: "joe" });
-    right.send({ type: "queue", character: "joe" });
+    left.send({ type: "queue", shuttleSpeed: 1, character: "joe" });
+    right.send({ type: "queue", shuttleSpeed: 1, character: "joe" });
     expect((await left.wait("matched")).room).not.toBe(l.room);
   });
+  it("matches FIFO within tiers without singleton blocking, freezes both choices and clears cancellation/disconnect", async () => {
+    const clients: Peer[] = [];
+    for (let index = 0; index < 5; index++)
+      clients.push(await connect(await cookie()));
+    const [a, b, c, d, e] = clients;
+    for (const [peer, shuttleSpeed] of [
+      [a, 1],
+      [b, 2],
+      [c, 1.5],
+    ] as const) {
+      peer.send({ type: "queue", character: "joe", shuttleSpeed });
+      await peer.wait("queued");
+    }
+    expect(service.stats()).toMatchObject({ rooms: 0, queued: 3 });
+    b.send({ type: "queue", character: "joe", shuttleSpeed: 2 });
+    await b.wait("queued");
+    b.send({ type: "queue", character: "joe", shuttleSpeed: 1 });
+    expect((await b.wait("error")).code).toBe("already_queued");
+    d.send({ type: "queue", character: "red", shuttleSpeed: 2 });
+    const first = await b.wait("matched"),
+      other = await d.wait("matched");
+    expect(first).toMatchObject({ side: "left", shuttleSpeed: 2 });
+    expect(other).toMatchObject({
+      side: "right",
+      room: first.room,
+      shuttleSpeed: 2,
+    });
+    const bs = await b.wait("snapshot");
+    const ds = await d.wait("snapshot", (value) => value.tick === bs.tick);
+    expect(bs.state).toEqual(ds.state);
+    expect(bs.state.shuttleSpeed).toBe(2);
+    e.send({ type: "queue", character: "nadia", shuttleSpeed: 1 });
+    const next = await a.wait("matched");
+    expect(next.side).toBe("left");
+    expect((await e.wait("matched")).room).toBe(next.room);
+    c.send({ type: "cancel" });
+    await c.wait("idle", (message) => message.reason === "cancelled");
+    c.send({ type: "queue", character: "toaster", shuttleSpeed: 1.25 });
+    expect((await c.wait("queued")).shuttleSpeed).toBe(1.25);
+    await new Promise<void>((resolve) => {
+      c.ws.once("close", () => resolve());
+      c.ws.close();
+    });
+    expect(service.stats()).toMatchObject({ rooms: 2, queued: 0 });
+  });
+  it("expires an unmatched tier before requeueing with a different frozen configuration", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const peer = await connect(await cookie());
+    peer.send({ type: "queue", character: "joe", shuttleSpeed: 1.5 });
+    await peer.wait("queued");
+    vi.setSystemTime(Date.now() + 120_001);
+    await peer.wait("idle", (message) => message.reason === "queue_timeout");
+    expect(service.stats().queued).toBe(0);
+    peer.send({ type: "queue", character: "toaster", shuttleSpeed: 1.25 });
+    expect((await peer.wait("queued")).shuttleSpeed).toBe(1.25);
+    const other = await connect(await cookie());
+    other.send({ type: "queue", character: "red", shuttleSpeed: 1.25 });
+    expect((await peer.wait("matched")).shuttleSpeed).toBe(1.25);
+    await other.wait("matched");
+  });
+  it.each([false, true])(
+    "coalesces the newest manual hit and its jump together before later auto packets (replace=%s)",
+    async (replace) => {
+      await service.close();
+      vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] });
+      const origin = Date.now();
+      vi.spyOn(performance, "now").mockImplementation(
+        () => Date.now() - origin,
+      );
+      await startService();
+      const [, right] = await pair("joe", "toaster", 2);
+      vi.advanceTimersByTime(40); // Arm original jumpReady before the hitJump witness.
+      right.send({
+        type: "input",
+        seq: 1,
+        move: 0,
+        jump: true,
+        jumpPressed: false,
+        hitHeld: false,
+        hitPressed: true,
+        swing: "underhand",
+      });
+      if (replace)
+        right.send({
+          type: "input",
+          seq: 2,
+          move: 0,
+          jump: false,
+          jumpPressed: false,
+          hitHeld: false,
+          hitPressed: true,
+          swing: "overhead",
+        });
+      right.send({
+        type: "input",
+        seq: replace ? 3 : 2,
+        move: -1,
+        jump: false,
+        jumpPressed: false,
+        hitHeld: false,
+        hitPressed: false,
+        swing: "auto",
+      });
+      right.send({ type: "ping", time: 987 });
+      await right.wait("pong", (message) => message.time === 987);
+      vi.advanceTimersByTime(40);
+      const actual = await right.wait(
+        "snapshot",
+        (value) => value.ack === (replace ? 3 : 2),
+      );
+      expect(actual.ackTick).toBe(3);
+      expect(actual.state.players.right.swingKind).toBe(
+        replace ? "overhead" : "underhand",
+      );
+      expect(actual.state.players.right.grounded).toBe(replace);
+      expect(actual.state.players.right.x).toBeLessThan(500);
+      expect(actual.state.rallyHits).toBe(0);
+      right.send({ type: "release" });
+      right.send({ type: "ping", time: 988 });
+      await right.wait("pong", (message) => message.time === 988);
+      vi.advanceTimersByTime(40);
+      expect(
+        (await right.wait("snapshot", (value) => value.tick > actual.tick))
+          .ackTick,
+      ).toBeNull();
+    },
+  );
   it("samples packet bursts once using the latest held motion and preserving action edges", async () => {
     await service.close();
     // ws.send calls can arrive across simulation ticks. Freeze only the service
@@ -346,6 +483,7 @@ describe("real HTTP / WebSocket rooms", () => {
     for (let seq = 1; seq <= 30; seq++) {
       left.send({
         type: "input",
+        swing: "auto",
         seq,
         move: seq === 30 ? 0 : seq === 2 ? -1 : 1,
         jump: seq === 1,
@@ -409,47 +547,59 @@ describe("real HTTP / WebSocket rooms", () => {
     );
     expect(timedOut.ack).toBe(32);
   });
-  it("freezes validated queue choices, allows identical roles, and restores retained seat character", async () => {
-    const identity = await cookie(),
-      a = await connect(identity);
-    a.send({ type: "queue", character: "toaster" });
-    expect((await a.wait("queued")).character).toBe("toaster");
-    a.send({ type: "queue", character: "toaster" });
-    await a.wait("queued");
-    expect(service.stats().queued).toBe(1);
-    a.send({ type: "queue", character: "pirate" });
-    expect((await a.wait("error")).code).toBe("already_queued");
-    const b = await connect(await cookie());
-    b.send({ type: "queue", character: "pirate" });
-    const matched = await a.wait("matched");
-    await b.wait("matched");
-    expect(matched.characters).toEqual({ left: "toaster", right: "pirate" });
-    const initial = await a.wait("snapshot");
-    expect(initial.state.players.left.characterId).toBe("toaster");
-    expect(initial.state.players.right.characterId).toBe("pirate");
-    a.send({ type: "queue", character: "red" });
-    expect((await a.wait("error")).code).toBe("already_in_match");
-    await new Promise<void>((resolve) => {
-      a.ws.once("close", () => resolve());
-      a.ws.close();
-    });
-    await b.wait("snapshot", (s) => s.status === "reconnecting");
-    const resumed = await connect(identity);
-    expect((await resumed.wait("matched")).characters).toEqual(
-      matched.characters,
-    );
-    const state = await resumed.wait("snapshot");
-    expect(state.ackTick).toBeNull();
-    expect(state.state.players.left.characterId).toBe("toaster");
-    resumed.send({ type: "leave" });
-    await b.wait("result");
-    resumed.send({ type: "queue", character: "red" });
-    b.send({ type: "queue", character: "red" });
-    const same = await resumed.wait("matched");
-    await b.wait("matched");
-    expect(same.characters).toEqual({ left: "red", right: "red" });
-    expect(same.room).not.toBe(matched.room);
-  });
+  it.each(SHUTTLE_SPEEDS)(
+    "%sx freezes queue choices and restores retained speed/character before a different-tier rematch",
+    async (shuttleSpeed) => {
+      const identity = await cookie(),
+        a = await connect(identity);
+      a.send({ type: "queue", shuttleSpeed, character: "toaster" });
+      expect((await a.wait("queued")).character).toBe("toaster");
+      a.send({ type: "queue", shuttleSpeed, character: "toaster" });
+      await a.wait("queued");
+      expect(service.stats().queued).toBe(1);
+      a.send({ type: "queue", shuttleSpeed, character: "pirate" });
+      expect((await a.wait("error")).code).toBe("already_queued");
+      const b = await connect(await cookie());
+      b.send({ type: "queue", shuttleSpeed, character: "pirate" });
+      const matched = await a.wait("matched");
+      await b.wait("matched");
+      expect(matched.shuttleSpeed).toBe(shuttleSpeed);
+      expect(matched.characters).toEqual({ left: "toaster", right: "pirate" });
+      const initial = await a.wait("snapshot");
+      expect(initial.state.shuttleSpeed).toBe(shuttleSpeed);
+      expect(initial.state.players.left.characterId).toBe("toaster");
+      expect(initial.state.players.right.characterId).toBe("pirate");
+      a.send({ type: "queue", shuttleSpeed, character: "red" });
+      expect((await a.wait("error")).code).toBe("already_in_match");
+      await new Promise<void>((resolve) => {
+        a.ws.once("close", () => resolve());
+        a.ws.close();
+      });
+      await b.wait("snapshot", (s) => s.status === "reconnecting");
+      const resumed = await connect(identity);
+      expect((await resumed.wait("matched")).characters).toEqual(
+        matched.characters,
+      );
+      const state = await resumed.wait("snapshot");
+      expect(state.state.shuttleSpeed).toBe(shuttleSpeed);
+      expect(state.ackTick).toBeNull();
+      expect(state.state.players.left.characterId).toBe("toaster");
+      resumed.send({ type: "leave" });
+      await b.wait("result");
+      const nextSpeed = shuttleSpeed === 2 ? 1 : 2;
+      resumed.send({
+        type: "queue",
+        shuttleSpeed: nextSpeed,
+        character: "red",
+      });
+      b.send({ type: "queue", shuttleSpeed: nextSpeed, character: "red" });
+      const same = await resumed.wait("matched");
+      await b.wait("matched");
+      expect(same.shuttleSpeed).toBe(nextSpeed);
+      expect(same.characters).toEqual({ left: "red", right: "red" });
+      expect(same.room).not.toBe(matched.room);
+    },
+  );
   it.each(["robot", "timmy", "joe-invalid", ["joe"], null])(
     "rejects invalid queue role %j before it can enter queue",
     async (character) => {
@@ -457,20 +607,22 @@ describe("real HTTP / WebSocket rooms", () => {
       const closed = new Promise<number>((resolve) =>
         peer.ws.once("close", (code) => resolve(code)),
       );
-      peer.ws.send(JSON.stringify({ type: "queue", character }));
+      peer.ws.send(
+        JSON.stringify({ type: "queue", shuttleSpeed: 1, character }),
+      );
       expect(await closed).toBe(1008);
       expect(service.stats().queued).toBe(0);
     },
   );
   it("cancels queued guests and removes them when their connection closes", async () => {
     const peer = await connect(await cookie());
-    peer.send({ type: "queue", character: "joe" });
+    peer.send({ type: "queue", shuttleSpeed: 1, character: "joe" });
     await peer.wait("queued");
     expect(service.stats().queued).toBe(1);
     peer.send({ type: "cancel" });
     await peer.wait("idle", (s) => s.reason === "cancelled");
     expect(service.stats().queued).toBe(0);
-    peer.send({ type: "queue", character: "joe" });
+    peer.send({ type: "queue", shuttleSpeed: 1, character: "joe" });
     await peer.wait("queued");
     await new Promise<void>((resolve) => {
       peer.ws.once("close", () => resolve());
@@ -568,76 +720,85 @@ describe("real HTTP / WebSocket rooms", () => {
         expect(await right.wait("result")).toEqual(result);
         await right.wait("idle", (s) => s.reason === "disconnect");
       }
-      resumed.send({ type: "queue", character: "joe" });
+      resumed.send({ type: "queue", shuttleSpeed: 1, character: "joe" });
       await resumed.wait("queued");
       expect(service.stats()).toMatchObject({ rooms: 0, queued: 1 });
     },
   );
-  it("finishes an authoritative seven-point match with identical results on both connections", async () => {
-    const [left, right] = await pair("toaster", "pirate");
-    let latest: Snapshot | undefined;
-    left.ws.on("message", (raw) => {
-      const message = JSON.parse(raw.toString()) as ServerMessage;
-      if (message.type === "snapshot") latest = message;
-    });
-    const delivered = {
-      left: new Map<number, Snapshot["effects"]["events"][number]>(),
-      right: new Map<number, Snapshot["effects"]["events"][number]>(),
-    };
-    for (const [peer, side] of [
-      [left, "left"],
-      [right, "right"],
-    ] as const)
-      peer.ws.on("message", (raw) => {
+  it.each(SHUTTLE_SPEEDS)(
+    "%sx finishes an authoritative seven-point match with identical results on both connections",
+    async (shuttleSpeed) => {
+      const [left, right] = await pair("toaster", "pirate", shuttleSpeed);
+      let latest: Snapshot | undefined;
+      left.ws.on("message", (raw) => {
         const message = JSON.parse(raw.toString()) as ServerMessage;
-        if (message.type === "snapshot")
-          for (const event of message.effects.events)
-            delivered[side].set(event.id, event);
+        if (message.type === "snapshot") latest = message;
       });
-    const timer = setInterval(() => {
-      if (!latest || latest.status !== "playing") return;
+      const delivered = {
+        left: new Map<number, Snapshot["effects"]["events"][number]>(),
+        right: new Map<number, Snapshot["effects"]["events"][number]>(),
+      };
       for (const [peer, side] of [
         [left, "left"],
         [right, "right"],
       ] as const)
-        peer.input(
-          0,
-          latest.state.shuttle.state === "attached" &&
-            latest.state.server === side &&
-            !latest.state.players[side].swinging,
+        peer.ws.on("message", (raw) => {
+          const message = JSON.parse(raw.toString()) as ServerMessage;
+          if (message.type === "snapshot")
+            for (const event of message.effects.events)
+              delivered[side].set(event.id, event);
+        });
+      const timer = setInterval(() => {
+        if (!latest || latest.status !== "playing") return;
+        for (const [peer, side] of [
+          [left, "left"],
+          [right, "right"],
+        ] as const)
+          peer.input(
+            0,
+            latest.state.shuttle.state === "attached" &&
+              latest.state.server === side &&
+              !latest.state.players[side].swinging,
+          );
+      }, 1000 / 60);
+      try {
+        const a = await left.wait("result", () => true, 35_000);
+        const b = await right.wait("result", () => true, 2000);
+        expect(a).toEqual(b);
+        expect(a.reason).toBe("score");
+        expect(Math.max(a.score.left, a.score.right)).toBe(7);
+        const final = await left.wait(
+          "snapshot",
+          (s) => s.status === "finished",
         );
-    }, 1000 / 60);
-    try {
-      const a = await left.wait("result", () => true, 35_000);
-      const b = await right.wait("result", () => true, 2000);
-      expect(a).toEqual(b);
-      expect(a.reason).toBe("score");
-      expect(Math.max(a.score.left, a.score.right)).toBe(7);
-      const final = await left.wait("snapshot", (s) => s.status === "finished");
-      const other = await right.wait(
-        "snapshot",
-        (s) => s.status === "finished" && s.tick === final.tick,
-      );
-      expect(final.state).toEqual(other.state);
-      expect(final.effects).toEqual(other.effects);
-      expect(final.resultReason).toBe("score");
-      expect(
-        [...delivered.left.values()].filter((e) => e.kind === "point"),
-      ).toHaveLength(7);
-      expect(
-        [...delivered.left.values()].filter((e) => e.kind === "victory"),
-      ).toHaveLength(1);
-      expect([...delivered.left.values()]).toEqual([
-        ...delivered.right.values(),
-      ]);
-    } finally {
-      clearInterval(timer);
-    }
-  }, 40_000);
+        const other = await right.wait(
+          "snapshot",
+          (s) => s.status === "finished" && s.tick === final.tick,
+        );
+        expect(final.state.shuttleSpeed).toBe(shuttleSpeed);
+        expect(final.state).toEqual(other.state);
+        expect(final.effects).toEqual(other.effects);
+        expect(final.resultReason).toBe("score");
+        expect(
+          [...delivered.left.values()].filter((e) => e.kind === "point"),
+        ).toHaveLength(7);
+        expect(
+          [...delivered.left.values()].filter((e) => e.kind === "victory"),
+        ).toHaveLength(1);
+        expect([...delivered.left.values()]).toEqual([
+          ...delivered.right.values(),
+        ]);
+      } finally {
+        clearInterval(timer);
+      }
+    },
+    40_000,
+  );
 });
 it("validates every field and rejects non-finite numbers, oversized directions and untrusted state", () => {
   const valid = {
     type: "input",
+    swing: "auto",
     seq: 1,
     move: 0,
     jump: false,

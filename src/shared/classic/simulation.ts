@@ -36,6 +36,7 @@ import {
   type ClassicState,
 } from "./types";
 import type { GamePhase, PlayerIntent, Side } from "../types";
+import { isShuttleSpeed, type ShuttleSpeed } from "../match-settings";
 
 interface ClassicContact {
   at: number;
@@ -52,6 +53,7 @@ interface ClassicContact {
 /** Flash 90302's seven-human multiplayer match, independent of DOM, clocks and sockets. */
 export class ClassicSimulation {
   readonly players;
+  readonly shuttleSpeed: ShuttleSpeed;
   tick = 0;
   private eventCursor = 0;
   private events: ClassicPresentationEvent[] = [];
@@ -91,12 +93,19 @@ export class ClassicSimulation {
 
   constructor(
     options: {
+      shuttleSpeed?: ShuttleSpeed;
       seed?: number;
       characters?: Partial<Record<Side, CharacterId>>;
       cosmeticSeed?: number;
       cosmetics?: boolean;
     } = {},
   ) {
+    if (
+      options.shuttleSpeed !== undefined &&
+      !isShuttleSpeed(options.shuttleSpeed)
+    )
+      throw new Error("Invalid shuttle speed");
+    this.shuttleSpeed = options.shuttleSpeed ?? 1;
     this.players = {
       left: createClassicPlayer("left", options.characters?.left),
       right: createClassicPlayer("right", options.characters?.right),
@@ -146,18 +155,23 @@ export class ClassicSimulation {
 
   setIntents(left: PlayerIntent, right: PlayerIntent): void {
     // Preserve an edge until at least one fixed frame consumes it (e.g. 120-Hz caller).
-    this.intents.left = {
-      ...left,
-      hitPressed: left.hitPressed || this.intents.left.hitPressed,
-      jumpPressed: left.jumpPressed || this.intents.left.jumpPressed,
-      pausePressed: left.pausePressed || this.intents.left.pausePressed,
-    };
-    this.intents.right = {
-      ...right,
-      hitPressed: right.hitPressed || this.intents.right.hitPressed,
-      jumpPressed: right.jumpPressed || this.intents.right.jumpPressed,
-      pausePressed: right.pausePressed || this.intents.right.pausePressed,
-    };
+    for (const side of ["left", "right"] as const) {
+      const incoming = side === "left" ? left : right;
+      const previous = this.intents[side];
+      const hit = incoming.hitPressed
+        ? incoming
+        : previous.hitPressed
+          ? previous
+          : undefined;
+      this.intents[side] = {
+        ...incoming,
+        hitPressed: !!hit,
+        swing: hit?.swing ?? "auto",
+        hitJump: hit?.hitJump,
+        jumpPressed: incoming.jumpPressed || previous.jumpPressed,
+        pausePressed: incoming.pausePressed || previous.pausePressed,
+      };
+    }
   }
 
   /** Bound catch-up to 15 original frames. Paused time never advances point timers. */
@@ -188,6 +202,7 @@ export class ClassicSimulation {
   private clearEdges(): void {
     for (const side of ["left", "right"] as const) {
       this.intents[side].hitPressed = false;
+      this.intents[side].swing = "auto";
       this.intents[side].jumpPressed = false;
       this.intents[side].pausePressed = false;
       delete this.intents[side].hitJump;
@@ -205,6 +220,7 @@ export class ClassicSimulation {
       this.pointTimer = Math.max(0, this.pointTimer - dt);
       if (this.pointTimer < 1e-9) this.setupRally();
     }
+    const origins: Partial<Record<Side, { x: number; y: number }>> = {};
     // Original PlayState.handleEnterFrame: left -> right -> birdie. Timeline callbacks follow.
     for (const side of ["left", "right"] as const) {
       const player = this.players[side];
@@ -215,36 +231,46 @@ export class ClassicSimulation {
       });
       if (events.swingStarted)
         this.emit({ kind: "swing", side, sound: "whoosh" });
+      origins[side] = events.contactOrigin;
       this.tryContact(side, events.contactOrigin);
       this.emitSmoke(side);
     }
-    this.ballEvents = stepClassicBirdie(
-      this.shuttle,
-      dt,
-      this.random,
-      (ball) => {
-        if (
-          this.cosmetics &&
-          ball.speed > 50 &&
-          this.cosmeticRandom() * 100 < (ball.speed * 100) / 1400
-        )
-          this.emit({
-            kind: "tail",
-            x: ball.x,
-            y: ball.y,
-            seed: Math.floor(this.cosmeticRandom() * 0x100000000),
-          });
-      },
-    );
-    if (
-      this.ballEvents.includes("netTop") ||
-      this.ballEvents.includes("netSide")
-    )
-      this.net.playing = true; // Source net.play() resumes without rewinding.
-    if (this.ballEvents.includes("ground") && this.pointActive) {
-      this.awardPoint(
-        this.shuttle.x > classicGeometry.net.x ? "left" : "right",
+    const tail = (ball: Readonly<ClassicShuttleState>) => {
+      if (
+        this.cosmetics &&
+        ball.speed > 50 &&
+        this.cosmeticRandom() * 100 < (ball.speed * 100) / 1400
+      )
+        this.emit({
+          kind: "tail",
+          x: ball.x,
+          y: ball.y,
+          seed: Math.floor(this.cosmeticRandom() * 0x100000000),
+        });
+    };
+    const flight = (birdieDt: number, emitTail: boolean) => {
+      const events = stepClassicBirdie(
+        this.shuttle,
+        birdieDt,
+        this.random,
+        emitTail ? tail : undefined,
       );
+      this.ballEvents.push(...events);
+      if (events.includes("netTop") || events.includes("netSide"))
+        this.net.playing = true; // Source net.play() resumes without rewinding.
+      if (events.includes("ground") && this.pointActive)
+        this.awardPoint(
+          this.shuttle.x > classicGeometry.net.x ? "left" : "right",
+        );
+    };
+    if (this.shuttleSpeed === 1) flight(dt, true);
+    else {
+      const birdieDt = (dt * this.shuttleSpeed) / 2;
+      flight(birdieDt, false);
+      // Sample the resolved midpoint with the same source pose/pre-bob origin.
+      for (const side of ["left", "right"] as const)
+        this.tryContact(side, origins[side]);
+      flight(birdieDt, true);
     }
     for (const side of ["left", "right"] as const) {
       const player = this.players[side];
@@ -294,10 +320,21 @@ export class ClassicSimulation {
     this.statusText = `轮到${this.server === "left" ? "左" : "右"}侧发球`;
   }
 
+  private get birdieDt(): number {
+    return this.shuttleSpeed === 1
+      ? 1 / CLASSIC_WORLD.fps
+      : this.shuttleSpeed / (2 * CLASSIC_WORLD.fps);
+  }
+
   private releaseServe(side: Side): void {
     this.attachShuttle();
     const previousTouch = this.shuttle.lastTouchedBy;
-    launchClassicBirdie(this.shuttle, 1350 * 1.1, 40 * classicDirection(side));
+    launchClassicBirdie(
+      this.shuttle,
+      1350 * 1.1,
+      40 * classicDirection(side),
+      this.birdieDt,
+    );
     this.shuttle.lastTouchedBy = side;
     this.lastShotLabel = "发球";
     this.lastShotSide = side;
@@ -337,7 +374,7 @@ export class ClassicSimulation {
       ? (pose.rotation + 30) * classicDirection(side)
       : 40 * classicDirection(side);
     const previousTouch = this.shuttle.lastTouchedBy;
-    launchClassicBirdie(this.shuttle, speed, dir);
+    launchClassicBirdie(this.shuttle, speed, dir, this.birdieDt);
     this.shuttle.lastTouchedBy = side;
     this.rallyHits++;
     this.lastShotLabel = overhead ? "高点击球" : "低手挑球";
@@ -406,7 +443,8 @@ export class ClassicSimulation {
 
   snapshot(): ClassicState {
     return {
-      version: "flash-90302-v2",
+      version: "flash-90302-v3",
+      shuttleSpeed: this.shuttleSpeed,
       phase: this.phase,
       players: {
         left: cloneClassicPlayer(this.players.left),

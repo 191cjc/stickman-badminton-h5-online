@@ -8,6 +8,7 @@ export const emptyIntent = (): PlayerIntent => ({
   jumpPressed: false,
   hitHeld: false,
   hitPressed: false,
+  swing: "auto",
   pausePressed: false,
 });
 export const serializePlayer = cloneClassicPlayer;

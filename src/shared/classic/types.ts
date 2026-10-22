@@ -1,5 +1,6 @@
 import type { GamePhase, PlayerIntent, Side } from "../types";
 import type { CharacterId } from "./characters";
+import type { ShuttleSpeed } from "../match-settings";
 
 /** Flash 90302 logical units, not CSS pixels. See reference/flash-90302. */
 export const CLASSIC_WORLD = {
@@ -60,6 +61,7 @@ export interface ClassicPlayerState {
 export interface ClassicShuttleState {
   x: number;
   y: number;
+  /** Velocity/speed use native shuttle seconds; room speed scales flight time only. */
   vx: number;
   vy: number;
   speed: number;
@@ -72,7 +74,8 @@ export interface ClassicShuttleState {
 }
 
 export interface ClassicState {
-  version: "flash-90302-v2";
+  version: "flash-90302-v3";
+  shuttleSpeed: ShuttleSpeed;
   phase: GamePhase;
   players: Record<Side, ClassicPlayerState>;
   shuttle: ClassicShuttleState;
@@ -119,5 +122,6 @@ export const emptyClassicIntent = (): PlayerIntent => ({
   jumpPressed: false,
   hitHeld: false,
   hitPressed: false,
+  swing: "auto",
   pausePressed: false,
 });

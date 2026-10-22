@@ -44,8 +44,10 @@ it("accepts only the seven immutable role choices in queue and no injected autho
     "red",
   ]) {
     expect(
-      parseClientMessage(JSON.stringify({ type: "queue", character })),
-    ).toEqual({ type: "queue", character });
+      parseClientMessage(
+        JSON.stringify({ type: "queue", shuttleSpeed: 1, character }),
+      ),
+    ).toEqual({ type: "queue", shuttleSpeed: 1, character });
     for (const extra of [
       { side: "left" },
       { room: "stolen" },
@@ -54,7 +56,12 @@ it("accepts only the seven immutable role choices in queue and no injected autho
     ])
       expect(
         parseClientMessage(
-          JSON.stringify({ type: "queue", character, ...extra }),
+          JSON.stringify({
+            type: "queue",
+            shuttleSpeed: 1,
+            character,
+            ...extra,
+          }),
         ),
       ).toBeNull();
   }
@@ -71,7 +78,9 @@ it("accepts only the seven immutable role choices in queue and no injected autho
     {},
   ])
     expect(
-      parseClientMessage(JSON.stringify({ type: "queue", character })),
+      parseClientMessage(
+        JSON.stringify({ type: "queue", shuttleSpeed: 1, character }),
+      ),
     ).toBeNull();
   expect(parseClientMessage('{"type":"queue"}')).toBeNull();
 });
@@ -79,6 +88,7 @@ it("accepts only the seven immutable role choices in queue and no injected autho
 it("keeps input logical-only and rejects invented clock/contact authority and invalid ranges", () => {
   const input = {
     type: "input",
+    swing: "auto",
     seq: 1,
     move: 0,
     jump: false,
@@ -111,4 +121,63 @@ it("keeps input logical-only and rejects invented clock/contact authority and in
     expect(
       parseClientMessage(JSON.stringify({ ...input, ...patch })),
     ).toBeNull();
+});
+
+it("requires one of four numeric speeds and accepts every character at each speed", () => {
+  for (const character of [
+    "joe",
+    "nadia",
+    "harry",
+    "toaster",
+    "pirate",
+    "top-hat",
+    "red",
+  ])
+    for (const shuttleSpeed of [1, 1.25, 1.5, 2]) {
+      const queue = { type: "queue", character, shuttleSpeed };
+      expect(parseClientMessage(JSON.stringify(queue))).toEqual(queue);
+    }
+  for (const shuttleSpeed of [
+    undefined,
+    null,
+    "1",
+    true,
+    [],
+    {},
+    0,
+    1.1,
+    3,
+    Number.NaN,
+    Infinity,
+  ])
+    expect(
+      parseClientMessage(
+        JSON.stringify({ type: "queue", character: "joe", shuttleSpeed }),
+      ),
+    ).toBeNull();
+});
+it("requires edge-owned swing enum including released short taps and rejects stale forced choices", () => {
+  const input = {
+    type: "input",
+    seq: 1,
+    move: 0,
+    jump: false,
+    jumpPressed: false,
+    hitHeld: false,
+    hitPressed: true,
+    swing: "auto",
+  };
+  for (const swing of ["auto", "overhead", "underhand"]) {
+    expect(parseClientMessage(JSON.stringify({ ...input, swing }))).toEqual({
+      ...input,
+      swing,
+    });
+    expect(
+      parseClientMessage(
+        JSON.stringify({ ...input, hitPressed: false, swing }),
+      ),
+    ).toEqual(swing === "auto" ? { ...input, hitPressed: false, swing } : null);
+  }
+  for (const swing of [undefined, null, [], {}, 1, "serve", "OVERHEAD"])
+    expect(parseClientMessage(JSON.stringify({ ...input, swing }))).toBeNull();
 });

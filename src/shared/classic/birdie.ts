@@ -28,14 +28,24 @@ export function classicShotVelocity(
 /** Birdie.§_-5z§ future ground-X preview: original ignores top-net bounce. */
 export function predictClassicLanding(
   ball: Pick<ClassicShuttleState, "x" | "y" | "vx" | "vy">,
+  birdieDt = 1 / CLASSIC_WORLD.fps,
 ): number {
   let { x, y, vx, vy } = ball;
   if (y > CLASSIC_WORLD.groundY) y = CLASSIC_WORLD.groundY - 1;
   for (let step = 0; y < CLASSIC_WORLD.groundY && step < 2048; step++) {
-    vy = (vy + 1200 / CLASSIC_WORLD.fps) * 0.96;
-    vx *= 0.96;
-    x += vx / CLASSIC_WORLD.fps;
-    y += vy / CLASSIC_WORLD.fps;
+    // Keep the original 1x operations; fractional tiers use their flight integrator.
+    if (birdieDt === 1 / CLASSIC_WORLD.fps) {
+      vy = (vy + 1200 / CLASSIC_WORLD.fps) * 0.96;
+      vx *= 0.96;
+      x += vx / CLASSIC_WORLD.fps;
+      y += vy / CLASSIC_WORLD.fps;
+    } else {
+      const drag = Math.pow(0.96, 60 * birdieDt);
+      vy = (vy + 1200 * birdieDt) * drag;
+      vx *= drag;
+      x += vx * birdieDt;
+      y += vy * birdieDt;
+    }
     if (x > CLASSIC_WORLD.width - CLASSIC_WORLD.wallInset) {
       x = CLASSIC_WORLD.width - CLASSIC_WORLD.wallInset;
       vx *= -0.8;
@@ -61,6 +71,7 @@ export function launchClassicBirdie(
   ball: ClassicShuttleState,
   speed: number,
   dir: number,
+  birdieDt = 1 / CLASSIC_WORLD.fps,
 ): void {
   const velocity = classicShotVelocity(speed, dir);
   ball.vx = velocity.vx;
@@ -69,7 +80,7 @@ export function launchClassicBirdie(
   ball.dir = dir;
   ball.rotation = dir;
   ball.state = "flying";
-  ball.predictedLandingX = predictClassicLanding(ball);
+  ball.predictedLandingX = predictClassicLanding(ball, birdieDt);
 }
 
 /** Birdie.§_-3Q§. Source uses rectangular hitTestPoint(false), top checked first. */

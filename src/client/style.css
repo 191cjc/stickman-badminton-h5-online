@@ -690,3 +690,24 @@ footer a:hover {
     padding: 10px;
   }
 }
+
+#shuttle-speed-selection {
+  margin: 8px 0;
+  font-size: 12px;
+}
+.speed-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 5px;
+}
+.speed-options button {
+  min-width: 0;
+  padding: 7px 4px;
+  font-size: 13px;
+}
+.speed-options button[aria-pressed="true"] {
+  border-color: #ffdf4d;
+  background: #ffdf4d;
+  color: #19232c;
+}

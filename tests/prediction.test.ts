@@ -22,6 +22,7 @@ function snapshot(game: Simulation, ack = 0, tick = 0): Snapshot {
 function command(seq: number, patch: Partial<InputFrame> = {}): InputFrame {
   return {
     type: "input",
+    swing: "auto",
     seq,
     move: 0,
     jump: false,
@@ -76,7 +77,16 @@ it("predicts original serve without mutating authoritative shuttle or score", ()
   expect(authority.state.shuttle.state).toBe("attached");
   expect(game.snapshot().shuttle.state).toBe("flying");
 });
-it.each(["score", "room", "status", "role", "phase", "release"])(
+it.each([
+  "score",
+  "room",
+  "status",
+  "role",
+  "phase",
+  "release",
+  "speed",
+  "version",
+])(
   "%s boundaries clear outstanding operations and nested state stays detached",
   (boundary) => {
     const game = new Simulation();
@@ -101,6 +111,9 @@ it.each(["score", "room", "status", "role", "phase", "release"])(
     if (boundary === "role")
       authority.state.players.right.characterId = "toaster";
     if (boundary === "release") prediction.clear();
+    if (boundary === "speed") authority.state.shuttleSpeed = 2;
+    if (boundary === "version")
+      Object.assign(authority.state, { version: "incompatible" });
     prediction.reconcile(authority, 20);
     expect(prediction.player).toEqual(authority.state.players.right);
     expect(prediction.diagnostics(20).pendingInputs).toBe(0);
@@ -236,4 +249,88 @@ it("diagnostics measure actual small corrections and large snaps and pending inp
   expect(prediction.diagnostics(150).correction).toBeGreaterThan(40);
   expect(prediction.diagnostics(150).snapped).toBe(true);
   expect(prediction.diagnostics(150).pendingInputs).toBe(0);
+});
+
+it.each([1, 1.25, 1.5, 2] as const)(
+  "%sx prediction preserves the newest hit choice/jump payload through newer release packets",
+  (shuttleSpeed) => {
+    for (const newest of [false, true])
+      for (const side of ["left", "right"] as const) {
+        const game = new Simulation({
+          shuttleSpeed,
+          characters: { [side]: "toaster" },
+        });
+        game.players.left.serving = game.players.right.serving = false;
+        game.players[side].jumpReady = true;
+        const initial = snapshot(game);
+        const frozen = JSON.stringify(initial);
+        const prediction = new Prediction(side, game.players[side]);
+        prediction.reconcile(initial, 0);
+        prediction.accept(
+          command(1, { hitPressed: true, swing: "underhand", jump: true }),
+          0,
+        );
+        if (newest)
+          prediction.accept(
+            command(2, { hitPressed: true, swing: "overhead", jump: false }),
+            1,
+          );
+        prediction.accept(command(newest ? 3 : 2, { move: 1 }), 2);
+        prediction.advance(1000 / 60);
+        const expected = {
+          ...emptyIntent(),
+          move: 1,
+          hitPressed: true,
+          swing: newest ? ("overhead" as const) : ("underhand" as const),
+          hitJump: !newest,
+        };
+        game.setIntents(
+          side === "left" ? expected : emptyIntent(),
+          side === "right" ? expected : emptyIntent(),
+        );
+        game.update(1 / 60);
+        expect(prediction.player).toEqual(game.snapshot().players[side]);
+        expect(prediction.player.swingKind).toBe(
+          newest ? "overhead" : "underhand",
+        );
+        expect(prediction.player.grounded).toBe(newest);
+        expect(JSON.stringify(initial)).toBe(frozen);
+        expect(game.rallyHits).toBe(0);
+        prediction.advance((2 * 1000) / 60);
+        const frame = prediction.player.swingFrame;
+        expect(frame).toBeGreaterThan(1); // No second edge from the retained held intent.
+      }
+  },
+);
+it("speed/schema boundaries reset prediction and interpolation while same-side hits only choose actual shuttle endpoints", () => {
+  const game = new Simulation();
+  const a = snapshot(game, 0, 10);
+  const b = snapshot(game, 0, 12);
+  for (const value of [a, b]) {
+    value.state.shuttle.state = "flying";
+    value.state.shuttle.lastTouchedBy = "left";
+  }
+  a.state.shuttle.x = 100;
+  b.state.shuttle.x = 500;
+  b.state.rallyHits = 1;
+  const buffer = new Interpolation();
+  buffer.push(a, 0);
+  buffer.push(b, 1000 / 30);
+  buffer.sample(1000 / 30);
+  const before = buffer.diagnostics();
+  const actual = buffer.sample(1000 / 30 + 17)!;
+  expect([100, 500]).toContain(actual.shuttle.x);
+  expect(buffer.diagnostics().resets).toBe(before.resets);
+  const prediction = new Prediction("left", a.state.players.left);
+  prediction.reconcile(a, 0);
+  prediction.accept(command(1, { move: -1 }), 0);
+  prediction.advance(20);
+  const changed = snapshot(game, 0, 12);
+  changed.state.shuttleSpeed = 2;
+  prediction.reconcile(changed, 20);
+  expect(prediction.diagnostics(20).pendingInputs).toBe(0);
+  expect(prediction.player).toEqual(changed.state.players.left);
+  buffer.push(changed, 50);
+  expect(buffer.sample(50)).toEqual(changed.state);
+  expect(buffer.diagnostics().resets).toBe(before.resets + 1);
 });

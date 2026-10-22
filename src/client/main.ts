@@ -6,6 +6,7 @@ import {
   type CharacterId,
 } from "../shared/classic/characters";
 import { Simulation } from "../shared/simulation";
+import { isShuttleSpeed, type ShuttleSpeed } from "../shared/match-settings";
 import { INPUT_HZ, BASE_PATH } from "../shared/protocol";
 import type { Snapshot, ServerMessage } from "../shared/protocol";
 import type { Side, Viewport } from "../shared/types";
@@ -72,6 +73,8 @@ let assetsReady = false,
   latest: Snapshot | undefined,
   side: Side | undefined,
   room: string | undefined;
+let selectedShuttleSpeed: ShuttleSpeed = 1,
+  matchShuttleSpeed: ShuttleSpeed | undefined;
 let selected: CharacterId = "joe",
   seq = 0,
   naturalResult = false,
@@ -117,7 +120,25 @@ for (const id of CHARACTER_IDS) {
   characterButtons.set(id, button);
   el("character-grid").append(button);
 }
+const speedButtons = document.querySelectorAll<HTMLButtonElement>(
+  "[data-shuttle-speed]",
+);
+for (const button of speedButtons)
+  button.addEventListener("click", () => {
+    if (!assetsReady || (scene !== "idle" && scene !== "result")) return;
+    const speed = Number(button.dataset.shuttleSpeed);
+    if (!isShuttleSpeed(speed)) return;
+    selectedShuttleSpeed = speed;
+    updateSelection();
+  });
 function updateSelection(): void {
+  for (const button of speedButtons) {
+    button.setAttribute(
+      "aria-pressed",
+      String(Number(button.dataset.shuttleSpeed) === selectedShuttleSpeed),
+    );
+    button.disabled = !assetsReady || (scene !== "idle" && scene !== "result");
+  }
   for (const [id, button] of characterButtons) {
     button.setAttribute("aria-pressed", String(selected === id));
     button.disabled = !assetsReady || (scene !== "idle" && scene !== "result");
@@ -333,6 +354,7 @@ function idle(reason?: string): void {
   setSettingsOpen(false, false);
   naturalResult = false;
   result = undefined;
+  matchShuttleSpeed = undefined;
   latest = undefined;
   side = undefined;
   room = undefined;
@@ -353,6 +375,7 @@ function idle(reason?: string): void {
         : "选择角色后点击「开始匹配」，另一位玩家加入后自动开赛。",
   );
   labels();
+  el("match-status").textContent = "选择球速场次 · 先到 7 分获胜";
   updateScores(backdrop.score);
   buttons();
 }
@@ -406,14 +429,16 @@ function handleMessage(message: ServerMessage): void {
     side = undefined;
     room = undefined;
     selected = message.character;
+    selectedShuttleSpeed = matchShuttleSpeed = message.shuttleSpeed;
     effects.reset();
     renderer.clearEffectsImages();
     audio.setMatch(false);
     overlay(
       "匹配中",
       "正在寻找对手",
-      `${CHARACTERS[selected].name} 已准备，另一位玩家加入后会自动开赛。`,
+      `${matchShuttleSpeed}x 场 · ${CHARACTERS[selected].name} 已准备，同档玩家加入后会自动开赛。`,
     );
+    el("match-status").textContent = `${matchShuttleSpeed}x 场 · 等待同档对手`;
     labels();
     updateScores(backdrop.score);
     buttons();
@@ -429,6 +454,7 @@ function handleMessage(message: ServerMessage): void {
     side = message.side;
     room = message.room;
     selected = message.characters[side];
+    selectedShuttleSpeed = matchShuttleSpeed = message.shuttleSpeed;
     seq = 0;
     latest = undefined;
     prediction = undefined;
@@ -440,7 +466,7 @@ function handleMessage(message: ServerMessage): void {
     overlay(
       "匹配成功",
       "准备开赛",
-      `你在${displaySide(side, mirrored()) === "left" ? "左侧" : "右侧"}。`,
+      `${matchShuttleSpeed}x 场 · 你在${displaySide(side, mirrored()) === "left" ? "左侧" : "右侧"}。`,
     );
     labels();
     buttons();
@@ -453,6 +479,7 @@ function handleMessage(message: ServerMessage): void {
     if (!interpolation.push(message, performance.now())) return;
     const wasPaused = latest?.status === "reconnecting";
     latest = message;
+    matchShuttleSpeed = message.state.shuttleSpeed;
     seq = Math.max(seq, message.ack);
     if (side) {
       prediction ??= new Prediction(side, message.state.players[side]);
@@ -479,7 +506,7 @@ function handleMessage(message: ServerMessage): void {
         overlay(
           "对手断线",
           "比赛已暂停",
-          `等待重连，剩余 ${Math.ceil(message.reconnectRemainingMs / 1000)} 秒。`,
+          `${matchShuttleSpeed}x 场 · 等待重连，剩余 ${Math.ceil(message.reconnectRemainingMs / 1000)} 秒。`,
         );
       } else {
         if (wasPaused) {
@@ -511,6 +538,9 @@ function handleMessage(message: ServerMessage): void {
 function showResult(): void {
   if (!result) return;
   const message = result;
+  // Expired-seat reconnects can receive a result before any matched metadata.
+  const speedPrefix =
+    matchShuttleSpeed === undefined ? "" : `${matchShuttleSpeed}x 场 · `;
   const reason = {
     score: "比赛正常结束",
     leave: "有玩家主动结束比赛",
@@ -524,9 +554,9 @@ function showResult(): void {
       : message.winner === side
         ? "你赢了！"
         : "本场结束",
-    `${message.score[displaySide("left", mirrored())]} : ${message.score[displaySide("right", mirrored())]} · ${reason}。选择角色后可再次匹配。`,
+    `${speedPrefix}${message.score[displaySide("left", mirrored())]} : ${message.score[displaySide("right", mirrored())]} · ${reason}。选择角色后可再次匹配。`,
   );
-  el("match-status").textContent = reason;
+  el("match-status").textContent = `${speedPrefix}${reason}`;
   updateScores(message.score);
 }
 function updateScores(score: typeof backdrop.score): void {
@@ -538,7 +568,7 @@ function updateScores(score: typeof backdrop.score): void {
 function updateHud(state: typeof backdrop): void {
   updateScores(result?.score ?? state.score);
   if (scene === "result") return;
-  el("match-status").textContent =
+  const status =
     latest?.status === "reconnecting"
       ? "比赛暂停 · 等待重连"
       : state.phase === "point"
@@ -546,6 +576,7 @@ function updateHud(state: typeof backdrop): void {
         : state.shuttle.state === "attached"
           ? `${state.server === side ? `轮到你发球，${serveHint()}` : "等待对手发球"} · 先到 7 分获胜`
           : `回合击球 ${state.rallyHits} 次 · 先到 7 分获胜`;
+  el("match-status").textContent = `${state.shuttleSpeed}x 场 · ${status}`;
 }
 function serveHint(): string {
   const keys = controls.bindings.hit.length
@@ -568,7 +599,11 @@ start.addEventListener("click", () => {
   }
   clearInput();
   seq = 0;
-  network.send({ type: "queue", character: selected });
+  network.send({
+    type: "queue",
+    character: selected,
+    shuttleSpeed: selectedShuttleSpeed,
+  });
   start.disabled = true;
 });
 cancel.addEventListener("click", () => {
@@ -600,7 +635,7 @@ selfLeft.addEventListener("change", () => {
   if (result) showResult();
   else if (scene === "online" && !latest && side)
     el("overlay-detail").textContent =
-      `你在${displaySide(side, mirrored()) === "left" ? "左侧" : "右侧"}。`;
+      `${matchShuttleSpeed}x 场 · 你在${displaySide(side, mirrored()) === "left" ? "左侧" : "右侧"}。`;
 });
 for (const button of [start, cancel, leave]) {
   button.addEventListener("pointerenter", () => audio.play("hover"));

@@ -102,6 +102,7 @@ export class Prediction {
           .reverse()
           .find((command) => command.input.hitPressed);
         intent.hitPressed = !!hit;
+        intent.swing = hit?.input.swing ?? "auto";
         if (hit) intent.hitJump = hit.input.jump;
         owners = [
           latest.input.seq,
@@ -119,6 +120,7 @@ export class Prediction {
           ...intent,
           jumpPressed: false,
           hitPressed: false,
+          swing: "auto",
           hitJump: undefined,
         };
       }
@@ -155,7 +157,7 @@ export class Prediction {
   }
   reconcile(snapshot: Snapshot, at = this.lastAt ?? 0): void {
     this.advance(at);
-    const key = `${snapshot.room}:${snapshot.state.players[this.side].characterId}:${snapshot.state.score.left}:${snapshot.state.score.right}:${snapshot.state.phase}:${snapshot.status}`;
+    const key = `${snapshot.state.version}:${snapshot.state.shuttleSpeed}:${snapshot.room}:${snapshot.state.players[this.side].characterId}:${snapshot.state.score.left}:${snapshot.state.score.right}:${snapshot.state.phase}:${snapshot.status}`;
     const reset = this.cleared || key !== this.scoreKey;
     const before = this.drawState(0);
     const previousAck = this.ack;
@@ -362,7 +364,7 @@ export class Interpolation {
       this.ignored++;
       return false;
     }
-    const key = `${snapshot.room}:${snapshot.status}:${snapshot.state.phase}:${snapshot.state.score.left}:${snapshot.state.score.right}:${snapshot.state.players.left.characterId}:${snapshot.state.players.right.characterId}`;
+    const key = `${snapshot.state.version}:${snapshot.state.shuttleSpeed}:${snapshot.room}:${snapshot.status}:${snapshot.state.phase}:${snapshot.state.score.left}:${snapshot.state.score.right}:${snapshot.state.players.left.characterId}:${snapshot.state.players.right.characterId}`;
     const continuous =
       snapshot.status === "playing" && snapshot.state.phase === "playing";
     if (key !== this.key) {
@@ -498,6 +500,7 @@ export class Interpolation {
         right: mix(a.state.players.right, b.state.players.right),
       },
       shuttle:
+        a.state.rallyHits === b.state.rallyHits &&
         a.state.shuttle.state === b.state.shuttle.state &&
         a.state.shuttle.lastTouchedBy === b.state.shuttle.lastTouchedBy
           ? mix(a.state.shuttle, b.state.shuttle)

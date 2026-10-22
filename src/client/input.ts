@@ -1,5 +1,5 @@
 import type { InputFrame } from "../shared/protocol";
-import type { PlayerIntent } from "../shared/types";
+import type { PlayerIntent, SwingChoice } from "../shared/types";
 import {
   ACTIONS,
   bindingOwner,
@@ -34,7 +34,10 @@ type SourceKind = "keyboard" | "pointer" | "gamepad";
 export class Input {
   private sources = new Map<string, ReadonlySet<Action>>();
   // At most three provenance groups per edge, including released quick taps.
-  private pending = { jump: new Set<SourceKind>(), hit: new Set<SourceKind>() };
+  private pending = {
+    jump: new Set<SourceKind>(),
+    hit: new Map<SourceKind, SwingChoice>(),
+  };
   private keys = defaultControls().bindings;
   constructor(
     private readonly onRelease: () => void,
@@ -138,12 +141,24 @@ export class Input {
     if (actions.length) this.sources.set(source, new Set(actions));
     else this.sources.delete(source);
     if (!jump && this.has("jump")) this.pending.jump.add(kind);
-    if (!hit && this.has("hit")) this.pending.hit.add(kind);
+    if (!hit && this.has("hit")) {
+      const modifiers = new Set<Action>();
+      for (const [id, actions] of this.sources)
+        if (id.startsWith("keyboard:"))
+          for (const action of actions) modifiers.add(action);
+      const overhead = modifiers.has("overhead"),
+        underhand = modifiers.has("underhand");
+      const swing: SwingChoice =
+        overhead === underhand ? "auto" : overhead ? "overhead" : "underhand";
+      this.pending.hit.delete(kind);
+      this.pending.hit.set(kind, swing);
+    }
     if (before !== this.logicalKey()) this.onChange();
   }
   private logicalKey(): string {
-    const { move, jump, jumpPressed, hitHeld, hitPressed } = this.peek(1);
-    return `${move}:${jump}:${jumpPressed}:${hitHeld}:${hitPressed}`;
+    const { move, jump, jumpPressed, hitHeld, hitPressed, swing } =
+      this.peek(1);
+    return `${move}:${jump}:${jumpPressed}:${hitHeld}:${hitPressed}:${swing}`;
   }
   private has(action: Action): boolean {
     for (const actions of this.sources.values())
@@ -172,6 +187,7 @@ export class Input {
       jumpPressed: this.pending.jump.size > 0,
       hitHeld: this.has("hit"),
       hitPressed: this.pending.hit.size > 0,
+      swing: Array.from(this.pending.hit.values()).at(-1) ?? "auto",
     };
   }
   commit(input: InputFrame): void {

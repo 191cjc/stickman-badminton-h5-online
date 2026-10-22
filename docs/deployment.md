@@ -24,6 +24,9 @@ bash scripts/publish.sh
 
 脚本先完成安装、类型检查、lint、测试、构建，再准备新版本目录和生产依赖，安装独立 unit/snippet；仅在 env 不存在时生成密钥，仅在 include 缺失时新增本项目 include。`nginx -t` 通过后才切换 current、更新 previous，随后刷新 systemd 配置、启用并重启本服务、检查本地健康、reload Nginx，最后进行公网 HTTP 与 WebSocket 检查。发布会清空本项目内存比赛；现有云游戏不重启。
 
+
+已完成本地质量门并验证过构建、且 unit/snippet/env 均无需变更时，也可只将已验证的 `dist`、package/lock 与来源JSON安装到新release，安装生产依赖，更新previous并原子切换current，再重启本站服务。无需重写共享配置或reload Nginx；保存前后审计、loopback及公网HTTP/WS结果，失败立即切回旧完整release。该路径不跳过构建／代码／隔离HTTP与已授权浏览器检查。具体执行版本记录见[验证记录](validation.md)。
+
 首次共享 Nginx 文件的副本保存在 `/etc/nginx/sites-available/flash-global-data.before-badminton-h5-online`。若配置校验失败，Nginx 不 reload，先检查新 snippet/include；不要直接恢复旧备份覆盖他人后续配置。只撤销本次新增 include，重新 `sudo nginx -t`。
 
 ## 日志和健康
@@ -49,11 +52,11 @@ bash scripts/rollback.sh
 curl -fsS https://www.firesoul.cn/badminton-h5-online/api/health
 ```
 
-回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。本轮持续运行优化的回滚目标为 `20261015T065916Z-hit-timing`，健康协议仍为4，双方刷新页面；若另外选择更早的协议3版本，应使用目标版本工作树的检查脚本，当前协议4检查器不适用。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
+回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。本轮球速／手动挥拍升级的回滚目标为 `20261019T083234Z-controls-gamepad`（协议4），双方刷新页面；回滚后应使用目标版本的检查脚本，当前协议5检查器不适用。旧v1按键偏好保留供该版本读取。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
 
 ## 玩法版本与来源
 
-当前七角色双人内核使用协议 v4（`badminton-v4`、`flash-90302-v2`，快照含 `ackTick`）。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1/v2/v3 页面会在绑定席位前被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。本轮发布 `20261016T061913Z-sustained-smoothness` 的上一版为 `20261015T065916Z-hit-timing`，均为协议4；版本切换后仍应刷新以使用对应前端。
+当前七角色双人内核使用协议 v5（`badminton-v5`、`flash-90302-v3`，快照含 `ackTick` 和本场 `shuttleSpeed`）。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1/v2/v3/v4 页面会在绑定席位前被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。球速／手动挥拍版本的准确release及检查结果见验证记录；版本切换后须刷新以使用对应前端。
 
 本项目 CSP 使用 `img-src 'self' blob:`，用于本地生成带原滤镜的彩屑着色 SVG。发布只安装本项目 snippet，不更改其他游戏的策略。
 
@@ -65,7 +68,7 @@ curl -fsS https://www.firesoul.cn/badminton-h5-online/api/health
 - 失焦、隐藏或 pagehide 清空按键并发送 release。即使 release 丢失，750 ms 没有新输入也会清键；关闭 WS 清双方输入并暂停比赛。
 - 断线席位保留 15 秒，原 Cookie 重连后恢复；超时判对方胜，双方都离线则无获胜方，并释放房间。心跳每 5 秒检查，静默网络故障通常需要一个至两个心跳周期才被识别；断线保留计时从服务器确认断开开始。
 - 正常结束的结算保留 30 秒，可提前再次匹配释放旧席位；主动结束视为弃权。队列 120 秒未匹配移除；单场最长 20 分钟。
-- 会话最多 5000，房间最多 100；HTTP 初始化按真实 IP 每分钟 120 次；WS 最多 1024 字节、每秒 180 消息，输入积压最多 120 帧。序号必须连续，移动仅 -1/0/1，状态/席位字段禁止。以上是资源限制，不代表已完成 100 房间并发压测。
+- 会话最多 5000，房间最多 100；HTTP 初始化按真实 IP 每分钟 120 次；WS 最多 1024 字节、每秒 180 消息，输入积压最多 120 帧。序号必须连续，移动仅 -1/0/1，挥拍模式仅 auto/overhead/underhand（非按下沿必须 auto），状态/席位字段禁止。匹配档位仅数值1/1.25/1.5/2，同档配对且角色／档位在排队和比赛内冻结。以上是资源限制，不代表已完成 100 房间并发压测。
 - Cookie 为 30 天、HttpOnly、SameSite=Lax、生产 Secure、Path 限定本入口。空闲内存会话 24 小时回收，下一次 HTTP 初始化可用签名 Cookie 重新建立会话。没有数据库或 Redis。
 
 ## 联网卡顿诊断

@@ -147,6 +147,11 @@ export class ControlsSettings {
       this.changed(false);
     });
     this.render();
+    const missing = (["overhead", "underhand"] as const).filter(
+      (action) => !initial.bindings[action].length,
+    );
+    if (missing.length)
+      this.message.textContent = `已保留现有按键；${missing.map((action) => ACTION_LABELS[action]).join("、")}未设置，可自行添加空闲按键。`;
   }
   setOpen(open: boolean): void {
     if (!open) this.capture.cancel();

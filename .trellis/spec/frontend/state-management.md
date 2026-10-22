@@ -87,7 +87,7 @@ Network receive timing crosses interpolation, prediction, effects and rendering.
 
 ### 3. Contracts
 
-Receipt/sample times use monotonic performance.now(). Reject non-finite receipt times and stale/duplicate gameplay snapshots. Main returns before updating latest/prediction/effects for rejected snapshots. Sample x/y/vx/vy within compatible authority snapshots; discrete fields choose a real endpoint. Attachment/last-toucher transitions choose actual shuttle state. `renderTick` may reset across semantic boundaries, never within a continuous one. Normal samples up to250ms retain0.85..1.15 slew. A gap greater than250ms rebases the authority clock to the latest actual snapshot tick **and receipt time**, then recovers forward toward that clock minus current delay, clamped to oldest/latest and never behind the old cursor. Without fresh authority, hold the latest real state. Do not reanchor ordinary packets. Diagnostics expose target delay, actual latest-to-render gap, starvation/rewinds and scalar `recoveries`, `lastRecoveryPauseMs`, `lastRecoveryAdvanceTicks`; no wire change or client ball stepping.
+Receipt/sample times use monotonic performance.now(). Reject non-finite receipt times and stale/duplicate gameplay snapshots. Main returns before updating latest/prediction/effects for rejected snapshots. Sample x/y/vx/vy within compatible authority snapshots; discrete fields choose a real endpoint. Attachment/last-toucher/rallyHits transitions choose actual shuttle state. Interpolate the shuttle only when rallyHits also matches; legal same-toucher hits must not be smeared into a false trajectory. A hit does not reset the whole presentation clock. `renderTick` may reset across semantic boundaries, never within a continuous one. Normal samples up to250ms retain0.85..1.15 slew. A gap greater than250ms rebases the authority clock to the latest actual snapshot tick **and receipt time**, then recovers forward toward that clock minus current delay, clamped to oldest/latest and never behind the old cursor. Without fresh authority, hold the latest real state. Do not reanchor ordinary packets. Diagnostics expose target delay, actual latest-to-render gap, starvation/rewinds and scalar `recoveries`, `lastRecoveryPauseMs`, `lastRecoveryAdvanceTicks`; no wire change or client ball stepping.
 
 ### 4. Validation & Error Matrix
 
@@ -98,7 +98,7 @@ Receipt/sample times use monotonic performance.now(). Reject non-finite receipt 
 | No next snapshot | Hold latest; do not extrapolate ball |
 | Old tick from earlier score/phase | Ignore before resetting current segment |
 | Same tick on reconnect/status boundary | Accept new semantic state |
-| Either role/score/room/status/phase change | Clear old interpolation segment; own-role/score/room/status/phase changes also clear prediction history |
+| Either role/score/room/status/phase/schema/shuttleSpeed change | Clear old interpolation segment; own-role/score/room/status/phase changes also clear prediction history |
 
 ### 5. Good / Base / Bad Cases
 
@@ -139,7 +139,7 @@ Display-side preferences cross UI, input, actual-seat prediction and original-ar
 ### 3. Contracts
 
 - Default false; only stored exact `"true"` under `fiso-online:self-left:v1` enables. Persist locally, never in Cookie/WS. Invalid/missing/throwing storage defaults off; write failure retains the live choice.
-- Mirror only when enabled and actual side is right. Main's side, Snapshot, player.side, Prediction identity, winner/server comparisons, physics and protocol4 stay actual. No seat means ordinary view. Retained result keeps its side even after latest/room expire.
+- Mirror only when enabled and actual side is right. Main's side, Snapshot, player.side, Prediction identity, winner/server comparisons, physics and protocol5 stay actual. No seat means ordinary view. Retained result keeps its side even after latest/room expire.
 - Map horizontal screen intent once before send. Commit/advance seq/accept prediction only on successful send, using that same mapped frame. Zero stays zero; jump/hit fields are unchanged. Reflection is its own inverse for side selection.
 - World reflection is x'=640-x, applied only through Canvas transforms to background/net/markers/actors/shuttle/world effects. Scores, Logo, intro/name/finish glyphs remain unmirrored at existing depths. Choose scores, p1/p2 winner and left/right role-name artwork by displayed sides. Keep original spark/finish append order and source registration.
 - Preserve authority/effect objects, interpolation clock, effect/audio cursors, adaptive quality stage and source-SHA/backing-size rasters on a toggle. No per-frame state mirror/deep copy, perspective-specific cache key, full raster invalidation or event replay. Prepare and render share displayed art selection.
@@ -172,3 +172,9 @@ Perspective tests cover all seat/preference combinations, exact storage values/p
 Wrong: `side = "left"` when enabling; `canvas.style.transform = "scaleX(-1)"`; clear all effects/rasters on a preference change.
 
 Correct: keep actual side; `const command = worldInput(input.peek(seq + 1), isMirrored(enabled, side));` then preserve the existing send/commit/prediction transaction. Reflect only world layers and select readable art by display side.
+
+## Match-speed UI ownership
+
+Menu selectedShuttleSpeed is the next request; matchShuttleSpeed is server-confirmed for queued/playing/reconnecting/result displays. Use four native `[data-shuttle-speed]` buttons in `role=group` named “球速场次”, exactly one aria-pressed. Default1, keep last choice within the page only, disable until loaded and during queue/room, enable after cancel/result. Result speed remains the finished match even when selecting the next tier. Queue sends role and speed atomically; matched/resume restores server speed. Configuration/schema changes reset incompatible prediction/interpolation histories. Prediction still advances actors with fixed real dt and never simulates/scales the ball. Compact panels must scroll to all six binding rows and match controls.
+
+An expired-seat upgrade can send result/idle before matched metadata reaches a freshly loaded page. Prefix result text only when matchShuttleSpeed is confirmed; otherwise omit the speed label, preserving the score/reason without guessing from the next menu selection or rendering undefined.

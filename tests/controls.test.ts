@@ -11,18 +11,20 @@ import {
   saveControls,
 } from "../src/client/controls";
 afterEach(() => vi.unstubAllGlobals());
-it("preserves all original aliases with detached mutable defaults and labels", () => {
+it("uses J/K with six detached remappable actions with detached mutable defaults and labels", () => {
   const a = defaultControls(),
     b = defaultControls();
   expect(a.bindings).toEqual({
     left: ["KeyA", "ArrowLeft"],
     right: ["KeyD", "ArrowRight"],
-    jump: ["KeyW", "ArrowUp"],
-    hit: ["Space", "KeyS", "ArrowDown"],
+    jump: ["KeyK", "ArrowUp"],
+    hit: ["KeyJ", "Space", "ArrowDown"],
+    overhead: ["KeyW"],
+    underhand: ["KeyS"],
   });
   a.bindings.hit.length = 0;
   expect(actionKeys(a.bindings, "hit")).toBe("未设置");
-  expect(actionKeys(b.bindings, "hit")).toBe("空格 / S / ↓");
+  expect(actionKeys(b.bindings, "hit")).toBe("J / 空格 / ↓");
   expect(keyboardHelp(b.bindings)).toContain("向左 A / ←");
   expect(b.gamepadEnabled).toBe(true);
 });
@@ -60,10 +62,10 @@ it("rejects conflicts and full rows without changing the current mapping", () =>
   const value = defaultControls(),
     before = structuredClone(value);
   expect(bindingError(value.bindings, "left", "KeyD")).toContain("向右");
-  expect(bindingError(value.bindings, "hit", "KeyJ")).toContain("最多");
+  expect(bindingError(value.bindings, "hit", "KeyQ")).toContain("最多");
   expect(bindingError(value.bindings, "left", "KeyM")).toContain("静音");
   expect(bindingError(value.bindings, "left", "KeyA")).toBeUndefined();
-  expect(bindingError(value.bindings, "left", "KeyJ")).toBeUndefined();
+  expect(bindingError(value.bindings, "left", "KeyQ")).toBeUndefined();
   expect(value).toEqual(before);
 });
 it.each([
@@ -73,7 +75,7 @@ it.each([
   "[]",
   "null",
   " ".repeat(4097),
-  JSON.stringify({ ...defaultControls(), version: 2 }),
+  JSON.stringify({ ...defaultControls(), version: 1 }),
   JSON.stringify({ ...defaultControls(), extra: 1 }),
   JSON.stringify({ ...defaultControls(), gamepadEnabled: "true" }),
   JSON.stringify({
@@ -148,4 +150,87 @@ it("roundtrips empty/custom keys and disabled pad, guarding storage getter/read/
   expect(readControls()).toEqual(defaultControls());
   expect(() => saveControls(value)).not.toThrow();
   expect(value.bindings.left).toEqual([]); // Persistence failure cannot discard live settings.
+});
+
+it("migrates reordered v1 defaults while retaining a disabled pad and the rollback entry", () => {
+  const legacy = JSON.stringify({
+    version: 1,
+    gamepadEnabled: false,
+    bindings: {
+      left: ["ArrowLeft", "KeyA"],
+      right: ["ArrowRight", "KeyD"],
+      jump: ["ArrowUp", "KeyW"],
+      hit: ["ArrowDown", "KeyS", "Space"],
+    },
+  });
+  const values = new Map([["fiso-online:controls:v1", legacy]]);
+  const storage = () => ({
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, raw: string) => {
+      values.set(key, raw);
+    },
+  });
+  const migrated = readControls(storage);
+  expect(migrated).toEqual({ ...defaultControls(), gamepadEnabled: false });
+  saveControls(migrated, storage);
+  expect(values.get("fiso-online:controls:v1")).toBe(legacy);
+  expect(readControls(storage)).toEqual(migrated);
+});
+it.each([true, false])(
+  "preserves custom/empty v1 rows and only assigns unoccupied modifiers (W occupied: %s)",
+  (occupied) => {
+    const bindings = {
+      left: [],
+      right: ["KeyL"],
+      jump: occupied ? ["KeyW"] : ["KeyK"],
+      hit: ["KeyS"],
+    };
+    const legacy = JSON.stringify({
+      version: 1,
+      gamepadEnabled: true,
+      bindings,
+    });
+    const storage = () => ({
+      getItem: (key: string) => (key.endsWith(":v1") ? legacy : null),
+      setItem: () => {},
+    });
+    const migrated = readControls(storage);
+    expect(migrated.bindings).toEqual({
+      ...bindings,
+      overhead: occupied ? [] : ["KeyW"],
+      underhand: [],
+    });
+    expect(actionKeys(migrated.bindings, "underhand")).toBe("未设置");
+    migrated.bindings.jump.length = 0;
+    expect(readControls(storage).bindings.jump).toEqual(bindings.jump);
+  },
+);
+it("a present invalid v2 never resurrects legacy preferences; invalid v1 uses safe new defaults", () => {
+  const old = JSON.stringify({
+    version: 1,
+    gamepadEnabled: false,
+    bindings: { left: [], right: [], jump: [], hit: [] },
+  });
+  for (const current of [
+    "{}",
+    "null",
+    "",
+    JSON.stringify({
+      ...defaultControls(),
+      bindings: { ...defaultControls().bindings, overhead: ["KeyJ"] },
+    }),
+  ]) {
+    expect(
+      readControls(() => ({
+        getItem: (key) => (key.endsWith(":v2") ? current : old),
+        setItem: () => {},
+      })),
+    ).toEqual(defaultControls());
+  }
+  expect(
+    readControls(() => ({
+      getItem: (key) => (key.endsWith(":v1") ? '{"version":1}' : null),
+      setItem: () => {},
+    })),
+  ).toEqual(defaultControls());
 });

@@ -8,6 +8,8 @@ assert.equal(page.status, 200);
 const html = await page.text();
 assert.ok(html.includes("<title>FisoOnline</title>"));
 assert.ok(html.includes("火柴人羽毛球"));
+for (const speed of [1, 1.25, 1.5, 2])
+  assert.ok(html.includes(`data-shuttle-speed="${speed}"`));
 const assets = [
   ...html.matchAll(/(?:src|href)="(\/badminton-h5-online\/assets\/[^\"]+)"/g),
 ].map((match) => match[1]);
@@ -21,7 +23,7 @@ const health = await fetch(new URL("api/health", base));
 assert.equal(health.status, 200);
 const status = await health.json();
 assert.equal(status.ok, true);
-assert.equal(status.protocol, 4);
+assert.equal(status.protocol, 5);
 assert.equal(status.simulationHz, 60);
 assert.equal(status.snapshotHz, 30);
 const artResponse = await fetch(new URL("classic/manifest.json", base));
@@ -56,10 +58,12 @@ assert.equal(session.status, 200);
 const setCookie = session.headers.get("set-cookie");
 assert.ok(setCookie?.includes("HttpOnly"));
 assert.ok(setCookie.includes("SameSite=Lax"));
+assert.ok(setCookie.includes("Path=/badminton-h5-online/"));
+assert.equal((await session.json()).protocol, 5);
 if (base.protocol === "https:") assert.ok(setCookie.includes("Secure"));
 const wsUrl = new URL("ws", base);
 wsUrl.protocol = base.protocol === "https:" ? "wss:" : "ws:";
-const ws = new WebSocket(wsUrl, "badminton-v4", {
+const ws = new WebSocket(wsUrl, "badminton-v5", {
   headers: { Cookie: setCookie.split(";")[0], Origin: new URL(origin).origin },
 });
 const greeting = await new Promise((resolve, reject) => {
@@ -77,8 +81,31 @@ const greeting = await new Promise((resolve, reject) => {
   });
 });
 assert.equal(greeting.type, "hello");
-assert.equal(greeting.protocol, 4);
+assert.equal(greeting.protocol, 5);
 ws.close();
+const legacy = new WebSocket(wsUrl, "badminton-v4", {
+  headers: { Cookie: setCookie.split(";")[0], Origin: new URL(origin).origin },
+});
+const legacyMessages = [];
+legacy.on("message", (raw) => legacyMessages.push(JSON.parse(raw.toString())));
+const legacyClosed = await new Promise((resolve, reject) => {
+  const timeout = setTimeout(() => {
+    legacy.terminate();
+    reject(new Error("Legacy WebSocket timed out"));
+  }, 5000);
+  legacy.once("error", (error) => {
+    clearTimeout(timeout);
+    reject(error);
+  });
+  legacy.once("close", (code, reason) => {
+    clearTimeout(timeout);
+    resolve({ code, reason: reason.toString() });
+  });
+});
+assert.deepEqual(legacyClosed, { code: 1008, reason: "protocol_mismatch" });
+assert.deepEqual(legacyMessages, [
+  { type: "error", code: "protocol_mismatch" },
+]);
 const existing = [];
 for (const path of [
   "/badminton/",
@@ -99,7 +126,7 @@ console.log(
       classicArt:
         "source record, 640x426, 60 fps, 24 net frames and 4 SVG hashes checked",
       cookie: "HttpOnly/SameSite checked",
-      websocket: "hello protocol=4",
+      websocket: "hello protocol=5; legacy v4 mismatch/1008",
       existing,
     },
     null,

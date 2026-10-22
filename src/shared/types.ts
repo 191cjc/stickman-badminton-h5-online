@@ -1,6 +1,7 @@
 export type Side = "left" | "right";
 
 export type GamePhase = "menu" | "playing" | "paused" | "point" | "matchEnd";
+export type SwingChoice = "auto" | "overhead" | "underhand";
 
 export interface PlayerIntent {
   move: number;
@@ -8,6 +9,7 @@ export interface PlayerIntent {
   jumpPressed: boolean;
   hitHeld: boolean;
   hitPressed: boolean;
+  swing?: SwingChoice;
   pausePressed: boolean;
   // Server-only locks preserve shot combinations when input packets are coalesced.
   hitJump?: boolean;

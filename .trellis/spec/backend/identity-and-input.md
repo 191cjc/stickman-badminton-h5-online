@@ -10,9 +10,9 @@ GET health is public and reports status/cadence/room/queue counts. Non-GET reque
 
 ## WebSocket seat binding
 
-An upgrade must target the exact WS route, have an allowed Origin, offer `badminton-v4`, and contain a valid Cookie mapped to an initialized guest. Missing identity returns 401; foreign Origin 403; missing subprotocol 400; an existing guest socket 409.
+An upgrade must target the exact WS route, have an allowed Origin, offer `badminton-v5`, and contain a valid Cookie mapped to an initialized guest. Missing identity returns 401; foreign Origin 403; missing subprotocol 400; an existing guest socket 409.
 
-Legacy `badminton-v1`/`badminton-v2`/`badminton-v3` are accepted only to send protocol_mismatch and1008close before binding a guest or seat. It cannot occupy or replace an active connection.
+Legacy `badminton-v1`/`badminton-v2`/`badminton-v3`/`badminton-v4` are accepted only to send protocol_mismatch and1008close before binding a guest or seat. It cannot occupy or replace an active connection.
 
 Guest.socket is assigned on successful current-version upgrade. New connections do not replace an active socket. Seat lookup uses the authenticated Guest object in the room, never a room/side/guest field submitted by the client. Reconnect reuses the same signed guest and the existing retained seat.
 
@@ -22,7 +22,7 @@ Use [parseClientMessage](../../../src/shared/protocol.ts) before dispatch. It re
 
 The discriminator must be an actual string before command membership is checked. Array/nested-array command types and other non-string values return null; an authenticated socket then closes with 1008/`invalid_message`. Do not coerce untrusted command types with `String`. [Parser regressions](../../../tests/protocol.test.ts) and [real WS regressions](../../../tests/service.test.ts) verify the two boundaries; see the [executable contract](../shared/protocol.md).
 
-The only input payload is logical direction, jump/hit held/edge flags, and sequence. Internal `hitJump` locks are server-created, not wire fields. Position, ball, score, room, side, and match results cannot be submitted as input.
+The only input payload is logical direction, jump/hit held/edge flags, swing selection and sequence. Forced swing requires a hit edge; non-hit frames require auto. Queue speed must be one of the four shared numeric literals. Internal `hitJump` locks are server-created, not wire fields. Position, ball, score, room, side, and match results cannot be submitted as input.
 
 WS payload maximum is 1024 bytes, compression is disabled, binary messages are rejected, and a connection is limited to 180 messages per one-second bucket. Input sequence must be received+1 and pending input is bounded at 120 frames. Invalid messages/sequence use policy close 1008. Slow output above 256 KiB terminates the socket.
 

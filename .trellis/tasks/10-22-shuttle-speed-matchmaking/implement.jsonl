@@ -1,0 +1,17 @@
+{"file": ".trellis/spec/shared/index.md", "reason": "Shared simulation/transport owners and cross-runtime boundaries"}
+{"file": ".trellis/spec/shared/simulation.md", "reason": "Flash90302 source order, character contact, 1x parity and cosmetic isolation"}
+{"file": ".trellis/spec/shared/protocol.md", "reason": "Strict queue validation, authenticated commands and coordinated protocol migration"}
+{"file": ".trellis/spec/backend/rooms.md", "reason": "FIFO, freeze, reconnect, fixed-step ack, cleanup and independent rematch"}
+{"file": ".trellis/spec/backend/identity-and-input.md", "reason": "Cookie/Origin checks and mismatch before socket/seat binding"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Native in-court speed choices, compact layout and accessible scene actions"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Own-player prediction, authority-only shuttle, interpolation and actual-seat mirroring"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Release on interactive focus, source input gates and one paced send owner"}
+{"file": ".trellis/spec/frontend/controls-and-devices.md", "reason": "Preserve keyboard bindings, standard gamepad and transactional input mapping"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Shared inferred state and runtime trust-boundary validation"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Required checks, HTTP before isolated browser and actual-device limits"}
+{"file": ".trellis/spec/deployment/operations.md", "reason": "Owned release/service isolation, atomic switch, secrets and version-aware rollback"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Reuse existing queue, step, input and UI owners"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace config from selection through parser and authority to presentation"}
+{"file": ".trellis/tasks/10-22-shuttle-speed-matchmaking/research/matching-ui-protocol.md", "reason": "Code-backed queue/protocol/UI design and verification matrix"}
+{"file": ".trellis/tasks/10-22-shuttle-speed-matchmaking/research/physics.md", "reason": "Shuttle-only time scaling, contact chronology, native velocity units and bounded substeps"}
+{"file": ".trellis/tasks/10-22-shuttle-speed-matchmaking/research/manual-swing-controls.md", "reason": "Confirmed A mapping, bounded per-hit swing provenance, shared coalescing, source gates and v1-to-v2 binding migration"}

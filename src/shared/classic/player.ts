@@ -17,7 +17,7 @@ import {
   type ClassicPlayerState,
   type ClassicSwingKind,
 } from "./types";
-import type { PlayerIntent, Side } from "../types";
+import type { PlayerIntent, Side, SwingChoice } from "../types";
 
 export function createClassicPlayer(
   side: Side,
@@ -151,6 +151,7 @@ function chooseClassicSwing(
 export function startClassicSwing(
   player: ClassicPlayerState,
   context: ClassicPlayerContext = {},
+  choice: SwingChoice = "auto",
 ): boolean {
   if (
     context.pointActive === false ||
@@ -158,7 +159,11 @@ export function startClassicSwing(
     player.swingFrame !== 1
   )
     return false;
-  player.swingKind = chooseClassicSwing(player, context);
+  player.swingKind = player.serving
+    ? "serve"
+    : choice === "auto"
+      ? chooseClassicSwing(player, context)
+      : choice;
   player.swinging = true;
   player.contactEnabled = !player.serving;
   player.swingClips[player.swingKind].playing = true;
@@ -249,7 +254,11 @@ export function stepClassicPlayer(
   const hit = intent.hitHeld || intent.hitPressed;
   const swingStarted =
     hit && (intent.hitPressed || !player.hitLatched)
-      ? startClassicSwing(player, context)
+      ? startClassicSwing(
+          player,
+          context,
+          intent.hitPressed ? intent.swing : "auto",
+        )
       : false;
   player.hitLatched = hit;
   if (!player.grounded) {

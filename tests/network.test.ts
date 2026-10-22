@@ -70,7 +70,9 @@ it("stops before opening a socket on incompatible session and requires a refresh
   await vi.advanceTimersByTimeAsync(20_000);
   expect(network.refreshRequired).toBe(true);
   expect(network.connected).toBe(false);
-  expect(network.send({ type: "queue", character: "joe" })).toBe(false);
+  expect(
+    network.send({ type: "queue", shuttleSpeed: 1, character: "joe" }),
+  ).toBe(false);
   expect(fetcher).toHaveBeenCalledTimes(1);
   expect(sockets).toHaveLength(0);
   expect(statuses.at(-1)).toContain("刷新");
@@ -133,10 +135,12 @@ it("paced sends retain edges and consecutive sequence through disconnection, bac
     Object.assign(event, { code, repeat: false });
     win.dispatchEvent(event);
   };
-  for (const code of ["KeyW", "Space"]) {
+  key("keydown", "KeyW");
+  for (const code of ["KeyK", "Space"]) {
     key("keydown", code);
     key("keyup", code);
   }
+  key("keyup", "KeyW");
   let seq = 0;
   const scheduler = new InputScheduler(
     () => {
@@ -162,13 +166,25 @@ it("paced sends retain edges and consecutive sequence through disconnection, bac
   await vi.advanceTimersByTimeAsync(17);
   expect(seq).toBe(0);
   expect(prediction.diagnostics(Date.now()).pendingInputs).toBe(0);
-  expect(input.peek(1)).toMatchObject({ jumpPressed: true, hitPressed: true });
+  expect(input.peek(1)).toMatchObject({
+    jumpPressed: true,
+    hitPressed: true,
+    swing: "overhead",
+  });
   expect(socket.sent).toEqual([]);
   await vi.advanceTimersByTimeAsync(34);
   const frames = socket.sent.map((raw) => JSON.parse(raw));
   expect(frames.map(({ seq }) => seq)).toEqual([1, 2]);
-  expect(frames[0]).toMatchObject({ jumpPressed: true, hitPressed: true });
-  expect(frames[1]).toMatchObject({ jumpPressed: false, hitPressed: false });
+  expect(frames[0]).toMatchObject({
+    jumpPressed: true,
+    hitPressed: true,
+    swing: "overhead",
+  });
+  expect(frames[1]).toMatchObject({
+    jumpPressed: false,
+    hitPressed: false,
+    swing: "auto",
+  });
   expect(prediction.diagnostics(Date.now()).pendingInputs).toBe(2);
   scheduler.setActive(false);
   await vi.advanceTimersByTimeAsync(100);
@@ -207,7 +223,7 @@ it("mirrored movement reaches the actual right-side prediction only after the id
       Object.assign(new Event("keydown"), { code, repeat: false }),
     );
   key("KeyA");
-  key("KeyW");
+  key("KeyK");
   key("Space");
   let seq = 0;
   const send = () => {
@@ -334,12 +350,10 @@ it("actual logical notifications expedite one transactional send and rejected ex
 it("paced gamepad polling retains quick edges through real send failures and maps the identical accepted frame to prediction", async () => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ protocol: PROTOCOL, connected: false }),
-      }),
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ protocol: PROTOCOL, connected: false }),
+    }),
   );
   vi.stubGlobal("window", new EventTarget());
   vi.stubGlobal("document", {

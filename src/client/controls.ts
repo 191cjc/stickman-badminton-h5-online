@@ -1,9 +1,16 @@
 /** Browser-local preferences; no device identity or controls are sent to server. */
-export const ACTIONS = ["left", "right", "jump", "hit"] as const;
+export const ACTIONS = [
+  "left",
+  "right",
+  "jump",
+  "hit",
+  "overhead",
+  "underhand",
+] as const;
 export type Action = (typeof ACTIONS)[number];
 export type KeyBindings = Record<Action, string[]>;
 export interface ControlsPreferences {
-  version: 1;
+  version: 2;
   bindings: KeyBindings;
   gamepadEnabled: boolean;
 }
@@ -12,13 +19,18 @@ export const ACTION_LABELS: Record<Action, string> = {
   right: "向右",
   jump: "跳跃",
   hit: "挥拍／发球",
+  overhead: "高位挥拍修饰",
+  underhand: "低位挑球修饰",
 };
-export const CONTROLS_STORAGE_KEY = "fiso-online:controls:v1";
+export const CONTROLS_STORAGE_KEY = "fiso-online:controls:v2";
+export const LEGACY_CONTROLS_STORAGE_KEY = "fiso-online:controls:v1";
 const defaults: KeyBindings = {
   left: ["KeyA", "ArrowLeft"],
   right: ["KeyD", "ArrowRight"],
-  jump: ["KeyW", "ArrowUp"],
-  hit: ["Space", "KeyS", "ArrowDown"],
+  jump: ["KeyK", "ArrowUp"],
+  hit: ["KeyJ", "Space", "ArrowDown"],
+  overhead: ["KeyW"],
+  underhand: ["KeyS"],
 };
 const supported = new Set([
   ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -61,7 +73,7 @@ export const isSupportedCode = (value: unknown): value is string =>
   typeof value === "string" && supported.has(value);
 export function defaultControls(): ControlsPreferences {
   return {
-    version: 1,
+    version: 2,
     bindings: cloneBindings(defaults),
     gamepadEnabled: true,
   };
@@ -72,6 +84,8 @@ export function cloneBindings(value: KeyBindings): KeyBindings {
     right: [...value.right],
     jump: [...value.jump],
     hit: [...value.hit],
+    overhead: [...value.overhead],
+    underhand: [...value.underhand],
   };
 }
 const object = (value: unknown): value is Record<string, unknown> =>
@@ -85,39 +99,79 @@ function exactKeys(
     keys.every((key) => Object.hasOwn(value, key))
   );
 }
-export function parseControls(
+const legacyActions = ["left", "right", "jump", "hit"] as const;
+type LegacyBindings = Pick<KeyBindings, (typeof legacyActions)[number]>;
+const legacyDefaults: LegacyBindings = {
+  left: ["KeyA", "ArrowLeft"],
+  right: ["KeyD", "ArrowRight"],
+  jump: ["KeyW", "ArrowUp"],
+  hit: ["Space", "KeyS", "ArrowDown"],
+};
+function parsePreferences(
   raw: string | null,
-): ControlsPreferences | undefined {
+  version: number,
+  actions: readonly Action[],
+) {
   if (raw === null || raw.length > 4096) return;
   try {
     const value: unknown = JSON.parse(raw);
     if (
       !object(value) ||
       !exactKeys(value, ["version", "bindings", "gamepadEnabled"]) ||
-      value.version !== 1 ||
+      value.version !== version ||
       typeof value.gamepadEnabled !== "boolean" ||
       !object(value.bindings) ||
-      !exactKeys(value.bindings, ACTIONS)
+      !exactKeys(value.bindings, actions)
     )
       return;
     const keys = new Set<string>();
-    for (const action of ACTIONS) {
+    const bindings: Partial<KeyBindings> = {};
+    for (const action of actions) {
       const codes = value.bindings[action];
       if (!Array.isArray(codes) || codes.length > 3) return;
+      const detached: string[] = [];
       for (const code of codes) {
         if (!isSupportedCode(code) || keys.has(code)) return;
         keys.add(code);
+        detached.push(code);
       }
+      bindings[action] = detached;
     }
-    // Each array was validated above; detach it from the parsed boundary object.
-    return {
-      version: 1,
-      bindings: cloneBindings(value.bindings as KeyBindings),
-      gamepadEnabled: value.gamepadEnabled,
-    };
+    return { bindings, gamepadEnabled: value.gamepadEnabled };
   } catch {
     return;
   }
+}
+export function parseControls(
+  raw: string | null,
+): ControlsPreferences | undefined {
+  const parsed = parsePreferences(raw, 2, ACTIONS);
+  if (parsed)
+    return {
+      version: 2,
+      bindings: parsed.bindings as KeyBindings,
+      gamepadEnabled: parsed.gamepadEnabled,
+    };
+}
+function migrateControls(raw: string | null): ControlsPreferences | undefined {
+  const parsed = parsePreferences(raw, 1, legacyActions);
+  if (!parsed) return;
+  const old = parsed.bindings as LegacyBindings;
+  const unchanged = legacyActions.every(
+    (action) =>
+      old[action].length === legacyDefaults[action].length &&
+      legacyDefaults[action].every((code) => old[action].includes(code)),
+  );
+  const value = defaultControls();
+  value.gamepadEnabled = parsed.gamepadEnabled;
+  if (unchanged) return value;
+  const used = new Set(legacyActions.flatMap((action) => old[action]));
+  value.bindings = {
+    ...old,
+    overhead: used.has("KeyW") ? [] : ["KeyW"],
+    underhand: used.has("KeyS") ? [] : ["KeyS"],
+  };
+  return value;
 }
 type StorageFactory = () => Pick<Storage, "getItem" | "setItem">;
 const browserStorage: StorageFactory = () => window.localStorage;
@@ -125,8 +179,11 @@ export function readControls(
   storage: StorageFactory = browserStorage,
 ): ControlsPreferences {
   try {
+    const store = storage();
+    const current = store.getItem(CONTROLS_STORAGE_KEY);
+    if (current !== null) return parseControls(current) ?? defaultControls();
     return (
-      parseControls(storage().getItem(CONTROLS_STORAGE_KEY)) ??
+      migrateControls(store.getItem(LEGACY_CONTROLS_STORAGE_KEY)) ??
       defaultControls()
     );
   } catch {
@@ -205,4 +262,4 @@ export const actionKeys = (bindings: KeyBindings, action: Action): string =>
 export const keyboardHelp = (bindings: KeyBindings): string =>
   ACTIONS.map(
     (action) => `${ACTION_LABELS[action]} ${actionKeys(bindings, action)}`,
-  ).join(" · ");
+  ).join(" · ") + " · 按住高位／低位修饰再挥拍；两者同按为自动";

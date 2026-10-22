@@ -11,6 +11,7 @@ const dt = 1000 / 60;
 function command(seq: number, patch: Partial<InputFrame> = {}): InputFrame {
   return {
     type: "input",
+    swing: "auto",
     seq,
     move: 1,
     jump: false,

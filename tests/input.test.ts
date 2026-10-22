@@ -4,7 +4,7 @@ class Element {
   constructor(readonly tagName: string) {}
 }
 afterEach(() => vi.unstubAllGlobals());
-it("Space hits; W/Up jump; M/Escape are local actions and focus loss releases everything", () => {
+it("J/Space hit; K/Up jump; M/Escape are local actions and focus loss releases everything", () => {
   const win = new EventTarget(),
     doc = new EventTarget();
   Object.assign(doc, { hidden: false, querySelectorAll: () => [] });
@@ -26,7 +26,7 @@ it("Space hits; W/Up jump; M/Escape are local actions and focus loss releases ev
   expect(frame.hitPressed).toBe(true);
   expect(frame.hitHeld).toBe(true);
   expect(frame.jump).toBe(false);
-  key("keydown", "KeyW");
+  key("keydown", "KeyK");
   frame = input.read(2);
   expect(frame.jumpPressed).toBe(true);
   expect(frame.jump).toBe(true);
@@ -79,9 +79,9 @@ it.each(["blur", "pagehide", "hidden"])(
       Object.assign(event, { code, repeat: false });
       win.dispatchEvent(event);
     };
-    key("keydown", "KeyW");
+    key("keydown", "KeyK");
     key("keydown", "Space");
-    key("keyup", "KeyW");
+    key("keyup", "KeyK");
     key("keyup", "Space");
     // A press/release between sends survives output backpressure. A failed send
     // performs no commit and uses the same consecutive sequence on retry.
@@ -92,7 +92,7 @@ it.each(["blur", "pagehide", "hidden"])(
     input.commit(input.peek(1));
     expect(input.peek(2).jumpPressed).toBe(false);
     expect(input.peek(2).hitPressed).toBe(false);
-    key("keydown", "KeyW");
+    key("keydown", "KeyK");
     key("keydown", "Space");
     if (releaseEvent === "hidden") {
       Object.assign(doc, { hidden: true });
@@ -135,12 +135,12 @@ it("notifies only after logical changes, preserving aliases, rapid edges and poi
   };
   key("keydown", "Space");
   key("keydown", "Space", true);
-  key("keydown", "KeyS");
+  key("keydown", "KeyJ");
   key("keyup", "Space"); // Alias still holds hit; no logical change.
   key("keydown", "KeyX");
   expect(changes).toHaveLength(1);
   expect(changes[0]).toMatchObject({ hitPressed: true, hitHeld: true });
-  key("keyup", "KeyS");
+  key("keyup", "KeyJ");
   expect(changes).toHaveLength(2);
   expect(changes[1]).toMatchObject({ hitPressed: true, hitHeld: false });
   touch.dispatchEvent(
@@ -195,7 +195,7 @@ it("settings gate ignores native presses and touch, and closing cannot resurrect
     false,
   );
   key("KeyD");
-  key("KeyW");
+  key("KeyK");
   key("Escape");
   touch.dispatchEvent(
     Object.assign(new Event("pointerdown"), { pointerId: 1 }),
@@ -217,7 +217,7 @@ it("settings gate ignores native presses and touch, and closing cannot resurrect
   expect(input.peek(1).move).toBe(-1);
 });
 
-function mergedFixture() {
+function mergedFixture(onChange = () => {}) {
   const win = new EventTarget(),
     doc = new EventTarget();
   const touch = Object.assign(new EventTarget(), {
@@ -228,7 +228,7 @@ function mergedFixture() {
   vi.stubGlobal("window", win);
   vi.stubGlobal("document", doc);
   vi.stubGlobal("HTMLElement", Element);
-  const input = new Input(() => {});
+  const input = new Input(() => {}, undefined, undefined, onChange);
   const key = (type: string, code: string, extra = {}) => {
     const event = Object.assign(new Event(type, { cancelable: true }), {
       code,
@@ -251,6 +251,8 @@ it("custom/removal mapping changes keyboard only; pointer IDs and keyboard holds
     right: ["KeyL"],
     jump: ["Enter"],
     hit: [],
+    overhead: [],
+    underhand: [],
   });
   key("keydown", "KeyA");
   expect(input.peek(1).move).toBe(0);
@@ -267,7 +269,14 @@ it("custom/removal mapping changes keyboard only; pointer IDs and keyboard holds
     hitHeld: false,
     hitPressed: false,
   });
-  input.setBindings({ left: [], right: [], jump: [], hit: ["KeyJ"] });
+  input.setBindings({
+    left: [],
+    right: [],
+    jump: [],
+    hit: ["KeyJ"],
+    overhead: [],
+    underhand: [],
+  });
   expect(input.peek(2).move).toBe(0);
   key("keydown", "KeyJ", { repeat: true });
   expect(input.peek(2).hitHeld).toBe(false);
@@ -288,7 +297,7 @@ it("merges opposing directions and aggregate edges; unplug discards only pad-own
     hitHeld: true,
     hitPressed: true,
   });
-  key("keydown", "KeyS");
+  key("keydown", "KeyJ");
   pointer("pointerdown", 1);
   input.clearGamepad();
   expect(input.peek(1)).toMatchObject({
@@ -296,10 +305,10 @@ it("merges opposing directions and aggregate edges; unplug discards only pad-own
     hitHeld: true,
     hitPressed: false,
   });
-  key("keyup", "KeyS");
+  key("keyup", "KeyJ");
   pointer("pointerup", 1); // No manufactured edge from surviving sources.
-  key("keydown", "KeyW");
-  key("keyup", "KeyW");
+  key("keydown", "KeyK");
+  key("keyup", "KeyK");
   input.setGamepad(["hit"]);
   input.setGamepad([]);
   expect(input.peek(1)).toMatchObject({
@@ -324,11 +333,11 @@ it("keyboard quick taps survive gamepad removal; aliases and same-action devices
   const { input, key } = mergedFixture();
   key("keydown", "Space");
   input.commit(input.peek(1));
-  key("keydown", "KeyS");
+  key("keydown", "KeyJ");
   input.setGamepad(["hit"]);
   expect(input.peek(2).hitPressed).toBe(false);
   key("keyup", "Space");
-  key("keyup", "KeyS");
+  key("keyup", "KeyJ");
   expect(input.peek(2).hitHeld).toBe(true);
   input.clearGamepad();
   key("keydown", "Space");
@@ -355,4 +364,97 @@ it("browser shortcuts, composition and consumed events never create gameplay ope
   event.preventDefault();
   window.dispatchEvent(event);
   expect(input.peek(1).move).toBe(0);
+});
+
+it("captures manual choice on the aggregate edge, retaining short taps and latest keyboard requests", () => {
+  const { input, key } = mergedFixture();
+  for (const [mods, swing] of [
+    [[], "auto"],
+    [["KeyW"], "overhead"],
+    [["KeyS"], "underhand"],
+    [["KeyW", "KeyS"], "auto"],
+  ] as const) {
+    input.release(false);
+    for (const code of mods) key("keydown", code);
+    expect(input.peek(1)).toMatchObject({
+      jump: false,
+      hitHeld: false,
+      hitPressed: false,
+      swing: "auto",
+    });
+    key("keydown", "KeyJ");
+    for (const code of mods) key("keyup", code);
+    key("keyup", "KeyJ");
+    const pending = input.peek(1);
+    expect(pending).toMatchObject({ hitHeld: false, hitPressed: true, swing });
+    expect(input.peek(1)).toEqual(pending);
+    input.commit(pending);
+    expect(input.peek(2)).toMatchObject({ hitPressed: false, swing: "auto" });
+  }
+  key("keydown", "KeyJ");
+  key("keydown", "KeyW");
+  expect(input.peek(1).swing).toBe("auto"); // Later modifier cannot retarget.
+  key("keyup", "KeyJ");
+  key("keydown", "KeyJ");
+  key("keyup", "KeyJ");
+  expect(input.peek(1).swing).toBe("overhead");
+  key("keyup", "KeyW");
+  key("keydown", "KeyS");
+  key("keydown", "KeyJ");
+  expect(input.peek(1).swing).toBe("underhand");
+});
+it("remapped modifiers follow hit bindings and pad removal reveals the latest surviving source choice", () => {
+  const changed = vi.fn();
+  const { input, key, pointer } = mergedFixture(changed);
+  input.setBindings({
+    left: [],
+    right: [],
+    jump: ["KeyK"],
+    hit: ["KeyH"],
+    overhead: ["KeyO"],
+    underhand: ["KeyU"],
+  });
+  key("keydown", "KeyO");
+  key("keydown", "KeyH");
+  key("keyup", "KeyH");
+  key("keyup", "KeyO");
+  expect(input.peek(1).swing).toBe("overhead");
+  key("keydown", "KeyU");
+  input.setGamepad(["hit"]);
+  input.setGamepad([]);
+  expect(input.peek(1).swing).toBe("underhand");
+  changed.mockClear();
+  input.clearGamepad();
+  expect(changed).toHaveBeenCalledOnce(); // Same booleans, different surviving choice still expedites.
+  expect(input.peek(1)).toMatchObject({ hitPressed: true, swing: "overhead" });
+  pointer("pointerdown", 9);
+  pointer("pointerup", 9);
+  expect(input.peek(1).swing).toBe("underhand");
+  input.release(false);
+  expect(input.peek(1)).toMatchObject({ hitPressed: false, swing: "auto" });
+  input.setGamepad(["hit"]);
+  key("keydown", "KeyH");
+  input.clearGamepad();
+  expect(input.peek(1)).toMatchObject({
+    hitPressed: false,
+    hitHeld: true,
+    swing: "auto",
+  });
+});
+it("bounds pending choices under thousands of unsent taps and clears modifiers at lifecycle release", () => {
+  const { input, key } = mergedFixture();
+  key("keydown", "KeyW");
+  for (let i = 0; i < 3000; i++) {
+    key("keydown", "KeyJ");
+    key("keyup", "KeyJ");
+  }
+  expect(input.peek(1)).toMatchObject({ hitPressed: true, swing: "overhead" });
+  // Provenance is one entry per device class rather than an event queue.
+  expect(
+    (input as unknown as { pending: { hit: Map<string, unknown> } }).pending.hit
+      .size,
+  ).toBe(1);
+  input.release(false);
+  key("keydown", "KeyJ");
+  expect(input.peek(2).swing).toBe("auto");
 });

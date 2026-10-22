@@ -46,6 +46,47 @@
           <div class="menu-panel">
             <span id="overlay-tag">即刻开打</span>
             <h2 id="overlay-title">球场正在等你</h2>
+            <div
+              id="shuttle-speed-selection"
+              role="group"
+              aria-label="球速场次"
+            >
+              <span>球速场次</span>
+              <div class="speed-options">
+                <button
+                  type="button"
+                  data-shuttle-speed="1"
+                  aria-pressed="true"
+                  disabled
+                >
+                  1x
+                </button>
+                <button
+                  type="button"
+                  data-shuttle-speed="1.25"
+                  aria-pressed="false"
+                  disabled
+                >
+                  1.25x
+                </button>
+                <button
+                  type="button"
+                  data-shuttle-speed="1.5"
+                  aria-pressed="false"
+                  disabled
+                >
+                  1.5x
+                </button>
+                <button
+                  type="button"
+                  data-shuttle-speed="2"
+                  aria-pressed="false"
+                  disabled
+                >
+                  2x
+                </button>
+              </div>
+            </div>
             <div class="actions" aria-label="比赛菜单">
               <button id="start" class="primary" type="button" disabled>
                 <img id="rematch-art" alt="" hidden />
@@ -88,6 +129,9 @@
           >
           <p>左右操作跟随画面方向。设置期间比赛继续，关闭后恢复操作。</p>
           <h3>键盘按键</h3>
+          <p>
+            按住高位／低位修饰后按挥拍键；单按挥拍或同时按住两种修饰为自动。修饰不影响发球动作，能否接球仍取决于时机与位置。
+          </p>
           <div id="keyboard-bindings" role="group" aria-label="比赛按键"></div>
           <p id="binding-status" role="status" aria-live="polite">
             每项最多三个按键；点击按键可移除。
@@ -125,8 +169,8 @@
       </section>
       <section class="controls">
         <p id="controls-help">
-          A / ← 向左 · D / → 向右 · W / ↑ 跳跃 · 空格 / S / ↓ 挥拍／发球 · M
-          静音 · Esc 结束比赛
+          A / ← 向左 · D / → 向右 · K / ↑ 跳跃 · J / 空格 / ↓ 挥拍／发球 · W
+          高位修饰 · S 低位修饰 · M 静音 · Esc 结束比赛
         </p>
         <p id="hint">可在设置中修改自己的按键；匹配后显示你的场地位置。</p>
       </section>

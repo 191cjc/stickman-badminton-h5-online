@@ -32,6 +32,7 @@ import type {
 } from "../shared/protocol";
 import type { CharacterId } from "../shared/classic/characters";
 import type { PlayerIntent, Side } from "../shared/types";
+import type { ShuttleSpeed } from "../shared/match-settings";
 
 const COOKIE = "badminton_h5_guest";
 const SIDES: Side[] = ["left", "right"];
@@ -41,6 +42,7 @@ interface Guest {
   room?: string;
   queuedAt?: number;
   character?: CharacterId;
+  shuttleSpeed?: ShuttleSpeed;
   seen: number;
 }
 interface Seat {
@@ -164,13 +166,15 @@ export function createGameService(options: ServiceOptions) {
     handleProtocols: (protocols) =>
       protocols.has(SUBPROTOCOL)
         ? SUBPROTOCOL
-        : protocols.has("badminton-v3")
-          ? "badminton-v3"
-          : protocols.has("badminton-v2")
-            ? "badminton-v2"
-            : protocols.has("badminton-v1")
-              ? "badminton-v1"
-              : false,
+        : protocols.has("badminton-v4")
+          ? "badminton-v4"
+          : protocols.has("badminton-v3")
+            ? "badminton-v3"
+            : protocols.has("badminton-v2")
+              ? "badminton-v2"
+              : protocols.has("badminton-v1")
+                ? "badminton-v1"
+                : false,
   });
   function send(guest: Guest, message: ServerMessage): void {
     const ws = guest.socket;
@@ -187,6 +191,7 @@ export function createGameService(options: ServiceOptions) {
     if (index >= 0) queue.splice(index, 1);
     guest.queuedAt = undefined;
     guest.character = undefined;
+    guest.shuttleSpeed = undefined;
   }
   function clearSeat(seat: Seat): void {
     seat.pending = [];
@@ -278,15 +283,27 @@ export function createGameService(options: ServiceOptions) {
   }
   function match(): void {
     while (queue.length >= 2 && rooms.size < 100) {
-      const left = queue.shift()!;
-      const right = queue.shift()!;
+      const first = new Map<ShuttleSpeed, number>();
+      let pair: [number, number] | undefined;
+      for (let index = 0; index < queue.length; index++) {
+        const speed = queue[index].shuttleSpeed!;
+        const earlier = first.get(speed);
+        if (earlier !== undefined) {
+          pair = [earlier, index];
+          break;
+        }
+        first.set(speed, index);
+      }
+      if (!pair) break;
+      const left = queue[pair[0]],
+        right = queue[pair[1]];
       const characters = { left: left.character!, right: right.character! };
-      left.character = right.character = undefined;
-      left.queuedAt = undefined;
-      right.queuedAt = undefined;
+      const shuttleSpeed = left.shuttleSpeed!;
+      removeQueue(left);
+      removeQueue(right);
       const room: Room = {
         id: randomUUID(),
-        simulation: new Simulation({ characters }),
+        simulation: new Simulation({ characters, shuttleSpeed }),
         tick: 0,
         status: "playing",
         created: Date.now(),
@@ -304,6 +321,7 @@ export function createGameService(options: ServiceOptions) {
           side,
           resumed: false,
           characters,
+          shuttleSpeed,
         });
       }
       snapshot(room);
@@ -328,7 +346,8 @@ export function createGameService(options: ServiceOptions) {
       }
       if (
         guest.queuedAt !== undefined &&
-        guest.character !== message.character
+        (guest.character !== message.character ||
+          guest.shuttleSpeed !== message.shuttleSpeed)
       ) {
         send(guest, { type: "error", code: "already_queued" });
         return;
@@ -337,9 +356,14 @@ export function createGameService(options: ServiceOptions) {
       if (guest.queuedAt === undefined) {
         guest.queuedAt = Date.now();
         guest.character = message.character;
+        guest.shuttleSpeed = message.shuttleSpeed;
         queue.push(guest);
       }
-      send(guest, { type: "queued", character: message.character });
+      send(guest, {
+        type: "queued",
+        character: message.character,
+        shuttleSpeed: message.shuttleSpeed,
+      });
       match();
       return;
     }
@@ -402,7 +426,8 @@ export function createGameService(options: ServiceOptions) {
       !offered?.includes(SUBPROTOCOL) &&
       !offered?.includes("badminton-v1") &&
       !offered?.includes("badminton-v2") &&
-      !offered?.includes("badminton-v3")
+      !offered?.includes("badminton-v3") &&
+      !offered?.includes("badminton-v4")
     )
       return reject(400, "Bad Request");
     const id = cookieId(req);
@@ -411,7 +436,7 @@ export function createGameService(options: ServiceOptions) {
     if (guest.socket && offered.includes(SUBPROTOCOL))
       return reject(409, "Conflict");
     wss.handleUpgrade(req, socket, head, (ws) => {
-      // Previously loaded v1/v2/v3 pages get a terminal policy close instead of
+      // Previously loaded v1/v2/v3/v4 pages get a terminal policy close instead of
       // reconnecting repeatedly. It never acquires a guest connection or seat.
       if (ws.protocol !== SUBPROTOCOL) {
         ws.on("error", () => {});
@@ -451,6 +476,7 @@ export function createGameService(options: ServiceOptions) {
             room: room.id,
             side,
             resumed: true,
+            shuttleSpeed: room.simulation.shuttleSpeed,
             characters: {
               left: room.seats.left.character,
               right: room.seats.right.character,
@@ -529,6 +555,7 @@ export function createGameService(options: ServiceOptions) {
             .reverse()
             .find((frame) => frame.hitPressed);
           seat.current.hitPressed = !!hit;
+          seat.current.swing = hit?.swing ?? "auto";
           if (hit) {
             seat.current.hitJump = hit.jump;
           }
@@ -537,6 +564,7 @@ export function createGameService(options: ServiceOptions) {
             ...seat.current,
             jumpPressed: false,
             hitPressed: false,
+            swing: "auto",
             hitJump: undefined,
           };
           seat.pending = [];
@@ -554,6 +582,8 @@ export function createGameService(options: ServiceOptions) {
           ...seat.current,
           jumpPressed: false,
           hitPressed: false,
+          swing: "auto",
+          hitJump: undefined,
         };
         if (seat.currentSeq !== seat.ack) {
           seat.ack = seat.currentSeq;
