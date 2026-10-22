@@ -365,3 +365,25 @@ Added local keyboard remapping, capture/conflict/reset, standard gamepad mapping
 ### Status
 
 [OK] **Completed**
+
+
+## Session 13: Shuttle speed tiers and manual swing controls
+<!-- trellis-session: v=2 fp=c635f0bec48c3456 -->
+
+**Date**: 2026-10-22
+**Task**: Shuttle speed tiers and manual swing controls
+**Branch**: `feat/shuttle-speed-manual-swing`
+
+### Summary
+
+Implemented same-tier 1/1.25/1.5/2x matching, J hit/K jump and W/S manual swing modifiers with v2 preference migration and protocol5. 428 tests plus lint/types/build passed; independent review fixed unknown-speed result text and verified 33,600 baseline comparisons. Final isolated HTTP/Chromium checks passed four natural seven-point matches, 2421 authority comparisons, returns, migration and compact settings. Published 20261022T072020Z-speed-manual-controls; own service restarted15:20:22CST; public HTTP/bytes and unrelated-resource audit passed. Preserved complete v4 rollback. Physical-device/dual-computer feel remains external.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c4b5637` | feat: add speed matchmaking and manual swings |
+
+### Status
+
+[OK] **Completed**

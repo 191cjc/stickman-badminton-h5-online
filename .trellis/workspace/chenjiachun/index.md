@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 12
-- **Last Active**: 2026-10-19
+- **Total Sessions**: 13
+- **Last Active**: 2026-10-22
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~367 | Active |
+| `journal-1.md` | ~389 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 13 | 2026-10-22 | Shuttle speed tiers and manual swing controls | `c4b5637` | `feat/shuttle-speed-manual-swing` |
 | 12 | 2026-10-19 | Configurable controls and standard gamepad deployed | `9b6aaeb` | `feat/input-settings-gamepad` |
 | 11 | 2026-10-19 | Optional self-left view implemented and deployed | `bc019b7` | `feat/self-left-view` |
 | 10 | 2026-10-16 | 持续运行卡顿优化与公网发布 | `80b84ac` | `feat/sustained-smoothness` |
