@@ -10,7 +10,6 @@ import type {
   AtlasTier,
 } from "./atlas-manifest";
 import {
-  ASSET_TIMEOUT_MS,
   IMAGE_LOAD_CONCURRENCY,
   LoadingError,
   yieldForPaint,
@@ -18,6 +17,9 @@ import {
 } from "./loading";
 
 export const ATLAS_RGBA_LIMIT = ATLAS_ACTIVE_RGBA_LIMIT;
+// Large lossless atlas pages can exceed the generic 15s deadline on public links.
+// Bound their combined download/decode separately; scene cancellation stays immediate.
+export const ATLAS_IMAGE_TIMEOUT_MS = 60_000;
 export interface AtlasTextureFragment {
   texture: Texture;
   fragment: AtlasFragment;
@@ -320,7 +322,7 @@ export function decodeAtlasImage(
     const abort = () => finish(new LoadingError("images", "changed"));
     const timer = setTimeout(
       () => finish(new LoadingError("images", "timeout")),
-      ASSET_TIMEOUT_MS,
+      ATLAS_IMAGE_TIMEOUT_MS,
     );
     signal.addEventListener("abort", abort, { once: true });
     if (signal.aborted) {

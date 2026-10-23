@@ -32,7 +32,7 @@ const report = {
   routeCompletions: [],
   limits: [
     "Headless Chromium on the local host; physical device lifecycle/visibility and total GPU/process memory remain unverified.",
-    "The combined delayed new-role PNG through natural-result reclaim is not exercised:15s asset timeout is shorter than30s room retention. Separate real scenarios cover each boundary; the combined main transition was source-reviewed and remains without direct automated browser or unit coverage.",
+    "This runner exercises delayed new-role preparation and natural-result reclaim separately. Atlas images now have a60s deadline and can outlive30s room retention; use a dedicated combined check to verify the last authority/result survives under the preparation cover.",
   ],
 };
 const browser = await chromium.launch({

@@ -16,6 +16,7 @@ import type { Viewport } from "../src/shared/types";
 import { Effects, createParticle } from "../src/client/effects";
 import { Renderer, courtScissor } from "../src/client/renderer";
 import {
+  ATLAS_IMAGE_TIMEOUT_MS,
   AtlasLoader,
   decodeAtlasImage,
   requiredAtlasGroups,
@@ -595,20 +596,67 @@ it("restores graphics after a scene reset during the restore event's paint yield
   expect(f.renderer.readyFor(stateFor())).toBe(false);
 });
 
-it("bounds image decode as part of the timeout and suppresses a late completion after abort", async () => {
-  fixture();
+it.each(["download", "decode"])(
+  "immediately aborts a pending atlas %s and cleans up before any late completion",
+  async (phase) => {
+    const f = fixture();
+    f.setManual(true);
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    const removeAbort = vi.spyOn(controller.signal, "removeEventListener");
+    const request = decodeAtlasImage(
+      "/classic-atlas/pending.png",
+      controller.signal,
+    );
+    let decoded: (() => void) | undefined;
+    if (phase === "decode") {
+      f.images[0].decode.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            decoded = resolve;
+          }),
+      );
+      await f.complete();
+    }
+    controller.abort();
+    await expect(request).rejects.toMatchObject({
+      stage: "images",
+      reason: "changed",
+    });
+    expect(vi.getTimerCount()).toBe(0);
+    expect(removeAbort).toHaveBeenCalledWith("abort", expect.any(Function));
+    expect(f.images[0].onload).toBeNull();
+    expect(f.images[0].onerror).toBeNull();
+    expect(f.images[0].src).toBe("");
+    decoded?.();
+    await f.complete();
+    await vi.runAllTimersAsync();
+    expect(f.images[0].src).toBe("");
+  },
+);
+
+it("allows an atlas download beyond 15s to complete without leaving a deadline or handlers", async () => {
+  const f = fixture();
+  f.setManual(true);
   vi.useFakeTimers();
   const controller = new AbortController();
+  const removeAbort = vi.spyOn(controller.signal, "removeEventListener");
   const request = decodeAtlasImage(
-    "/classic-atlas/missing.png",
+    "/classic-atlas/slow.png",
     controller.signal,
   );
-  controller.abort();
-  await expect(request).rejects.toMatchObject({
-    stage: "images",
-    reason: "changed",
-  });
-  await vi.runAllTimersAsync();
+  const settled = vi.fn();
+  void request.then(settled, settled);
+  await vi.advanceTimersByTimeAsync(22_000);
+  expect(settled).not.toHaveBeenCalled();
+  expect(f.images[0].decode).not.toHaveBeenCalled();
+  await f.complete();
+  await expect(request).resolves.toBe(f.images[0]);
+  expect(f.images[0].src).toBe("/classic-atlas/slow.png");
+  expect(f.images[0].onload).toBeNull();
+  expect(f.images[0].onerror).toBeNull();
+  expect(removeAbort).toHaveBeenCalledWith("abort", expect.any(Function));
+  expect(vi.getTimerCount()).toBe(0);
 });
 
 it("shares identical atlas pixels while retaining each alias's fractional logical registration", async () => {
@@ -698,33 +746,50 @@ it("renders a confetti shader warmup under the loading cover before any result p
   expect(seen).toEqual([true, false]);
 });
 
-it("keeps the deadline active until image.decode resolves and ignores its late completion", async () => {
-  const f = fixture();
-  f.setManual(true);
-  vi.useFakeTimers();
-  const controller = new AbortController();
-  const request = decodeAtlasImage(
-    "/classic-atlas/pending.png",
-    controller.signal,
-  );
-  let decoded: (() => void) | undefined;
-  f.images[0].decode.mockImplementation(
-    () =>
-      new Promise<void>((resolve) => {
-        decoded = resolve;
-      }),
-  );
-  await f.complete();
-  const rejection = expect(request).rejects.toMatchObject({
-    stage: "images",
-    reason: "timeout",
-  });
-  await vi.advanceTimersByTimeAsync(15_000);
-  await rejection;
-  decoded?.();
-  await Promise.resolve();
-  expect(f.images[0].src).toBe("");
-});
+it.each(["download", "decode"])(
+  "bounds the combined atlas download/decode while %s is pending and suppresses late completion",
+  async (phase) => {
+    const f = fixture();
+    f.setManual(true);
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    const removeAbort = vi.spyOn(controller.signal, "removeEventListener");
+    const request = decodeAtlasImage(
+      "/classic-atlas/pending.png",
+      controller.signal,
+    );
+    const settled = vi.fn();
+    void request.then(settled, settled);
+    let decoded: (() => void) | undefined;
+    await vi.advanceTimersByTimeAsync(22_000);
+    if (phase === "decode") {
+      f.images[0].decode.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            decoded = resolve;
+          }),
+      );
+      await f.complete();
+    }
+    const rejection = expect(request).rejects.toMatchObject({
+      stage: "images",
+      reason: "timeout",
+    });
+    await vi.advanceTimersByTimeAsync(ATLAS_IMAGE_TIMEOUT_MS - 22_000 - 1);
+    expect(settled).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    await rejection;
+    expect(vi.getTimerCount()).toBe(0);
+    expect(removeAbort).toHaveBeenCalledWith("abort", expect.any(Function));
+    expect(f.images[0].onload).toBeNull();
+    expect(f.images[0].onerror).toBeNull();
+    expect(f.images[0].src).toBe("");
+    decoded?.();
+    await f.complete();
+    expect(settled).toHaveBeenCalledTimes(1);
+    expect(f.images[0].src).toBe("");
+  },
+);
 
 it("retains unchanged idle pixels across snapshot copies without suppressing mutable actor/frame changes", async () => {
   const f = fixture();
