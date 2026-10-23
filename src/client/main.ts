@@ -7,7 +7,7 @@ import {
 } from "../shared/classic/characters";
 import { Simulation } from "../shared/simulation";
 import { isShuttleSpeed, type ShuttleSpeed } from "../shared/match-settings";
-import { INPUT_HZ, BASE_PATH } from "../shared/protocol";
+import { INPUT_HZ } from "../shared/protocol";
 import type { Snapshot, ServerMessage } from "../shared/protocol";
 import type { Side, Viewport } from "../shared/types";
 import { Input, isInteractiveTarget } from "./input";
@@ -44,9 +44,8 @@ function el<T extends HTMLElement>(id: string): T {
 const canvas = el<HTMLCanvasElement>("game");
 const loadingScreen = el("loading-screen"),
   loadingProgress = el<HTMLProgressElement>("loading-progress"),
-  loadingRetry = el<HTMLButtonElement>("loading-retry");
-const ctx = canvas.getContext("2d", { alpha: false });
-if (!ctx) throw new Error("浏览器不支持 Canvas 2D");
+  loadingRetry = el<HTMLButtonElement>("loading-retry"),
+  loadingExit = el<HTMLButtonElement>("loading-exit");
 const start = el<HTMLButtonElement>("start"),
   cancel = el<HTMLButtonElement>("cancel"),
   leave = el<HTMLButtonElement>("leave"),
@@ -63,7 +62,7 @@ const startLabel = el("start-label"),
   rematchArt = el<HTMLImageElement>("rematch-art");
 let rematchUp = "",
   rematchOver = "";
-const renderer = new Renderer(),
+const renderer = new Renderer(canvas, contextChanged),
   effects = new Effects(),
   audio = new Audio(),
   quality = new RenderQuality();
@@ -73,6 +72,14 @@ let assetsReady = false,
   latest: Snapshot | undefined,
   side: Side | undefined,
   room: string | undefined;
+let artLoaded = false,
+  contextAvailable = true,
+  preparation: Promise<void> | undefined,
+  preparationEpoch = 0,
+  disposed = false,
+  frameRequest = 0,
+  contextTimer: ReturnType<typeof setTimeout> | undefined,
+  pendingCharacters: Record<Side, CharacterId> | undefined;
 let selectedShuttleSpeed: ShuttleSpeed = 1,
   matchShuttleSpeed: ShuttleSpeed | undefined;
 let selected: CharacterId = "joe",
@@ -175,6 +182,8 @@ function buttons(): void {
   start.classList.toggle("original-rematch", originalRematch);
   cancel.hidden = scene !== "queued";
   leave.hidden = scene !== "online";
+  loadingExit.hidden = scene !== "online" && scene !== "queued";
+  loadingExit.textContent = scene === "queued" ? "取消匹配" : "结束比赛";
   el("character-selection").hidden = scene !== "idle" && scene !== "result";
   el("overlay").classList.toggle("result", scene === "result");
   updateSelection();
@@ -216,7 +225,7 @@ function toggleMute(): void {
   mute.textContent = muted ? "开启声音" : "静音";
 }
 function leaveMatch(): void {
-  if (!assetsReady || scene !== "online") return;
+  if (scene !== "online") return;
   clearInput();
   audio.play("press");
   network.send({ type: "leave" });
@@ -338,8 +347,10 @@ window.addEventListener("focus", () => {
   syncInputClock();
 });
 document.addEventListener("visibilitychange", () => {
+  lastTime = 0;
   quality.resetObservation(performance.now());
   if (!document.hidden) {
+    renderer.invalidateFrame();
     inputFocused = true;
     syncInputClock();
   }
@@ -358,6 +369,7 @@ function idle(reason?: string): void {
   latest = undefined;
   side = undefined;
   room = undefined;
+  pendingCharacters = undefined;
   prediction = undefined;
   seq = 0;
   interpolation = new Interpolation();
@@ -409,6 +421,9 @@ function handleMessage(message: ServerMessage): void {
         message.reason ?? "",
       )
     ) {
+      // A room can finish while atlas preparation has presentation covered.
+      // Retain its final authority even if no RAF has painted that snapshot.
+      backdrop = latest?.state ?? backdrop;
       latest = undefined;
       room = undefined;
       buttons();
@@ -428,6 +443,7 @@ function handleMessage(message: ServerMessage): void {
     prediction = undefined;
     side = undefined;
     room = undefined;
+    pendingCharacters = undefined;
     selected = message.character;
     selectedShuttleSpeed = matchShuttleSpeed = message.shuttleSpeed;
     effects.reset();
@@ -453,6 +469,7 @@ function handleMessage(message: ServerMessage): void {
     result = undefined;
     side = message.side;
     room = message.room;
+    pendingCharacters = message.characters;
     selected = message.characters[side];
     selectedShuttleSpeed = matchShuttleSpeed = message.shuttleSpeed;
     seq = 0;
@@ -471,6 +488,7 @@ function handleMessage(message: ServerMessage): void {
     labels();
     buttons();
     if (assetsReady) canvas.focus();
+    ensureCourtReady();
     return;
   }
   if (message.type === "snapshot") {
@@ -517,6 +535,7 @@ function handleMessage(message: ServerMessage): void {
       }
     }
     updateHud(message.state);
+    ensureCourtReady();
     syncInputClock();
     return;
   }
@@ -666,21 +685,21 @@ function viewport(): Viewport {
 }
 function frame(time: number): void {
   const began = diagnostics ? performance.now() : 0;
-  requestAnimationFrame(frame);
+  if (disposed) return;
+  frameRequest = requestAnimationFrame(frame);
   const dt = lastTime
     ? Math.max(0, Math.min((time - lastTime) / 1000, 0.1))
     : 1 / INPUT_HZ;
   lastTime = time;
-  // Loading owns raster preparation. Do not start cold Canvas drawing or
-  // presentation clocks underneath the independent startup cover.
-  if (!assetsReady) {
+  // Only this RAF advances presentation. Pixi owns no ticker or logic clock.
+  if (!assetsReady || document.hidden || !contextAvailable) {
     quality.resetObservation(time);
     return;
   }
   if (canSampleInput() && latest?.state.phase === "playing")
     prediction?.advance(time);
   audio.advance(dt);
-  let state = backdrop;
+  let state = courtState();
   if (latest) {
     state = interpolation.sample(time) ?? latest.state;
     effects.advance(state.elapsed * 60, dt, (sound) => audio.play(sound));
@@ -707,25 +726,15 @@ function frame(time: number): void {
       presenting:
         (scene === "online" &&
           latest?.status === "playing" &&
-          latest.state.phase === "playing" &&
           network.connected) ||
         (scene === "result" && naturalResult),
       nativeDpr: devicePixelRatio || 1,
       scale: view.scale,
     })
   ) {
-    renderer.invalidateRasters();
     view = viewport();
   }
-  const pixelWidth = Math.max(1, Math.round(view.width * view.dpr)),
-    pixelHeight = Math.max(1, Math.round(view.height * view.dpr));
-  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-    canvas.width = pixelWidth;
-    canvas.height = pixelHeight;
-  }
-  ctx!.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
   renderer.render(
-    ctx!,
     view,
     state,
     scene === "online" || scene === "result" ? effects : undefined,
@@ -734,6 +743,7 @@ function frame(time: number): void {
   diagnostics?.frame(time, performance.now() - began);
 }
 function loading(progress: LoadingProgress): void {
+  if (disposed) return;
   loadingScreen.dataset.stage = progress.stage;
   const status = el("loading-status");
   if (status.textContent !== "加载中") status.textContent = "加载中";
@@ -748,13 +758,12 @@ function loading(progress: LoadingProgress): void {
   }
 }
 async function prepareCourt(): Promise<void> {
-  // Room messages can replace or clear the scene during a slow load. Restart
-  // only for an actual cache reset/viewport change, with a finite retry bound.
+  // Snapshots continue during loading. Reveal only the newest actor pair/view.
   for (let attempt = 0; attempt < 3; attempt++) {
     const view = viewport();
     const prepared = await renderer.prepare(
       view,
-      latest?.state ?? backdrop,
+      courtState(),
       scene === "online" || scene === "result" ? effects : undefined,
       loading,
       mirrored(),
@@ -762,6 +771,7 @@ async function prepareCourt(): Promise<void> {
     const currentView = viewport();
     if (
       prepared &&
+      renderer.readyFor(courtState()) &&
       view.width === currentView.width &&
       view.height === currentView.height &&
       view.dpr === currentView.dpr
@@ -770,53 +780,162 @@ async function prepareCourt(): Promise<void> {
   }
   throw new LoadingError("prewarm", "changed");
 }
+function courtState(): typeof backdrop {
+  if (latest) return latest.state;
+  if (!pendingCharacters) return backdrop;
+  return {
+    ...backdrop,
+    players: {
+      left: { ...backdrop.players.left, characterId: pendingCharacters.left },
+      right: {
+        ...backdrop.players.right,
+        characterId: pendingCharacters.right,
+      },
+    },
+  };
+}
+function coverCourt(): void {
+  assetsReady = false;
+  clearInput();
+  setSettingsOpen(false, false);
+  loadingScreen.hidden = false;
+  loadingProgress.hidden = false;
+  loadingRetry.hidden = true;
+  el("loading-detail").textContent = "正在准备球场画面。";
+  document.querySelector(".court")!.setAttribute("aria-busy", "true");
+  for (const element of document.querySelectorAll<HTMLElement>(
+    "#overlay, .court-actions, .touch-controls",
+  ))
+    element.inert = true;
+  canvas.tabIndex = -1;
+  buttons();
+}
+function revealCourt(): void {
+  assetsReady = true;
+  lastTime = 0;
+  quality.resetObservation(performance.now());
+  loadingScreen.hidden = true;
+  document.querySelector(".court")!.setAttribute("aria-busy", "false");
+  for (const element of document.querySelectorAll<HTMLElement>(
+    "#overlay, .court-actions, .touch-controls",
+  ))
+    element.inert = false;
+  canvas.tabIndex = 0;
+  clearInput(false);
+  buttons();
+  if (scene === "online") canvas.focus();
+  syncInputClock();
+}
+function loadingFailed(error: unknown): void {
+  assetsReady = false;
+  loadingScreen.dataset.stage = "failed";
+  el("loading-status").textContent = "球场准备失败";
+  loadingProgress.hidden = true;
+  el("loading-count").textContent = "请重新加载后重试";
+  const reasons = {
+    timeout: "画面资源加载超时，请检查网络后重试。",
+    request: "画面资源未能加载，请检查网络后重试。",
+    incompatible: "画面资源版本不兼容，请重新加载。",
+    changed: "球场状态发生变化，请重新加载后继续。",
+  };
+  el("loading-detail").textContent =
+    error instanceof LoadingError
+      ? reasons[error.reason]
+      : "画面准备失败，请确认浏览器支持 WebGL 后重试。";
+  loadingRetry.hidden = false;
+  document.querySelector(".court")!.setAttribute("aria-busy", "false");
+  buttons();
+}
+function ensureCourtReady(): void {
+  if (
+    !artLoaded ||
+    !contextAvailable ||
+    disposed ||
+    preparation ||
+    (assetsReady && renderer.readyFor(courtState())) ||
+    loadingScreen.dataset.stage === "failed"
+  )
+    return;
+  const epoch = ++preparationEpoch;
+  coverCourt();
+  preparation = prepareCourt()
+    .then(() => {
+      if (epoch === preparationEpoch && !disposed && contextAvailable)
+        revealCourt();
+    })
+    .catch((error: unknown) => {
+      if (epoch === preparationEpoch && !disposed) loadingFailed(error);
+    })
+    .finally(() => {
+      preparation = undefined;
+      if (epoch !== preparationEpoch) ensureCourtReady();
+    });
+}
+function contextChanged(available: boolean): void {
+  if (disposed) return;
+  contextAvailable = available;
+  preparationEpoch++;
+  lastTime = 0;
+  clearTimeout(contextTimer);
+  if (!available) {
+    coverCourt();
+    loading({ stage: "prewarm", completed: 0 });
+    el("loading-status").textContent = "正在恢复画面";
+    contextTimer = setTimeout(() => {
+      if (!contextAvailable)
+        loadingFailed(new LoadingError("prewarm", "timeout"));
+    }, 15_000);
+  } else {
+    // Pixi's context systems finish their restore event before reupload starts.
+    loadingScreen.dataset.stage = "prewarm";
+    setTimeout(ensureCourtReady, 0);
+  }
+}
 loadingRetry.addEventListener("click", () => location.reload());
+loadingExit.addEventListener("click", () => {
+  if (scene === "online") leaveMatch();
+  else if (scene === "queued") network.send({ type: "cancel" });
+});
 idle();
 void renderer
   .load(loading)
-  .then(async (manifest) => {
+  .then((manifest) => {
+    if (disposed) return;
     for (const [id, button] of characterButtons)
-      button.querySelector("img")!.src =
-        `${BASE_PATH}classic/${manifest.characters[id].preview.path}?v=${manifest.files[manifest.characters[id].preview.path]}`;
-    rematchUp = `${BASE_PATH}classic/${manifest.ui.rematchUp.path}?v=${manifest.files[manifest.ui.rematchUp.path]}`;
-    rematchOver = `${BASE_PATH}classic/${manifest.ui.rematchOver.path}?v=${manifest.files[manifest.ui.rematchOver.path]}`;
+      button.querySelector("img")!.src = renderer.domUrl(
+        manifest.characters[id].preview.path,
+      );
+    rematchUp = renderer.domUrl(manifest.ui.rematchUp.path);
+    rematchOver = renderer.domUrl(manifest.ui.rematchOver.path);
     rematchArt.src = rematchUp;
     // Audio downloads/decoding cannot hold up a playable court.
     void audio.load(manifest);
-    await prepareCourt();
-    assetsReady = true;
-    quality.resetObservation(performance.now());
-    loadingScreen.hidden = true;
-    document.querySelector(".court")!.setAttribute("aria-busy", "false");
-    for (const element of document.querySelectorAll<HTMLElement>(
-      "#overlay, .court-actions, .touch-controls",
-    ))
-      element.inert = false;
-    canvas.tabIndex = 0;
-    // Keys pressed during preparation must not become gameplay at reveal.
-    clearInput(false);
-    buttons();
-    if (scene === "online") canvas.focus();
-    syncInputClock();
+    artLoaded = true;
+    ensureCourtReady();
   })
   .catch((error: unknown) => {
-    loadingScreen.dataset.stage = "failed";
-    el("loading-status").textContent = "球场准备失败";
-    loadingProgress.hidden = true;
-    el("loading-count").textContent = "请重新加载后重试";
-    const reasons = {
-      timeout: "画面资源加载超时，请检查网络后重试。",
-      request: "画面资源未能加载，请检查网络后重试。",
-      incompatible: "画面资源版本不兼容，请重新加载。",
-      changed: "球场状态发生变化，请重新加载后继续。",
-    };
-    el("loading-detail").textContent =
-      error instanceof LoadingError
-        ? reasons[error.reason]
-        : "画面准备失败，请重新加载后重试。";
-    loadingRetry.hidden = false;
-    document.querySelector(".court")!.setAttribute("aria-busy", "false");
-    buttons();
+    if (!disposed) loadingFailed(error);
   });
 void network.connect();
-requestAnimationFrame(frame);
+frameRequest = requestAnimationFrame(frame);
+function disposeRenderer(): void {
+  if (disposed) return;
+  disposed = true;
+  preparationEpoch++;
+  clearTimeout(contextTimer);
+  cancelAnimationFrame(frameRequest);
+  clearInput();
+  renderer.destroy();
+}
+window.addEventListener("pagehide", (event) => {
+  lastTime = 0;
+  if (!event.persisted) disposeRenderer();
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) {
+    lastTime = 0;
+    renderer.invalidateFrame();
+    ensureCourtReady();
+  }
+});
+if (import.meta.hot) import.meta.hot.dispose(disposeRenderer);

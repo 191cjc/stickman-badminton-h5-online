@@ -32,7 +32,7 @@ function trace(
   return { at, changes };
 }
 
-it.each([60, 120, 144])(
+it.each([30, 60, 120, 144])(
   "retains native resolution at healthy %s Hz and bounds its observation counters",
   (hz) => {
     const quality = new RenderQuality();
@@ -53,7 +53,7 @@ it("a lone stall does not lower quality; persistent overload selects finite lowe
   quality.observe(at + 750, playing);
   ({ at } = trace(quality, at + 767, 3000, 1000 / 60));
   expect(quality.diagnostics().reductions).toBe(0);
-  const { changes } = trace(quality, at, 60000, 1000 / 30);
+  const { changes } = trace(quality, at, 60000, 50);
   expect(changes.map((item) => item.density)).toEqual([2.8, 2, 1.4, 1]);
   for (let i = 1; i < changes.length; i++)
     expect(changes[i].at - changes[i - 1].at).toBeGreaterThanOrEqual(
@@ -71,12 +71,83 @@ it.each([750, 1000])(
   (gap) => {
     const quality = new RenderQuality();
     const { changes } = trace(quality, 0, 90000, gap);
-    expect(changes.map((item) => item.density)).toEqual([2.8, 2, 1.4, 1]);
-    for (let i = 1; i < changes.length; i++)
-      expect(changes[i].at - changes[i - 1].at).toBeGreaterThanOrEqual(
-        RENDER_QUALITY.cooldownMs + RENDER_QUALITY.windowMs,
-      );
-    expect(quality.diagnostics().reductions).toBe(4);
+    expect(changes.map((item) => item.density)).toEqual([1]);
+    expect(changes[0].at).toBeGreaterThanOrEqual(
+      RENDER_QUALITY.graceMs + RENDER_QUALITY.minSamples * gap,
+    );
+    expect(quality.diagnostics().reductions).toBe(1);
+  },
+);
+
+it.each([
+  [150, [1.4, 1]],
+  [200, [1.4, 1]],
+] as const)(
+  "persistent %ims gaps skip costly intermediate levels but retain cooldown and the floor",
+  (gap, expected) => {
+    const quality = new RenderQuality();
+    const { changes } = trace(quality, 0, 30000, gap, {
+      ...playing,
+      scale: 2,
+    });
+    expect(changes.map((item) => item.density)).toEqual(expected);
+    expect(changes[0].at).toBeGreaterThanOrEqual(
+      RENDER_QUALITY.graceMs + RENDER_QUALITY.windowMs,
+    );
+    expect(changes[1].at - changes[0].at).toBeGreaterThanOrEqual(
+      RENDER_QUALITY.cooldownMs + RENDER_QUALITY.windowMs,
+    );
+    expect(quality.diagnostics()).toMatchObject({
+      lastWindowMeanGap: gap,
+      lastWindowSlowFraction: 1,
+      worldDensityCap: 1,
+      reductions: 2,
+    });
+  },
+);
+
+it.each([
+  [69, 2.8],
+  [70, 2],
+  // Replays the measured ~102.5ms window that previously waited a cooldown at2.8.
+  [102.5, 1.4],
+])("only skips levels at a severe completed mean of %ims", (gap, cap) => {
+  const quality = new RenderQuality();
+  const { changes } = trace(quality, 0, 3500, gap, { ...playing, scale: 2 });
+  expect(changes.map((item) => item.density)).toEqual([cap]);
+});
+
+it("a huge isolated stall cannot use a high mean to bypass the slow-frame fraction", () => {
+  const quality = new RenderQuality();
+  const { at } = trace(quality, 0, 1500, 10);
+  expect(quality.observe(at + 10000, playing)).toBe(false);
+  expect(quality.diagnostics().lastWindowMeanGap).toBeGreaterThan(105);
+  expect(quality.diagnostics().lastWindowSlowFraction).toBeLessThan(0.5);
+  expect(quality.diagnostics().reductions).toBe(0);
+  expect(quality.dpr(2, playing.scale)).toBe(2);
+});
+
+it("a severely slow window still needs all minimum samples even after two seconds", () => {
+  const quality = new RenderQuality();
+  for (const at of [0, 1000, 2000, 3000, 4000])
+    expect(quality.observe(at, playing)).toBe(false);
+  expect(quality.diagnostics().samples).toBe(3);
+  expect(quality.observe(5000, playing)).toBe(true);
+  expect(quality.diagnostics().worldDensityCap).toBe(1);
+});
+
+it.each(["ready", "visible"] as const)(
+  "%s=false discards severe partial-window means before normal overload resumes",
+  (key) => {
+    const quality = new RenderQuality();
+    trace(quality, 0, 2400, 200);
+    expect(quality.observe(2500, { ...playing, [key]: false })).toBe(false);
+    const { changes } = trace(quality, 3000, 3200, 50, {
+      ...playing,
+      scale: 2,
+    });
+    expect(changes.map((item) => item.density)).toEqual([2.8]);
+    expect(quality.diagnostics().lastWindowMeanGap).toBe(50);
   },
 );
 

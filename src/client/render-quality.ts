@@ -1,7 +1,10 @@
 /** Presentation cost control only; never changes world geometry or simulation. */
 export const RENDER_QUALITY = Object.freeze({
   windowMs: 2000,
-  slowFrameMs: 25,
+  // Preserve stable 30 Hz detail, allowing ordinary timer jitter around 33 ms.
+  slowFrameMs: 35,
+  // Severe overload needs headroom for game/DOM/composition work after resize.
+  severeTargetFrameMs: 25,
   slowFraction: 0.5,
   minSamples: 4,
   maxSamples: 240,
@@ -30,6 +33,7 @@ export class RenderQuality {
   private windowStart?: number;
   private samples = 0;
   private slowSamples = 0;
+  private meanGap = 0;
   private graceUntil = 0;
   private cooldownUntil = 0;
   private eligible = false;
@@ -38,6 +42,7 @@ export class RenderQuality {
   private observedAt = 0;
   private reductions = 0;
   private lastWindowSlowFraction = 0;
+  private lastWindowMeanGap = 0;
 
   dpr(nativeDpr: number, scale: number): number {
     const native = nativeDensity(nativeDpr);
@@ -57,7 +62,7 @@ export class RenderQuality {
     }
   }
 
-  /** Returns true once per actual decrease, so the caller invalidates rasters. */
+  /** Returns true once per decrease, so the caller resizes the render backing. */
   observe(at: number, frame: QualityFrame): boolean {
     if (!Number.isFinite(at) || at < this.observedAt) return false;
     this.observedAt = at;
@@ -95,8 +100,10 @@ export class RenderQuality {
     this.windowStart ??= previous;
     // Counters only: no per-frame history or diagnostic observer is needed.
     if (this.samples < RENDER_QUALITY.maxSamples) {
+      const gap = at - previous;
       this.samples++;
-      if (at - previous > RENDER_QUALITY.slowFrameMs) this.slowSamples++;
+      if (gap > RENDER_QUALITY.slowFrameMs) this.slowSamples++;
+      this.meanGap += (gap - this.meanGap) / this.samples;
     }
     // Severe overload can produce fewer than four frames in two seconds.
     // Keep that evidence until both completion bounds hold, rather than
@@ -107,14 +114,30 @@ export class RenderQuality {
     )
       return false;
     this.lastWindowSlowFraction = this.slowSamples / this.samples;
+    this.lastWindowMeanGap = this.meanGap;
     const overloaded =
       this.lastWindowSlowFraction >= RENDER_QUALITY.slowFraction;
     this.clearWindow();
     if (!overloaded) return false;
     const actualDensity = this.dpr(native, frame.scale) * frame.scale;
+    // Pixel area scales with density squared. A whole severely slow window
+    // can skip levels; the slow-frame fraction still excludes isolated stalls.
+    // Use a tighter target than the 30 Hz observation tolerance to leave
+    // headroom, without lowering detail on an already stable 30 Hz court.
+    const targetDensity =
+      this.lastWindowMeanGap >= 2 * RENDER_QUALITY.slowFrameMs
+        ? Math.max(
+            1,
+            actualDensity *
+              Math.sqrt(
+                RENDER_QUALITY.severeTargetFrameMs / this.lastWindowMeanGap,
+              ),
+          )
+        : actualDensity;
     const next = RENDER_QUALITY.worldDensityLevels.find(
       (level) =>
         level < actualDensity - 1e-6 &&
+        level <= targetDensity + 1e-6 &&
         (this.cap === undefined || level < this.cap),
     );
     if (next === undefined) return false;
@@ -128,6 +151,7 @@ export class RenderQuality {
   private clearWindow(): void {
     this.windowStart = undefined;
     this.samples = this.slowSamples = 0;
+    this.meanGap = 0;
   }
 
   diagnostics() {
@@ -148,6 +172,7 @@ export class RenderQuality {
       samples: this.samples,
       slowSamples: this.slowSamples,
       lastWindowSlowFraction: this.lastWindowSlowFraction,
+      lastWindowMeanGap: this.lastWindowMeanGap,
       graceRemainingMs: Math.max(0, this.graceUntil - this.observedAt),
       cooldownRemainingMs: Math.max(0, this.cooldownUntil - this.observedAt),
     };

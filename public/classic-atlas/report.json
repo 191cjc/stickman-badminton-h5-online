@@ -1,0 +1,1543 @@
+{
+  "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+  "generator": {
+    "playwrightVersion": "1.62.0",
+    "chromiumVersion": "151.0.7922.34",
+    "algorithm": "chromium-srgb-ceil-alpha0-maxrects-gutter2-pngbest-v2",
+    "nodeVersion": "24.19.0",
+    "platform": "linux-x64",
+    "colorSpace": "srgb",
+    "alpha": "straight PNG; premultiply on GPU upload",
+    "pngEncoding": "RGBA8 adaptive filter; zlib9 min(strategy3,strategy0), ties3",
+    "mipmaps": false,
+    "gutter": 2
+  },
+  "encoding": {
+    "strategy3Bytes": 15693203,
+    "strategy0Bytes": 13507106,
+    "selectedBytes": 13506815,
+    "strategy3Images": 3,
+    "strategy0Images": 31
+  },
+  "sourceSvgPaths": 499,
+  "variants": {
+    "hd": {
+      "groups": {
+        "body-harry": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 139447,
+          "rgbaBytes": 4371840,
+          "originalRgbaBytes": 6194876,
+          "trimmedRgbaBytes": 3092920
+        },
+        "body-joe": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 133926,
+          "rgbaBytes": 4261248,
+          "originalRgbaBytes": 6089928,
+          "trimmedRgbaBytes": 3025208
+        },
+        "body-nadia": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 160458,
+          "rgbaBytes": 4296320,
+          "originalRgbaBytes": 6879272,
+          "trimmedRgbaBytes": 3054224
+        },
+        "body-pirate": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 182868,
+          "rgbaBytes": 13807872,
+          "originalRgbaBytes": 8454288,
+          "trimmedRgbaBytes": 4697468
+        },
+        "body-red": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 153476,
+          "rgbaBytes": 4334592,
+          "originalRgbaBytes": 6196948,
+          "trimmedRgbaBytes": 3101008
+        },
+        "body-toaster": {
+          "paths": 4,
+          "uniqueRasters": 1,
+          "pages": 1,
+          "pngBytes": 12668,
+          "rgbaBytes": 109824,
+          "originalRgbaBytes": 793656,
+          "trimmedRgbaBytes": 103284
+        },
+        "body-top-hat": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 163408,
+          "rgbaBytes": 4462208,
+          "originalRgbaBytes": 7143176,
+          "trimmedRgbaBytes": 3684064
+        },
+        "common": {
+          "paths": 111,
+          "uniqueRasters": 97,
+          "pages": 2,
+          "pngBytes": 786068,
+          "rgbaBytes": 16860928,
+          "originalRgbaBytes": 55019708,
+          "trimmedRgbaBytes": 15068440
+        },
+        "court": {
+          "paths": 27,
+          "uniqueRasters": 10,
+          "pages": 3,
+          "pngBytes": 6570717,
+          "rgbaBytes": 35618816,
+          "originalRgbaBytes": 36622596,
+          "trimmedRgbaBytes": 30473716
+        },
+        "swing-adult": {
+          "paths": 69,
+          "uniqueRasters": 68,
+          "pages": 1,
+          "pngBytes": 970991,
+          "rgbaBytes": 16646144,
+          "originalRgbaBytes": 134710684,
+          "trimmedRgbaBytes": 11556212
+        },
+        "swing-toaster": {
+          "paths": 73,
+          "uniqueRasters": 46,
+          "pages": 1,
+          "pngBytes": 454144,
+          "rgbaBytes": 6580544,
+          "originalRgbaBytes": 86870728,
+          "trimmedRgbaBytes": 3868372
+        }
+      },
+      "totalPages": 14,
+      "sourcePaths": 490,
+      "worstActivePair": {
+        "left": "pirate",
+        "right": "toaster",
+        "groups": [
+          "court",
+          "common",
+          "body-pirate",
+          "body-toaster",
+          "swing-adult",
+          "swing-toaster"
+        ],
+        "rgbaBytes": 89624128
+      },
+      "activePairs": [
+        {
+          "left": "pirate",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 89624128
+        },
+        {
+          "left": "toaster",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-pirate",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 89624128
+        },
+        {
+          "left": "pirate",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87395968
+        },
+        {
+          "left": "top-hat",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87395968
+        },
+        {
+          "left": "harry",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87305600
+        },
+        {
+          "left": "pirate",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87305600
+        },
+        {
+          "left": "pirate",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87268352
+        },
+        {
+          "left": "red",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87268352
+        },
+        {
+          "left": "nadia",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87230080
+        },
+        {
+          "left": "pirate",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87230080
+        },
+        {
+          "left": "joe",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87195008
+        },
+        {
+          "left": "pirate",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 87195008
+        },
+        {
+          "left": "pirate",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 82933760
+        },
+        {
+          "left": "toaster",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-top-hat",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 80278464
+        },
+        {
+          "left": "top-hat",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 80278464
+        },
+        {
+          "left": "harry",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 80188096
+        },
+        {
+          "left": "toaster",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-harry",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 80188096
+        },
+        {
+          "left": "red",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 80150848
+        },
+        {
+          "left": "toaster",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-red",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 80150848
+        },
+        {
+          "left": "nadia",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 80112576
+        },
+        {
+          "left": "toaster",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-nadia",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 80112576
+        },
+        {
+          "left": "joe",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 80077504
+        },
+        {
+          "left": "toaster",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-joe",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 80077504
+        },
+        {
+          "left": "harry",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77959936
+        },
+        {
+          "left": "top-hat",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77959936
+        },
+        {
+          "left": "red",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77922688
+        },
+        {
+          "left": "top-hat",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77922688
+        },
+        {
+          "left": "nadia",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77884416
+        },
+        {
+          "left": "top-hat",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77884416
+        },
+        {
+          "left": "joe",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77849344
+        },
+        {
+          "left": "top-hat",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77849344
+        },
+        {
+          "left": "harry",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77832320
+        },
+        {
+          "left": "red",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77832320
+        },
+        {
+          "left": "harry",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77794048
+        },
+        {
+          "left": "nadia",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77794048
+        },
+        {
+          "left": "harry",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77758976
+        },
+        {
+          "left": "joe",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77758976
+        },
+        {
+          "left": "nadia",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77756800
+        },
+        {
+          "left": "red",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77756800
+        },
+        {
+          "left": "joe",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77721728
+        },
+        {
+          "left": "red",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77721728
+        },
+        {
+          "left": "joe",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77683456
+        },
+        {
+          "left": "nadia",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 77683456
+        },
+        {
+          "left": "top-hat",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 73588096
+        },
+        {
+          "left": "harry",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 73497728
+        },
+        {
+          "left": "red",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 73460480
+        },
+        {
+          "left": "nadia",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 73422208
+        },
+        {
+          "left": "joe",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 73387136
+        },
+        {
+          "left": "toaster",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 59170112
+        }
+      ],
+      "totalPngBytes": 9728171,
+      "totalRgbaBytes": 111350336
+    },
+    "sd": {
+      "groups": {
+        "body-harry": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 63533,
+          "rgbaBytes": 1692608,
+          "originalRgbaBytes": 1559208,
+          "trimmedRgbaBytes": 782988
+        },
+        "body-joe": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 60872,
+          "rgbaBytes": 1627392,
+          "originalRgbaBytes": 1533420,
+          "trimmedRgbaBytes": 766224
+        },
+        "body-nadia": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 72406,
+          "rgbaBytes": 1672256,
+          "originalRgbaBytes": 1727176,
+          "trimmedRgbaBytes": 772260
+        },
+        "body-pirate": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 82981,
+          "rgbaBytes": 2174976,
+          "originalRgbaBytes": 2126312,
+          "trimmedRgbaBytes": 1186128
+        },
+        "body-red": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 69910,
+          "rgbaBytes": 1734912,
+          "originalRgbaBytes": 1556560,
+          "trimmedRgbaBytes": 786508
+        },
+        "body-toaster": {
+          "paths": 4,
+          "uniqueRasters": 1,
+          "pages": 1,
+          "pngBytes": 4671,
+          "rgbaBytes": 26752,
+          "originalRgbaBytes": 198852,
+          "trimmedRgbaBytes": 23904
+        },
+        "body-top-hat": {
+          "paths": 34,
+          "uniqueRasters": 18,
+          "pages": 1,
+          "pngBytes": 75872,
+          "rgbaBytes": 2181504,
+          "originalRgbaBytes": 1794016,
+          "trimmedRgbaBytes": 933300
+        },
+        "common": {
+          "paths": 111,
+          "uniqueRasters": 97,
+          "pages": 1,
+          "pngBytes": 318308,
+          "rgbaBytes": 4521984,
+          "originalRgbaBytes": 13766700,
+          "trimmedRgbaBytes": 3762020
+        },
+        "court": {
+          "paths": 27,
+          "uniqueRasters": 10,
+          "pages": 1,
+          "pngBytes": 2437289,
+          "rgbaBytes": 9427968,
+          "originalRgbaBytes": 9164576,
+          "trimmedRgbaBytes": 7642320
+        },
+        "swing-adult": {
+          "paths": 69,
+          "uniqueRasters": 68,
+          "pages": 1,
+          "pngBytes": 374279,
+          "rgbaBytes": 5040896,
+          "originalRgbaBytes": 33724812,
+          "trimmedRgbaBytes": 2931552
+        },
+        "swing-toaster": {
+          "paths": 73,
+          "uniqueRasters": 46,
+          "pages": 1,
+          "pngBytes": 183127,
+          "rgbaBytes": 1836928,
+          "originalRgbaBytes": 21732348,
+          "trimmedRgbaBytes": 992992
+        }
+      },
+      "totalPages": 11,
+      "sourcePaths": 490,
+      "worstActivePair": {
+        "left": "pirate",
+        "right": "top-hat",
+        "groups": [
+          "court",
+          "common",
+          "body-pirate",
+          "body-top-hat",
+          "swing-adult"
+        ],
+        "rgbaBytes": 23347328
+      },
+      "activePairs": [
+        {
+          "left": "pirate",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 23347328
+        },
+        {
+          "left": "top-hat",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 23347328
+        },
+        {
+          "left": "toaster",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-top-hat",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 23036032
+        },
+        {
+          "left": "top-hat",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 23036032
+        },
+        {
+          "left": "pirate",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 23029504
+        },
+        {
+          "left": "toaster",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-pirate",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 23029504
+        },
+        {
+          "left": "red",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22907264
+        },
+        {
+          "left": "top-hat",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22907264
+        },
+        {
+          "left": "pirate",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22900736
+        },
+        {
+          "left": "red",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22900736
+        },
+        {
+          "left": "harry",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22864960
+        },
+        {
+          "left": "top-hat",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22864960
+        },
+        {
+          "left": "harry",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22858432
+        },
+        {
+          "left": "pirate",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22858432
+        },
+        {
+          "left": "nadia",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22844608
+        },
+        {
+          "left": "top-hat",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22844608
+        },
+        {
+          "left": "nadia",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22838080
+        },
+        {
+          "left": "pirate",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22838080
+        },
+        {
+          "left": "joe",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22799744
+        },
+        {
+          "left": "top-hat",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22799744
+        },
+        {
+          "left": "joe",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22793216
+        },
+        {
+          "left": "pirate",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22793216
+        },
+        {
+          "left": "red",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 22589440
+        },
+        {
+          "left": "toaster",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-red",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22589440
+        },
+        {
+          "left": "harry",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 22547136
+        },
+        {
+          "left": "toaster",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-harry",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22547136
+        },
+        {
+          "left": "nadia",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 22526784
+        },
+        {
+          "left": "toaster",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-nadia",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22526784
+        },
+        {
+          "left": "joe",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-toaster",
+            "swing-adult",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 22481920
+        },
+        {
+          "left": "toaster",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "body-joe",
+            "swing-toaster",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22481920
+        },
+        {
+          "left": "harry",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22418368
+        },
+        {
+          "left": "red",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22418368
+        },
+        {
+          "left": "nadia",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22398016
+        },
+        {
+          "left": "red",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22398016
+        },
+        {
+          "left": "harry",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22355712
+        },
+        {
+          "left": "nadia",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22355712
+        },
+        {
+          "left": "joe",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22353152
+        },
+        {
+          "left": "red",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22353152
+        },
+        {
+          "left": "harry",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22310848
+        },
+        {
+          "left": "joe",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22310848
+        },
+        {
+          "left": "joe",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22290496
+        },
+        {
+          "left": "nadia",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 22290496
+        },
+        {
+          "left": "top-hat",
+          "right": "top-hat",
+          "groups": [
+            "court",
+            "common",
+            "body-top-hat",
+            "swing-adult"
+          ],
+          "rgbaBytes": 21172352
+        },
+        {
+          "left": "pirate",
+          "right": "pirate",
+          "groups": [
+            "court",
+            "common",
+            "body-pirate",
+            "swing-adult"
+          ],
+          "rgbaBytes": 21165824
+        },
+        {
+          "left": "red",
+          "right": "red",
+          "groups": [
+            "court",
+            "common",
+            "body-red",
+            "swing-adult"
+          ],
+          "rgbaBytes": 20725760
+        },
+        {
+          "left": "harry",
+          "right": "harry",
+          "groups": [
+            "court",
+            "common",
+            "body-harry",
+            "swing-adult"
+          ],
+          "rgbaBytes": 20683456
+        },
+        {
+          "left": "nadia",
+          "right": "nadia",
+          "groups": [
+            "court",
+            "common",
+            "body-nadia",
+            "swing-adult"
+          ],
+          "rgbaBytes": 20663104
+        },
+        {
+          "left": "joe",
+          "right": "joe",
+          "groups": [
+            "court",
+            "common",
+            "body-joe",
+            "swing-adult"
+          ],
+          "rgbaBytes": 20618240
+        },
+        {
+          "left": "toaster",
+          "right": "toaster",
+          "groups": [
+            "court",
+            "common",
+            "body-toaster",
+            "swing-toaster"
+          ],
+          "rgbaBytes": 15813632
+        }
+      ],
+      "totalPngBytes": 3743248,
+      "totalRgbaBytes": 31938176
+    }
+  },
+  "dom": {
+    "preview/joe/preview-01.svg": {
+      "pngBytes": 4165,
+      "rgbaBytes": 108836
+    },
+    "preview/nadia/preview-01.svg": {
+      "pngBytes": 4296,
+      "rgbaBytes": 108836
+    },
+    "preview/harry/preview-01.svg": {
+      "pngBytes": 4225,
+      "rgbaBytes": 108836
+    },
+    "preview/toaster/preview-01.svg": {
+      "pngBytes": 4008,
+      "rgbaBytes": 153664
+    },
+    "preview/pirate/preview-01.svg": {
+      "pngBytes": 4662,
+      "rgbaBytes": 108836
+    },
+    "preview/top-hat/preview-01.svg": {
+      "pngBytes": 4636,
+      "rgbaBytes": 108836
+    },
+    "preview/red/preview-01.svg": {
+      "pngBytes": 4305,
+      "rgbaBytes": 108836
+    },
+    "ui/rematchUp-01.svg": {
+      "pngBytes": 2309,
+      "rgbaBytes": 13524
+    },
+    "ui/rematchOver-01.svg": {
+      "pngBytes": 2790,
+      "rgbaBytes": 13524
+    }
+  },
+  "confetti": {
+    "hd": {
+      "colors": [
+        "000000",
+        "ffffff",
+        "ff0000",
+        "00ff00",
+        "0000ff",
+        "12ab45",
+        "808080",
+        "fdfdfd",
+        "010203"
+      ],
+      "maxAlphaError": 0,
+      "maxPremultipliedRgbError": 1.130795847750861,
+      "meanPremultipliedRgbError": 0.0009519029962129531,
+      "units": "8-bit channel values (0..255)",
+      "bounds": {
+        "x": 47,
+        "y": 47,
+        "width": 27,
+        "height": 27
+      }
+    },
+    "sd": {
+      "colors": [
+        "000000",
+        "ffffff",
+        "ff0000",
+        "00ff00",
+        "0000ff",
+        "12ab45",
+        "808080",
+        "fdfdfd",
+        "010203"
+      ],
+      "maxAlphaError": 0,
+      "maxPremultipliedRgbError": 1.1784083044982698,
+      "meanPremultipliedRgbError": 0.0017148539159495431,
+      "units": "8-bit channel values (0..255)",
+      "bounds": {
+        "x": 24,
+        "y": 24,
+        "width": 13,
+        "height": 13
+      }
+    }
+  },
+  "uniqueRasterizations": 687,
+  "memoryNote": "RGBA estimates are page width*height*4, excluding decoded browser copies, framebuffers, JS heap and total GPU/process memory.",
+  "reproducibilityNote": "Byte reproducibility verified only in the pinned local Node/Chromium/platform environment; other platforms are unverified."
+}
