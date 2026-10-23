@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 13
-- **Last Active**: 2026-10-22
+- **Total Sessions**: 14
+- **Last Active**: 2026-10-23
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~389 | Active |
+| `journal-1.md` | ~431 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 14 | 2026-10-23 | Complete PixiJS WebGL migration and local acceptance | `5573394dabe264632f08c048bbd0f854bb25a45e`, `7c723f5b068b2d35bb36de0200ce0e1d5622a485` | `feat/pixi-renderer` |
 | 13 | 2026-10-22 | Shuttle speed tiers and manual swing controls | `c4b5637` | `feat/shuttle-speed-manual-swing` |
 | 12 | 2026-10-19 | Configurable controls and standard gamepad deployed | `9b6aaeb` | `feat/input-settings-gamepad` |
 | 11 | 2026-10-19 | Optional self-left view implemented and deployed | `bc019b7` | `feat/self-left-view` |

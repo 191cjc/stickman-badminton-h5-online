@@ -387,3 +387,45 @@ Implemented same-tier 1/1.25/1.5/2x matching, J hit/K jump and W/S manual swing 
 ### Status
 
 [OK] **Completed**
+
+
+## Session 14: Complete PixiJS WebGL migration and local acceptance
+<!-- trellis-session: v=2 fp=1a47d7bf68a6f038 -->
+
+**Date**: 2026-10-23
+**Task**: Complete PixiJS WebGL migration and local acceptance
+**Branch**: `feat/pixi-renderer`
+
+### Summary
+
+Delivered and archived the approved local rendering migration, reproducible lossless atlases, visual/performance evidence and maintained specs. No production deployment; remote backup push remains blocked by the absent Git remote.
+
+### Main Changes
+
+- Pinned PixiJS 8.22.0 WebGL with the existing sole RAF/state timelines; preserved simulation, networking, prediction, interpolation, input and audio contracts.
+- Baked original SVG filters into grouped, trimmed, versioned transparent PNG atlases with bounded role ownership, real loading/retry and context/visibility/resource lifecycle handling.
+- Captured comparable Canvas/Pixi cold and warm measurements, 202 visual pairs plus 26 final supplement cases, browser acceptance and explicit residual costs in docs/pixi-migration.md.
+- Committed exactly the two user-approved batches, then archived 10-22-pixi-renderer. Canvas checkpoint fb87796, pre-pixijs-20261022 tag and verified local full-history bundle remain intact.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5573394dabe264632f08c048bbd0f854bb25a45e` | feat: migrate classic rendering to PixiJS WebGL |
+| `7c723f5b068b2d35bb36de0200ce0e1d5622a485` | docs: record PixiJS design and local validation |
+
+### Testing
+
+- [OK] Final typecheck, lint and production build passed; 24 test files / 455 tests passed after the 70ms quality-policy fix. No product changes after those gates.
+- [OK] Independent 36-file atlas rebuild byte-identical; all 34 PNGs preserve decoded pixels/geometry after compression. Frozen source/shared/server/reference/upstream unchanged.
+- [OK] Four speed tiers naturally completed two-client matches: 2608 equal same-tick authority snapshots. Mirror, keyboard, synthetic standard pad, pointer touch controls, settings, resize, reconnect/rematch, loading failure/retry and WebGL restoration passed.
+- [OK] Headed trusted tab hiding/resume passed. Final 75s cold/warm software-WebGL benchmark complete; warm p95 33.4/33.4ms versus Canvas 50/50ms. Warm long-task count, download volume and JS heap costs remain disclosed; adaptive internal density differs.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Obtain the repository remote URL to complete the requested backup push; no remote was configured and nothing was pushed.
+- Review locally on isolated frontend 18926/backend 18925. Production deployment is separate. Physical mobile/GPU/Safari/Firefox/WebGL1/controllers/weak-network and actual BFCache remain unverified.
