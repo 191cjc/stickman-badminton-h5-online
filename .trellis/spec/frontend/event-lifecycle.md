@@ -2,7 +2,7 @@
 
 ## Page-lifetime controllers
 
-[main.ts](../../../src/client/main.ts) constructs one `Input`, `Network`, and `Renderer` and starts a `requestAnimationFrame` loop for presentation. A single page-owned [InputScheduler](../../../src/client/input-scheduler.ts) separately paces logical input at60Hz. [input.ts](../../../src/client/input.ts) owns native keyboard/pointer listeners. Controllers live for the page; there is currently no general mount/unmount or `dispose()` API. Recreating them for scene transitions would duplicate listeners.
+[main.ts](../../../src/client/main.ts) constructs one `Input`, `Network`, and `Renderer` and starts a `requestAnimationFrame` loop for presentation. A single page-owned [InputScheduler](../../../src/client/input-scheduler.ts) separately paces logical input at60Hz. [input.ts](../../../src/client/input.ts) owns native keyboard/pointer listeners. Controllers live for the page; Renderer has explicit `destroy()` ownership on terminal pagehide/HMR; BFCache pagehide retains it. There is no general controller mount/unmount API. Recreating them for scene transitions would duplicate listeners.
 
 ## Logical input and release
 
@@ -26,7 +26,7 @@ Use `Network.send()` for ready-state and buffered-output checks. It returns fals
 
 [Service tests](../../../tests/service.test.ts) cover identity, queue cancel/disconnect, reconnect, and server input timeout. Native focus/pointer behavior and rendered feedback require [manual browser checks](../../../docs/validation.md).
 
-M toggles the shared audio gain and visible mute button; Esc clears input and sends server leave. Reconnect suspends effects, clears transient queues/particles and establishes a cursor baseline before resuming. New rooms and exit revoke old scene Blob URLs, clear effects and stop audio nodes. Controllers remain page-owned rather than duplicated per scene.
+M toggles the shared audio gain and visible mute button; Esc clears input and sends server leave. Reconnect suspends effects, clears transient queues/particles and establishes a cursor baseline before resuming. New rooms and exit clear effects and stop audio nodes. Renderer cancels stale preparation and releases obsolete actor pages before loading the next pair. Controllers remain page-owned rather than duplicated per scene.
 
 ## Paced input contract
 
@@ -44,19 +44,18 @@ One timer owns both normal60Hz deadlines and expedited logical-change requests. 
 
 Run only with loaded assets, connected online scene, latest status playing, visible document and active focus. Blur/hidden/pagehide, close, leave, result and room transitions stop/reset and release. Focus/visible restoration and online snapshots restart from a fresh deadline. Main-thread blockage still blocks timers. Prediction advances elapsed time separately on RAF/accepted input/snapshot callbacks; more packets never speed physics. Protocol5 metadata does not add client coordinates/timestamps.
 
-
 The minimum spacing is between attempt **starts**, including rejected sends. Count synchronous `step()` time toward it. After normal work, pick the first future periodic grid and retime a too-near grid to `attemptStart + 1000/120`; do not discard another whole period merely because completion is near it. Expedited work resumes from `max(attemptStart + 1000/60, completion)`. Keep one timer, ceil-rounded waits and no catch-up burst. Callback-cost tests (8/9/12ms), late grids, early wakeups and expedited work assert actual attempt times and minimum spacing, not only counters.
 
 ### 4. Validation & Error Matrix
 
-| Condition | Expected |
-| --- | --- |
-| Disconnected, buffered over64KiB, send exception | false; preserve pending edges, seq and prediction history |
-| Successful synchronous send | commit once, consecutive seq, register command once; fixed-time prediction when gameplay phase playing |
-| Timer fires early | Reschedule without input |
-| Long callback gap | One input, skip past deadlines, no accelerated gameplay |
-| Release/stop during callback | No timer resurrection |
-| Blur/hidden/room result | Release keys, clear prediction history, stop sampling |
+| Condition                                        | Expected                                                                                               |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Disconnected, buffered over64KiB, send exception | false; preserve pending edges, seq and prediction history                                              |
+| Successful synchronous send                      | commit once, consecutive seq, register command once; fixed-time prediction when gameplay phase playing |
+| Timer fires early                                | Reschedule without input                                                                               |
+| Long callback gap                                | One input, skip past deadlines, no accelerated gameplay                                                |
+| Release/stop during callback                     | No timer resurrection                                                                                  |
+| Blur/hidden/room result                          | Release keys, clear prediction history, stop sampling                                                  |
 
 ### 5. Good / Base / Bad Cases
 
@@ -71,3 +70,7 @@ Scheduler tests cover15/30/60/144Hz draw cadences, early/late callbacks, long st
 Wrong: `const frame = input.read(++seq); network.send(frame); prediction.accept(frame, performance.now());`
 
 Correct: `const frame = input.peek(seq + 1); if (network.send(frame)) { input.commit(frame); seq++; prediction.accept(frame, performance.now()); }` (prediction only in playing phase).
+
+## WebGL and visibility
+
+Main is the sole presentation RAF; no Pixi Application/Ticker/AnimatedSprite. Hidden pages skip GPU draws and reset elapsed-frame observation. Visible restoration and persisted pageshow call `renderer.invalidateFrame()` so retained idle artwork repaints without advancing another clock. Context loss gates input and draws, preserves decoded pages, and shows recovery UI with a15s deadline. Restore rechecks capabilities and uploads current pages before revealing current authority. Scene cancellation must never cancel the independent context-restoration generation. See [rendering](rendering.md).

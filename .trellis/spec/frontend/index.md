@@ -1,6 +1,6 @@
 # Frontend development
 
-The client uses native TypeScript, static HTML, CSS, and Canvas 2D. `main.ts` coordinates scene/UI state; `Input`, `Network`, `Prediction`, `Interpolation`, and `Renderer` own focused behavior.
+The client uses native TypeScript, static HTML, CSS, and PixiJS WebGL. `main.ts` coordinates scene/UI state; `Input`, `Network`, `Prediction`, `Interpolation`, and `Renderer` own focused behavior.
 
 ## Pre-development checklist
 
@@ -13,15 +13,16 @@ The client uses native TypeScript, static HTML, CSS, and Canvas 2D. `main.ts` co
 
 ## Topics
 
-| Document | Local concern |
-| --- | --- |
-| [Directory structure](directory-structure.md) | Module ownership and dependencies |
-| [Component guidelines](component-guidelines.md) | Static DOM, Canvas presentation, accessibility |
-| [Event lifecycle](event-lifecycle.md) | Keyboard/touch, focus loss, WS reconnect, timers |
-| [Controls and devices](controls-and-devices.md) | Keyboard remapping, capture, standard gamepad, source merging and rearm |
-| [State management](state-management.md) | Scene state, authority, prediction, interpolation, optional self-left perspective |
-| [Type safety](type-safety.md) | Shared contracts and boundary assertions |
-| [Quality guidelines](quality-guidelines.md) | Checks and browser acceptance limits |
+| Document                                        | Local concern                                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------------------------- |
+| [Directory structure](directory-structure.md)   | Module ownership and dependencies                                                 |
+| [Component guidelines](component-guidelines.md) | Static DOM, Pixi court presentation, accessibility                                |
+| [Rendering and atlas](rendering.md)             | Baked source art, WebGL scene, loading and GPU lifetime                           |
+| [Event lifecycle](event-lifecycle.md)           | Keyboard/touch, focus loss, WS reconnect, timers                                  |
+| [Controls and devices](controls-and-devices.md) | Keyboard remapping, capture, standard gamepad, source merging and rearm           |
+| [State management](state-management.md)         | Scene state, authority, prediction, interpolation, optional self-left perspective |
+| [Type safety](type-safety.md)                   | Shared contracts and boundary assertions                                          |
+| [Quality guidelines](quality-guidelines.md)     | Checks and browser acceptance limits                                              |
 
 Write Trellis specs in English. Product UI is currently Chinese; retain its existing language when changing labels.
 

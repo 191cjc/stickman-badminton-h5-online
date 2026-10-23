@@ -1,0 +1,17 @@
+{
+  "expectedFailedRequests": [
+    "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/dom/image-81b68e3d897628300b59d475cb7e4691782110519a89c32808099ff7fb991a11.png?v=81b68e3d897628300b59d475cb7e4691782110519a89c32808099ff7fb991a11",
+    "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/dom/image-0591772f7797efff86f725f1f71270efa8fbdd1e645f317e271369095220c196.png?v=0591772f7797efff86f725f1f71270efa8fbdd1e645f317e271369095220c196",
+    "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/dom/image-0ae8f483663631f5e9e02ef84873432384815e32a13b4f8bbd0ac9dfa1b16721.png?v=0ae8f483663631f5e9e02ef84873432384815e32a13b4f8bbd0ac9dfa1b16721",
+    "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/dom/image-68c0d3fc37f577e74cf41da7d7b8452478de1ea19dce0a574b338b7bfe60529b.png?v=68c0d3fc37f577e74cf41da7d7b8452478de1ea19dce0a574b338b7bfe60529b",
+    "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/dom/image-a5dc771400fbdbad1bc52e5394155f659fde2a901d05858e0288d7a086873cec.png?v=a5dc771400fbdbad1bc52e5394155f659fde2a901d05858e0288d7a086873cec",
+    "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/dom/image-e423361c911352713fbb71b9548ec42a777ad810cb4cb4bdd558590671a26fe9.png?v=e423361c911352713fbb71b9548ec42a777ad810cb4cb4bdd558590671a26fe9",
+    "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/sd/body-toaster-ec4e1785b2da80b5400dcd6a50d83eb3e79360dd38724a5d6f0383e139e54147.png?v=ec4e1785b2da80b5400dcd6a50d83eb3e79360dd38724a5d6f0383e139e54147"
+  ],
+  "errors": [],
+  "checks": {
+    "startupPngFailureNativeReloadRetry": true,
+    "liveRoleFailureKeepsSnapshotsGatesInputAndAllowsExit": true
+  },
+  "complete": true
+}

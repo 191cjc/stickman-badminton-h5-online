@@ -1,0 +1,1009 @@
+{
+  "browser": "151.0.7922.34",
+  "dpr": 1,
+  "checks": {
+    "lifecycleFreezeResume": {
+      "observedHidden": false,
+      "before": {
+        "events": 0,
+        "sent": 23,
+        "frames": 30
+      },
+      "after": {
+        "hidden": false,
+        "events": [],
+        "sent": [
+          {
+            "type": "input",
+            "seq": 16,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 17,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 18,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 19,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 20,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 21,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 22,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 23,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 24,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 25,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 26,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 27,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 28,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 29,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 30,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          },
+          {
+            "type": "input",
+            "seq": 31,
+            "move": 1,
+            "jump": false,
+            "jumpPressed": false,
+            "hitHeld": false,
+            "hitPressed": false,
+            "swing": "auto"
+          }
+        ],
+        "frames": 53
+      }
+    },
+    "resizeBackbufferWorldMappingMirrorHud": true,
+    "naturalReclaimRetainsFinalScoreAndActorPages": {
+      "result": {
+        "type": "result",
+        "winner": "left",
+        "reason": "score",
+        "score": {
+          "left": 7,
+          "right": 0
+        }
+      },
+      "beforeReclaim": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      },
+      "afterReclaim": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      },
+      "scoreComparison": {
+        "fractionPixelsAnyChannelAbove16": 0.022018815153826594,
+        "meanAbsoluteChannelError": 1.1841342486651412
+      }
+    },
+    "rematchChangesGroupsReleasesOldActorsWithinBudget": true,
+    "delayedRoleContextRestoreAndNativeExitKeepsResultGated": {
+      "thirdRoom": "151052ce-dbd1-4689-bd38-d61d62857774",
+      "delayedUrls": [
+        "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/sd/body-nadia-223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf.png?v=223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf"
+      ],
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 1766,
+        "staticFramesSkipped": 134,
+        "preparations": 4,
+        "contextLosses": 1,
+        "contextRestores": 1,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 5,
+          "uploadedPages": 5,
+          "rgbaBytesEstimate": 22355712,
+          "rgbaLimit": 100663296,
+          "uploads": 14,
+          "decodes": 11,
+          "groups": [
+            "body-harry",
+            "body-nadia",
+            "common",
+            "court",
+            "swing-adult"
+          ]
+        },
+        "confetti": {
+          "particles": 0,
+          "draws": 0,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 59
+      }
+    }
+  },
+  "samples": [
+    {
+      "label": "initial-pair",
+      "roles": [
+        "toaster",
+        "pirate"
+      ],
+      "atlas": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      },
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 9,
+        "staticFramesSkipped": 64,
+        "preparations": 2,
+        "contextLosses": 0,
+        "contextRestores": 0,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 6,
+          "uploadedPages": 6,
+          "rgbaBytesEstimate": 23029504,
+          "rgbaLimit": 100663296,
+          "uploads": 7,
+          "decodes": 7,
+          "groups": [
+            "body-pirate",
+            "body-toaster",
+            "common",
+            "court",
+            "swing-adult",
+            "swing-toaster"
+          ]
+        },
+        "confetti": {
+          "particles": 0,
+          "draws": 0,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 17
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0,
+        "lastWindowMeanGap": 0,
+        "graceRemainingMs": 833.4000000000001,
+        "cooldownRemainingMs": 0
+      }
+    },
+    {
+      "label": "initial-pair",
+      "roles": [
+        "toaster",
+        "pirate"
+      ],
+      "atlas": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      },
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 14,
+        "staticFramesSkipped": 28,
+        "preparations": 2,
+        "contextLosses": 0,
+        "contextRestores": 0,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 6,
+          "uploadedPages": 6,
+          "rgbaBytesEstimate": 23029504,
+          "rgbaLimit": 100663296,
+          "uploads": 7,
+          "decodes": 7,
+          "groups": [
+            "body-pirate",
+            "body-toaster",
+            "common",
+            "court",
+            "swing-adult",
+            "swing-toaster"
+          ]
+        },
+        "confetti": {
+          "particles": 0,
+          "draws": 0,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 18
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0,
+        "lastWindowMeanGap": 0,
+        "graceRemainingMs": 666.6000000000001,
+        "cooldownRemainingMs": 0
+      }
+    },
+    {
+      "label": "resize",
+      "viewport": {
+        "width": 900,
+        "height": 600
+      },
+      "canvas": {
+        "width": 671,
+        "height": 446,
+        "cssWidth": 671,
+        "cssHeight": 446,
+        "x": 114.46875,
+        "y": 57
+      },
+      "world": {
+        "width": 640,
+        "height": 426,
+        "scale": 1.0469483568075117,
+        "offsetX": 0.47652582159622625,
+        "offsetY": 0
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.0469483568075117,
+        "worldDensity": 1.0469483568075117,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0,
+        "lastWindowMeanGap": 0,
+        "graceRemainingMs": 783.2999999999997,
+        "cooldownRemainingMs": 0
+      },
+      "atlas": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      }
+    },
+    {
+      "label": "resize",
+      "viewport": {
+        "width": 812,
+        "height": 375
+      },
+      "canvas": {
+        "width": 478,
+        "height": 318,
+        "cssWidth": 478,
+        "cssHeight": 318,
+        "x": 167,
+        "y": 43
+      },
+      "world": {
+        "width": 640,
+        "height": 426,
+        "scale": 0.7464788732394366,
+        "offsetX": 0.1267605633802873,
+        "offsetY": 0
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 0.7464788732394366,
+        "worldDensity": 0.7464788732394366,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0,
+        "lastWindowMeanGap": 0,
+        "graceRemainingMs": 833.3999999999996,
+        "cooldownRemainingMs": 0
+      },
+      "atlas": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      }
+    },
+    {
+      "label": "resize",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "canvas": {
+        "width": 1272,
+        "height": 846,
+        "cssWidth": 1272,
+        "cssHeight": 846,
+        "x": 84,
+        "y": 57
+      },
+      "world": {
+        "width": 640,
+        "height": 426,
+        "scale": 1.9859154929577465,
+        "offsetX": 0.5070422535211492,
+        "offsetY": 0
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0,
+        "lastWindowMeanGap": 0,
+        "graceRemainingMs": 716.6999999999998,
+        "cooldownRemainingMs": 0
+      },
+      "atlas": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      }
+    },
+    {
+      "label": "natural-result-before-reclaim",
+      "roles": [
+        "toaster",
+        "pirate"
+      ],
+      "atlas": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      },
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 762,
+        "staticFramesSkipped": 64,
+        "preparations": 2,
+        "contextLosses": 0,
+        "contextRestores": 0,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 6,
+          "uploadedPages": 6,
+          "rgbaBytesEstimate": 23029504,
+          "rgbaLimit": 100663296,
+          "uploads": 7,
+          "decodes": 7,
+          "groups": [
+            "body-pirate",
+            "body-toaster",
+            "common",
+            "court",
+            "swing-adult",
+            "swing-toaster"
+          ]
+        },
+        "confetti": {
+          "particles": 104,
+          "draws": 1,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 59
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 43,
+        "slowSamples": 18,
+        "lastWindowSlowFraction": 0,
+        "lastWindowMeanGap": 0,
+        "graceRemainingMs": 0,
+        "cooldownRemainingMs": 0
+      }
+    },
+    {
+      "label": "natural-result-after-reclaim",
+      "roles": [
+        "toaster",
+        "pirate"
+      ],
+      "atlas": {
+        "tier": "sd",
+        "pages": 6,
+        "uploadedPages": 6,
+        "rgbaBytesEstimate": 23029504,
+        "rgbaLimit": 100663296,
+        "uploads": 7,
+        "decodes": 7,
+        "groups": [
+          "body-pirate",
+          "body-toaster",
+          "common",
+          "court",
+          "swing-adult",
+          "swing-toaster"
+        ]
+      },
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 1596,
+        "staticFramesSkipped": 64,
+        "preparations": 2,
+        "contextLosses": 0,
+        "contextRestores": 0,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 6,
+          "uploadedPages": 6,
+          "rgbaBytesEstimate": 23029504,
+          "rgbaLimit": 100663296,
+          "uploads": 7,
+          "decodes": 7,
+          "groups": [
+            "body-pirate",
+            "body-toaster",
+            "common",
+            "court",
+            "swing-adult",
+            "swing-toaster"
+          ]
+        },
+        "confetti": {
+          "particles": 129,
+          "draws": 1,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 59
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 30,
+        "slowSamples": 3,
+        "lastWindowSlowFraction": 0.015873015873015872,
+        "lastWindowMeanGap": 31.74603174603175,
+        "graceRemainingMs": 0,
+        "cooldownRemainingMs": 0
+      }
+    },
+    {
+      "label": "changed-pair",
+      "roles": [
+        "joe",
+        "red"
+      ],
+      "atlas": {
+        "tier": "sd",
+        "pages": 5,
+        "uploadedPages": 5,
+        "rgbaBytesEstimate": 22353152,
+        "rgbaLimit": 100663296,
+        "uploads": 9,
+        "decodes": 9,
+        "groups": [
+          "body-joe",
+          "body-red",
+          "common",
+          "court",
+          "swing-adult"
+        ]
+      },
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 1695,
+        "staticFramesSkipped": 101,
+        "preparations": 3,
+        "contextLosses": 0,
+        "contextRestores": 0,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 5,
+          "uploadedPages": 5,
+          "rgbaBytesEstimate": 22353152,
+          "rgbaLimit": 100663296,
+          "uploads": 9,
+          "decodes": 9,
+          "groups": [
+            "body-joe",
+            "body-red",
+            "common",
+            "court",
+            "swing-adult"
+          ]
+        },
+        "confetti": {
+          "particles": 0,
+          "draws": 0,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 59
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0.09090909090909091,
+        "lastWindowMeanGap": 36.96727272727281,
+        "graceRemainingMs": 883.4000000000015,
+        "cooldownRemainingMs": 0
+      }
+    },
+    {
+      "label": "changed-pair",
+      "roles": [
+        "joe",
+        "red"
+      ],
+      "atlas": {
+        "tier": "sd",
+        "pages": 5,
+        "uploadedPages": 5,
+        "rgbaBytesEstimate": 22353152,
+        "rgbaLimit": 100663296,
+        "uploads": 9,
+        "decodes": 9,
+        "groups": [
+          "body-joe",
+          "body-red",
+          "common",
+          "court",
+          "swing-adult"
+        ]
+      },
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 1742,
+        "staticFramesSkipped": 28,
+        "preparations": 3,
+        "contextLosses": 0,
+        "contextRestores": 0,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 5,
+          "uploadedPages": 5,
+          "rgbaBytesEstimate": 22353152,
+          "rgbaLimit": 100663296,
+          "uploads": 9,
+          "decodes": 9,
+          "groups": [
+            "body-joe",
+            "body-red",
+            "common",
+            "court",
+            "swing-adult"
+          ]
+        },
+        "confetti": {
+          "particles": 0,
+          "draws": 0,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 59
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": true,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0.04477611940298507,
+        "lastWindowMeanGap": 30.347761194029783,
+        "graceRemainingMs": 700,
+        "cooldownRemainingMs": 0
+      }
+    },
+    {
+      "label": "cancelled-scene-restored-result",
+      "roles": [
+        "harry",
+        "nadia"
+      ],
+      "atlas": {
+        "tier": "sd",
+        "pages": 5,
+        "uploadedPages": 5,
+        "rgbaBytesEstimate": 22355712,
+        "rgbaLimit": 100663296,
+        "uploads": 14,
+        "decodes": 11,
+        "groups": [
+          "body-harry",
+          "body-nadia",
+          "common",
+          "court",
+          "swing-adult"
+        ]
+      },
+      "renderer": {
+        "backend": "webgl",
+        "ready": true,
+        "contextAvailable": true,
+        "maxTextureSize": 8192,
+        "batchTextureLimit": 1,
+        "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "frames": 1761,
+        "staticFramesSkipped": 134,
+        "preparations": 4,
+        "contextLosses": 1,
+        "contextRestores": 1,
+        "contextRestoreFailures": 0,
+        "atlas": {
+          "tier": "sd",
+          "pages": 5,
+          "uploadedPages": 5,
+          "rgbaBytesEstimate": 22355712,
+          "rgbaLimit": 100663296,
+          "uploads": 14,
+          "decodes": 11,
+          "groups": [
+            "body-harry",
+            "body-nadia",
+            "common",
+            "court",
+            "swing-adult"
+          ]
+        },
+        "confetti": {
+          "particles": 0,
+          "draws": 0,
+          "source": "effects/confetti-01.svg"
+        },
+        "pooledSprites": 59
+      },
+      "quality": {
+        "stage": 0,
+        "limited": false,
+        "worldDensityCap": 0,
+        "nativeDpr": 1,
+        "effectiveDpr": 1,
+        "worldScale": 1.9859154929577465,
+        "worldDensity": 1.9859154929577465,
+        "reductions": 0,
+        "eligible": false,
+        "samples": 0,
+        "slowSamples": 0,
+        "lastWindowSlowFraction": 0.09090909090909091,
+        "lastWindowMeanGap": 36.96727272727281,
+        "graceRemainingMs": 1000,
+        "cooldownRemainingMs": 0
+      }
+    }
+  ],
+  "errors": [],
+  "console": [],
+  "failedRequests": [
+    {
+      "url": "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/sd/body-nadia-223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf.png?v=223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf",
+      "error": "net::ERR_ABORTED",
+      "deliberatelyDelayed": true
+    }
+  ],
+  "routeCompletions": [
+    {
+      "url": "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/sd/body-nadia-223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf.png?v=223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf",
+      "continued": true
+    },
+    {
+      "url": "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/sd/body-nadia-223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf.png?v=223c6e128e490012c1d03c25a08ce4ae80935cd73a80925fcb0e2a8e865b22cf",
+      "continued": true
+    }
+  ],
+  "limits": [
+    "Headless Chromium on the local host; physical device lifecycle/visibility and total GPU/process memory remain unverified.",
+    "The combined delayed new-role PNG through natural-result reclaim is not exercised:15s asset timeout is shorter than30s room retention. Separate real scenarios cover each boundary; the combined main transition was source-reviewed and remains without direct automated browser or unit coverage.",
+    "CDP freeze/resume produced no genuine hidden visibility event on this browser. Frozen execution was probed; hidden/resume input/effect behavior remains unverified by this script."
+  ],
+  "complete": true
+}

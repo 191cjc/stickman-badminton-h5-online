@@ -1,5 +1,66 @@
 # Flash 90302 asset extraction
 
+## PixiJS lossless atlases
+
+The SVGs and schema2 manifest below remain the reproducible source representation.
+The product renderer reads a separate generated `public/classic-atlas/manifest.json`
+and transparent RGBA8 PNGs. Frozen SWF/XML/recovered archives are never modified.
+
+```bash
+npm ci
+npx playwright install chromium
+npm run assets:atlas
+npm run assets:verify
+npm run assets:atlas -- --check
+```
+
+The baker pins Playwright1.62.0 / Chromium151.0.7922.34, uses Node24+ and pngjs7.0.0,
+renders the unchanged SVG filter graph in sRGB, and packs deterministic HD/SD
+pages. `--check` performs an independent full bake and compares every generated
+byte. Byte reproducibility is established only for the same pinned local platform;
+other platforms are unverified. `assets:verify` is a browser-free source/hash/PNG/
+manifest check, also run before production build. `report.json` records exact
+page sizes, compressed bytes, alpha trimming, all49pair memory estimates and
+confetti basis pixel errors.
+
+PNG encoding compares zlib level9 strategies3 and0 with the same adaptive row
+filters and RGBA8 pixels, selecting the smaller output (strategy3 on ties).
+This retains lossless pixels and guarantees no larger PNG than the earlier
+strategy3 encoder. The generated report records both totals and selected counts;
+this extra compression runs only during asset builds.
+
+Normal art is baked at4/2pixels per source coordinate; sparks at2/1 because the
+original runtime scale is0.3. DOM previews/rematch graphics use native-density PNG.
+Every GPU page fits2048×2048. Two-pixel gutters contain the actual neighboring
+pixels across split-image boundaries, avoiding atlas bleed and tile seams.
+Trimming removes only exactly-zero alpha. Byte-identical frames share a region
+inside each dependency group; original paths, frame order and timing remain in
+the source manifest. Pages are content-addressed and source-manifest SHA256 is
+validated before loading.
+
+Each fragment records its pixel rectangle and trim inside the full backing
+raster. Draw at `source.x + trim.x * source.width / pixelWidth` (likewise y), with
+size `trim.width * source.width / pixelWidth`. Use actual integer backing sizes,
+not the requested density; source bounds are fractional. Filter padding is
+already part of the source DrawFrame and must not be added a second time.
+
+Groups separate court/common, adult/Toaster actions and each individual body.
+Only current pair dependencies are decoded/uploaded; unused role pages are
+released before the next pair. The96MiB limit is an estimated current atlas RGBA
+allocation, excluding decoded browser copies, framebuffer, JS heap and total
+GPU/process memory. HD/SD selection and existing backing-quality controls are
+independent; resizing does not regenerate source SVGs.
+
+Confetti uses baked black-body and white-minus-black contributions, evaluated in
+one shared Pixi mesh. Only the marked shape279 body changes color; the original
+bevel/flood/shadow colors and alpha remain. The baker compares nine representative
+source colors and rejects a changed filter graph if alpha differs or premultiplied
+channel error exceeds3/255. No per-particle SVG/Blob/Canvas filter work occurs at
+runtime. Actual shader/sampling fidelity is a separate browser acceptance check.
+
+For a complete source rebuild, run `python3 tools/flash-assets/build.py` first,
+then `npm run assets:atlas`. Keep generated assets in review with their manifest.
+
 These tools read the frozen `reference/flash-90302/original.xml.gz` and verify its
 SHA-256 together with `original.swf` against `SOURCE.json`. They never overwrite
 those inputs. Assets come from the compiled 4399 Flash game, not the abandoned

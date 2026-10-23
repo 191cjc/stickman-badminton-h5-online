@@ -24,7 +24,6 @@ bash scripts/publish.sh
 
 脚本先完成安装、类型检查、lint、测试、构建，再准备新版本目录和生产依赖，安装独立 unit/snippet；仅在 env 不存在时生成密钥，仅在 include 缺失时新增本项目 include。`nginx -t` 通过后才切换 current、更新 previous，随后刷新 systemd 配置、启用并重启本服务、检查本地健康、reload Nginx，最后进行公网 HTTP 与 WebSocket 检查。发布会清空本项目内存比赛；现有云游戏不重启。
 
-
 已完成本地质量门并验证过构建、且 unit/snippet/env 均无需变更时，也可只将已验证的 `dist`、package/lock 与来源JSON安装到新release，安装生产依赖，更新previous并原子切换current，再重启本站服务。无需重写共享配置或reload Nginx；保存前后审计、loopback及公网HTTP/WS结果，失败立即切回旧完整release。该路径不跳过构建／代码／隔离HTTP与已授权浏览器检查。具体执行版本记录见[验证记录](validation.md)。
 
 首次共享 Nginx 文件的副本保存在 `/etc/nginx/sites-available/flash-global-data.before-badminton-h5-online`。若配置校验失败，Nginx 不 reload，先检查新 snippet/include；不要直接恢复旧备份覆盖他人后续配置。只撤销本次新增 include，重新 `sudo nginx -t`。
@@ -76,11 +75,19 @@ curl -fsS https://www.firesoul.cn/badminton-h5-online/api/health
 正常入口默认关闭诊断。需要本地测量时打开`https://www.firesoul.cn/badminton-h5-online/?debug=1`，在浏览器控制台执行：
 
 ```javascript
-window.badmintonDiagnostics.snapshot()
+window.badmintonDiagnostics.snapshot();
 ```
 
-只导出当前页面的有界统计，无上报：`frame`（帧间隔、CPU、长任务）、`network`（快照间隔/字节、RTT）、`predictionSamples`（位置校正/待确认输入年龄）、`input`（接受/拒绝数和节奏）、`scheduler`（提前发送、跳过周期）、`prediction`（固定步、锚点对齐、近似回退/过期/暂停）、`renderer`（缓存）、`interpolation`（缓冲/停顿/回跳）。每个滚动摘要为`{samples,mean,p95,max}`，最多240样本；未进房时prediction缺失、未采样时renderTick为null。计数可累计，缓存bytes为RGBA估算。
+只导出当前页面的有界统计，无上报：`frame`（帧间隔、CPU、长任务）、`network`（快照间隔/字节、RTT）、`predictionSamples`（位置校正/待确认输入年龄）、`input`（接受/拒绝数和节奏）、`scheduler`（提前发送、跳过周期）、`prediction`（固定步、锚点对齐、近似回退/过期/暂停）、`renderer`（WebGL上下文、图集页/解码/上传）、`interpolation`（缓冲/停顿/回跳）。每个滚动摘要为`{samples,mean,p95,max}`，最多240样本；未进房时prediction缺失、未采样时renderTick为null。计数可累计，图集rgbaBytesEstimate为页宽×高×4的RGBA估算。
 
-`quality`记录原生/有效DPR、世界缩放、世界密度上限、阶段和降低次数，以及有界观察计数、宽限和冷却剩余时间。stage/cap为0表示原生档，实际下降可跳过无用的较高档。此自适应功能在默认关闭诊断时同样运行，只降低内部Canvas分辨率，窗口大小和原版效果保持；页内再次匹配保留，刷新重新评估。`interpolation`同时提供实际最新权威与呈现的差距`availableMs`、恢复次数及上次恢复跨度；不要只看目标`delayMs`。
+`quality`记录原生/有效DPR、世界缩放、世界密度上限、阶段和降低次数，以及有界观察计数、宽限和冷却剩余时间。stage/cap为0表示原生档，实际下降可跳过无用的较高档。此自适应功能在默认关闭诊断时同样运行，只降低内部Pixi画布分辨率，窗口大小和原版效果保持；页内再次匹配保留，刷新重新评估。`interpolation`同时提供实际最新权威与呈现的差距`availableMs`、恢复次数及上次恢复跨度；不要只看目标`delayMs`。
 
 帧间隔/长任务需一起判断；RAF中的CPU时长不包含所有浏览器延迟栅格工作。RTT和插值delayMs均不等于按键到画面延迟。计时器独立于RAF但仍运行在主线程；真实弱网停顿无法靠客户端虚构球路消除。每次实际发布的版本和回滚目标见[验证记录](validation.md)，前后端一起切回并刷新页面。
+
+## Pixi 构建与本地验收（尚未部署）
+
+当前源码渲染已改为PixiJS WebGL；本次没有执行生产发布。部署前运行 `npm ci`、`npm run assets:verify` 和通常的质量/构建命令，完整复制 `dist/client/classic-atlas`（PNG MIME应为image/png）及源清单/音频。构建校验不自动烘焙；重新生成素材先按 [素材说明](../tools/flash-assets/README.md) 安装固定Chromium并执行 `npm run assets:atlas`。不要部署 tools/render-validation 或 artifacts。
+
+继续使用原CSP；Pixi的官方免eval适配已包含在包内。内容哈希PNG可长期缓存，但源/图集manifest和index须能更新，两个清单必须同一发布；保留旧哈希文件直至旧页面退出。当前本地A/B服务器刻意无Cache-Control以匹配基线，不能当作生产缓存策略验证。版本不配套会显示可重试资源不兼容，不允许部分画面继续比赛。
+
+本地验收使用独立127.0.0.1端口18925/18926和fixture18927，见 [验证工具](../tools/render-validation/README.md)。基线回退点为 `pre-pixijs-20261022`（fb87796），完整历史bundle在本地 artifacts/pixi-migration/backups。仓库未配置remote，迁移前推送尚未完成。真实生产版本与回滚仍需按既有发布流程另行授权。

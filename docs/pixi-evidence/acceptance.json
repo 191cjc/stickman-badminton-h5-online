@@ -1,0 +1,79 @@
+{
+  "environment": "Isolated built application; two Chromium guests, native keys/pointer and synthetic standard Gamepad API. No physical devices or real two-computer latency acceptance.",
+  "checks": {
+    "defaultDiagnosticsAbsent": true,
+    "webglContextLossRestoreRetainsAuthorityRoom": {
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "tick": 12
+    },
+    "defaultChoicesDifferentTierIsolationCancelRequeueAndLock": true,
+    "defaultJKModifiersAutoBothAndNoHeldRetarget": true,
+    "mirroredGamepadMoveJumpAndTouchAuto": true,
+    "retainedCookieRoomTierAndInputClear": true,
+    "fourTierNaturalResultsSameTickAuthorityAndResultSpeed": true,
+    "compactSixRowsAndSpeedMenuReachable": true,
+    "legacyDefaultsCustomConflictMigrationV2PersistenceResetAndInvalidFallback": true,
+    "resultWithoutMatchedOmitsUnconfirmedSpeed": true
+  },
+  "matches": [
+    {
+      "speed": 1,
+      "room": "88d05971-af5b-4a04-a63b-1f73d754e276",
+      "result": {
+        "type": "result",
+        "winner": "left",
+        "reason": "score",
+        "score": {
+          "left": 7,
+          "right": 0
+        }
+      },
+      "equalAuthoritySnapshots": 976
+    },
+    {
+      "speed": 1.25,
+      "room": "ecc7c60f-2fb2-45cb-aea2-0833a80ffe2f",
+      "result": {
+        "type": "result",
+        "winner": "left",
+        "reason": "score",
+        "score": {
+          "left": 7,
+          "right": 0
+        }
+      },
+      "equalAuthoritySnapshots": 577
+    },
+    {
+      "speed": 1.5,
+      "room": "f416fd0f-bdc7-4118-8e4f-0a526bc68999",
+      "result": {
+        "type": "result",
+        "winner": "left",
+        "reason": "score",
+        "score": {
+          "left": 7,
+          "right": 0
+        }
+      },
+      "equalAuthoritySnapshots": 549
+    },
+    {
+      "speed": 2,
+      "room": "b890835c-f8dc-4592-918a-a67a177e4516",
+      "result": {
+        "type": "result",
+        "winner": "left",
+        "reason": "score",
+        "score": {
+          "left": 7,
+          "right": 0
+        }
+      },
+      "equalAuthoritySnapshots": 506
+    }
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "complete": true
+}

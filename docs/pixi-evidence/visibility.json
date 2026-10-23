@@ -1,0 +1,1497 @@
+{
+  "browser": "151.0.7922.34",
+  "headed": true,
+  "virtualDisplay": true,
+  "connection": "external Chromium; default context; CDP noDefaults=true",
+  "dpr": 1,
+  "attempts": [
+    {
+      "strategy": "tab",
+      "before": {
+        "at": 7446.89999961853,
+        "hidden": false,
+        "focused": true,
+        "wireCount": 21,
+        "sentCount": 23,
+        "events": [
+          {
+            "type": "pageshow",
+            "at": 125.09999942779541,
+            "hidden": false,
+            "trusted": true,
+            "persisted": false,
+            "frames": 0,
+            "sentCount": 0
+          },
+          {
+            "type": "visibilitychange",
+            "at": 3487.199999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 2
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6484.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 6
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6726.699999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 9
+          },
+          {
+            "type": "visibilitychange",
+            "at": 7164.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 11
+          }
+        ],
+        "latest": {
+          "type": "snapshot",
+          "room": "184285a1-b992-4859-83a6-df0671b5023a",
+          "tick": 26,
+          "ack": 11,
+          "ackTick": 26,
+          "status": "playing",
+          "reconnectRemainingMs": 0,
+          "state": {
+            "version": "flash-90302-v3",
+            "shuttleSpeed": 1,
+            "phase": "playing",
+            "players": {
+              "left": {
+                "side": "left",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 153.75,
+                "y": 393.6666666666667,
+                "vx": 225,
+                "vy": -380,
+                "grounded": false,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "jump",
+                "bodyFrameIndex": 1,
+                "swingKind": "serve",
+                "swingFrame": 1,
+                "animationClock": 0.016666666666666666,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": true,
+                "hitLatched": false,
+                "jumpReady": false
+              },
+              "right": {
+                "side": "right",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 500,
+                "y": 400,
+                "vx": 0,
+                "vy": 0,
+                "grounded": true,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "normal",
+                "bodyFrameIndex": 1,
+                "swingKind": "overhead",
+                "swingFrame": 1,
+                "animationClock": 0,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": false,
+                "hitLatched": false,
+                "jumpReady": true
+              }
+            },
+            "shuttle": {
+              "x": 182.2,
+              "y": 371.4166666666667,
+              "vx": 0,
+              "vy": 0,
+              "speed": 0,
+              "dir": 0,
+              "rotation": 0,
+              "state": "attached",
+              "lastTouchedBy": null,
+              "predictedLandingX": 0
+            },
+            "net": {
+              "frame": 1,
+              "clock": 0,
+              "playing": false
+            },
+            "score": {
+              "left": 0,
+              "right": 0
+            },
+            "server": "left",
+            "winner": null,
+            "rallyHits": 0,
+            "pointActive": true,
+            "pointTimer": 0,
+            "elapsed": 0.4333333333333333,
+            "lastPointSide": null,
+            "lastPointReason": "",
+            "lastShotLabel": "",
+            "lastShotSide": null,
+            "statusText": "轮到左侧发球",
+            "rngState": 590594
+          },
+          "effects": {
+            "cursor": 0,
+            "events": []
+          },
+          "receivedAt": 7436.599999427795
+        },
+        "diagnostics": {
+          "version": 1,
+          "sampleLimit": 240,
+          "frame": {
+            "fps": 4.743270484999408,
+            "gapMs": {
+              "samples": 20,
+              "mean": 210.825,
+              "p95": 600,
+              "max": 3016.5
+            },
+            "cpuMs": {
+              "samples": 21,
+              "mean": 0.557142802647182,
+              "p95": 1.5,
+              "max": 4.600000381469727
+            },
+            "longTaskMs": {
+              "samples": 4,
+              "mean": 638.75,
+              "p95": 599,
+              "max": 1819
+            }
+          },
+          "network": {
+            "snapshotGapMs": {
+              "samples": 13,
+              "mean": 31.253846168518066,
+              "p95": 56.70000076293945,
+              "max": 67
+            },
+            "snapshotBytes": {
+              "samples": 14,
+              "mean": 1910.4285714285713,
+              "p95": 1912,
+              "max": 1942
+            },
+            "rttMs": {
+              "samples": 3,
+              "mean": 1,
+              "p95": 1,
+              "max": 1
+            }
+          },
+          "predictionSamples": {
+            "correction": {
+              "samples": 14,
+              "mean": 0.5257337492083689,
+              "p95": 0,
+              "max": 7.360272488917165
+            },
+            "ackAgeMs": {
+              "samples": 14,
+              "mean": 0.6285714421953473,
+              "p95": 3.1999998092651367,
+              "max": 3.6999998092651367
+            }
+          },
+          "input": {
+            "accepted": 12,
+            "rejected": 0,
+            "rateHz": 42.145593869731805,
+            "gapMs": {
+              "samples": 11,
+              "mean": 23.727272727272727,
+              "p95": 42.60000038146973,
+              "max": 59.59999942779541
+            }
+          },
+          "renderer": {
+            "backend": "webgl",
+            "ready": true,
+            "contextAvailable": true,
+            "maxTextureSize": 8192,
+            "batchTextureLimit": 1,
+            "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+            "frames": 7,
+            "staticFramesSkipped": 15,
+            "preparations": 1,
+            "contextLosses": 0,
+            "contextRestores": 0,
+            "contextRestoreFailures": 0,
+            "atlas": {
+              "tier": "sd",
+              "pages": 4,
+              "uploadedPages": 4,
+              "rgbaBytesEstimate": 20618240,
+              "rgbaLimit": 100663296,
+              "uploads": 4,
+              "decodes": 4,
+              "groups": [
+                "body-joe",
+                "common",
+                "court",
+                "swing-adult"
+              ]
+            },
+            "confetti": {
+              "particles": 0,
+              "draws": 0
+            },
+            "pooledSprites": 12
+          },
+          "interpolation": {
+            "renderTick": 15.868310693370415,
+            "latestTick": 26,
+            "snapshots": 14,
+            "delayMs": 51.513708922887886,
+            "availableMs": 168.86148844382643,
+            "starved": false,
+            "underruns": 0,
+            "ignored": 0,
+            "resets": 1,
+            "rewinds": 0,
+            "recoveries": 0,
+            "lastRecoveryPauseMs": 0,
+            "lastRecoveryAdvanceTicks": 0
+          },
+          "prediction": {
+            "correction": 7.360272488917165,
+            "snapped": false,
+            "pendingInputs": 1,
+            "ackAgeMs": 3.3000001907348633,
+            "steps": 0,
+            "fixedSteps": 22,
+            "aligned": 5,
+            "fallbacks": {
+              "null": 1,
+              "missing": 2,
+              "overlap": 1
+            },
+            "suspended": false,
+            "expirations": 0,
+            "stalls": 0,
+            "ackTick": 26,
+            "confirmedHeldTicks": 0
+          },
+          "scheduler": {
+            "active": true,
+            "ticks": 12,
+            "skipped": 4,
+            "expedited": 0,
+            "latenessMs": 1
+          },
+          "quality": {
+            "stage": 0,
+            "limited": false,
+            "worldDensityCap": 0,
+            "nativeDpr": 1,
+            "effectiveDpr": 1,
+            "worldScale": 1.9859154929577465,
+            "worldDensity": 1.9859154929577465,
+            "reductions": 0,
+            "eligible": true,
+            "samples": 0,
+            "slowSamples": 0,
+            "lastWindowSlowFraction": 0,
+            "lastWindowMeanGap": 0,
+            "graceRemainingMs": 883.4000000000005,
+            "cooldownRemainingMs": 0
+          }
+        }
+      },
+      "observedHidden": true,
+      "hiddenStart": {
+        "at": 7803.89999961853,
+        "hidden": true,
+        "focused": false,
+        "wireCount": 31,
+        "sentCount": 27,
+        "events": [
+          {
+            "type": "pageshow",
+            "at": 125.09999942779541,
+            "hidden": false,
+            "trusted": true,
+            "persisted": false,
+            "frames": 0,
+            "sentCount": 0
+          },
+          {
+            "type": "visibilitychange",
+            "at": 3487.199999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 2
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6484.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 6
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6726.699999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 9
+          },
+          {
+            "type": "visibilitychange",
+            "at": 7164.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 11
+          },
+          {
+            "type": "visibilitychange",
+            "at": 7498.099999427795,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 7,
+            "sentCount": 25
+          }
+        ],
+        "latest": {
+          "type": "snapshot",
+          "room": "184285a1-b992-4859-83a6-df0671b5023a",
+          "tick": 46,
+          "ack": 14,
+          "ackTick": null,
+          "status": "playing",
+          "reconnectRemainingMs": 0,
+          "state": {
+            "version": "flash-90302-v3",
+            "shuttleSpeed": 1,
+            "phase": "playing",
+            "players": {
+              "left": {
+                "side": "left",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 165,
+                "y": 337,
+                "vx": 0,
+                "vy": 20,
+                "grounded": false,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "jump",
+                "bodyFrameIndex": 1,
+                "swingKind": "serve",
+                "swingFrame": 1,
+                "animationClock": 0.016666666666666666,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": true,
+                "hitLatched": false,
+                "jumpReady": true
+              },
+              "right": {
+                "side": "right",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 500,
+                "y": 400,
+                "vx": 0,
+                "vy": 0,
+                "grounded": true,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "normal",
+                "bodyFrameIndex": 1,
+                "swingKind": "overhead",
+                "swingFrame": 1,
+                "animationClock": 0,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": false,
+                "hitLatched": false,
+                "jumpReady": true
+              }
+            },
+            "shuttle": {
+              "x": 193.45,
+              "y": 314.75,
+              "vx": 0,
+              "vy": 0,
+              "speed": 0,
+              "dir": 0,
+              "rotation": 0,
+              "state": "attached",
+              "lastTouchedBy": null,
+              "predictedLandingX": 0
+            },
+            "net": {
+              "frame": 1,
+              "clock": 0,
+              "playing": false
+            },
+            "score": {
+              "left": 0,
+              "right": 0
+            },
+            "server": "left",
+            "winner": null,
+            "rallyHits": 0,
+            "pointActive": true,
+            "pointTimer": 0,
+            "elapsed": 0.7666666666666674,
+            "lastPointSide": null,
+            "lastPointReason": "",
+            "lastShotLabel": "",
+            "lastShotSide": null,
+            "statusText": "轮到左侧发球",
+            "rngState": 590594
+          },
+          "effects": {
+            "cursor": 0,
+            "events": []
+          },
+          "receivedAt": 7774.199999809265
+        },
+        "diagnostics": {
+          "version": 1,
+          "sampleLimit": 240,
+          "frame": {
+            "fps": 4.743270484999408,
+            "gapMs": {
+              "samples": 20,
+              "mean": 210.825,
+              "p95": 600,
+              "max": 3016.5
+            },
+            "cpuMs": {
+              "samples": 21,
+              "mean": 0.557142802647182,
+              "p95": 1.5,
+              "max": 4.600000381469727
+            },
+            "longTaskMs": {
+              "samples": 4,
+              "mean": 638.75,
+              "p95": 599,
+              "max": 1819
+            }
+          },
+          "network": {
+            "snapshotGapMs": {
+              "samples": 23,
+              "mean": 32.339130443075426,
+              "p95": 41.90000057220459,
+              "max": 67
+            },
+            "snapshotBytes": {
+              "samples": 24,
+              "mean": 1918.125,
+              "p95": 1939,
+              "max": 1942
+            },
+            "rttMs": {
+              "samples": 3,
+              "mean": 1,
+              "p95": 1,
+              "max": 1
+            }
+          },
+          "predictionSamples": {
+            "correction": {
+              "samples": 24,
+              "mean": 1.2519423255295108,
+              "p95": 7.360272488917165,
+              "max": 10.992737501540613
+            },
+            "ackAgeMs": {
+              "samples": 24,
+              "mean": 0.36666667461395264,
+              "p95": 0.8000001907348633,
+              "max": 3.6999998092651367
+            }
+          },
+          "input": {
+            "accepted": 14,
+            "rejected": 0,
+            "rateHz": 44.157608752869535,
+            "gapMs": {
+              "samples": 13,
+              "mean": 22.64615381681002,
+              "p95": 42.60000038146973,
+              "max": 59.59999942779541
+            }
+          },
+          "renderer": {
+            "backend": "webgl",
+            "ready": true,
+            "contextAvailable": true,
+            "maxTextureSize": 8192,
+            "batchTextureLimit": 1,
+            "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+            "frames": 7,
+            "staticFramesSkipped": 15,
+            "preparations": 1,
+            "contextLosses": 0,
+            "contextRestores": 0,
+            "contextRestoreFailures": 0,
+            "atlas": {
+              "tier": "sd",
+              "pages": 4,
+              "uploadedPages": 4,
+              "rgbaBytesEstimate": 20618240,
+              "rgbaLimit": 100663296,
+              "uploads": 4,
+              "decodes": 4,
+              "groups": [
+                "body-joe",
+                "common",
+                "court",
+                "swing-adult"
+              ]
+            },
+            "confetti": {
+              "particles": 0,
+              "draws": 0
+            },
+            "pooledSprites": 12
+          },
+          "interpolation": {
+            "renderTick": 15.868310693370415,
+            "latestTick": 46,
+            "snapshots": 24,
+            "delayMs": 56.790902495613096,
+            "availableMs": 502.19482177715975,
+            "starved": false,
+            "underruns": 0,
+            "ignored": 0,
+            "resets": 1,
+            "rewinds": 0,
+            "recoveries": 0,
+            "lastRecoveryPauseMs": 0,
+            "lastRecoveryAdvanceTicks": 0
+          },
+          "prediction": {
+            "correction": 0,
+            "snapped": false,
+            "pendingInputs": 0,
+            "ackAgeMs": 0,
+            "steps": 14,
+            "fixedSteps": 39,
+            "aligned": 6,
+            "fallbacks": {
+              "null": 2,
+              "missing": 2,
+              "overlap": 1
+            },
+            "suspended": false,
+            "expirations": 0,
+            "stalls": 0,
+            "ackTick": null,
+            "confirmedHeldTicks": 0
+          },
+          "scheduler": {
+            "active": false,
+            "ticks": 14,
+            "skipped": 4,
+            "expedited": 0,
+            "latenessMs": 1.0666662851963338
+          },
+          "quality": {
+            "stage": 0,
+            "limited": false,
+            "worldDensityCap": 0,
+            "nativeDpr": 1,
+            "effectiveDpr": 1,
+            "worldScale": 1.9859154929577465,
+            "worldDensity": 1.9859154929577465,
+            "reductions": 0,
+            "eligible": false,
+            "samples": 0,
+            "slowSamples": 0,
+            "lastWindowSlowFraction": 0,
+            "lastWindowMeanGap": 0,
+            "graceRemainingMs": 1000,
+            "cooldownRemainingMs": 0
+          }
+        }
+      },
+      "hiddenEnd": {
+        "at": 8620.89999961853,
+        "hidden": true,
+        "focused": false,
+        "wireCount": 57,
+        "sentCount": 28,
+        "events": [
+          {
+            "type": "pageshow",
+            "at": 125.09999942779541,
+            "hidden": false,
+            "trusted": true,
+            "persisted": false,
+            "frames": 0,
+            "sentCount": 0
+          },
+          {
+            "type": "visibilitychange",
+            "at": 3487.199999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 2
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6484.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 6
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6726.699999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 9
+          },
+          {
+            "type": "visibilitychange",
+            "at": 7164.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 11
+          },
+          {
+            "type": "visibilitychange",
+            "at": 7498.099999427795,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 7,
+            "sentCount": 25
+          }
+        ],
+        "latest": {
+          "type": "snapshot",
+          "room": "184285a1-b992-4859-83a6-df0671b5023a",
+          "tick": 96,
+          "ack": 14,
+          "ackTick": null,
+          "status": "playing",
+          "reconnectRemainingMs": 0,
+          "state": {
+            "version": "flash-90302-v3",
+            "shuttleSpeed": 1,
+            "phase": "playing",
+            "players": {
+              "left": {
+                "side": "left",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 165,
+                "y": 400,
+                "vx": 0,
+                "vy": 0,
+                "grounded": true,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "normal",
+                "bodyFrameIndex": 1,
+                "swingKind": "serve",
+                "swingFrame": 1,
+                "animationClock": 0.016666666666666666,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": true,
+                "hitLatched": false,
+                "jumpReady": true
+              },
+              "right": {
+                "side": "right",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 500,
+                "y": 400,
+                "vx": 0,
+                "vy": 0,
+                "grounded": true,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "normal",
+                "bodyFrameIndex": 1,
+                "swingKind": "overhead",
+                "swingFrame": 1,
+                "animationClock": 0,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": false,
+                "hitLatched": false,
+                "jumpReady": true
+              }
+            },
+            "shuttle": {
+              "x": 193.45,
+              "y": 377.75,
+              "vx": 0,
+              "vy": 0,
+              "speed": 0,
+              "dir": 0,
+              "rotation": 0,
+              "state": "attached",
+              "lastTouchedBy": null,
+              "predictedLandingX": 0
+            },
+            "net": {
+              "frame": 1,
+              "clock": 0,
+              "playing": false
+            },
+            "score": {
+              "left": 0,
+              "right": 0
+            },
+            "server": "left",
+            "winner": null,
+            "rallyHits": 0,
+            "pointActive": true,
+            "pointTimer": 0,
+            "elapsed": 1.5999999999999992,
+            "lastPointSide": null,
+            "lastPointReason": "",
+            "lastShotLabel": "",
+            "lastShotSide": null,
+            "statusText": "轮到左侧发球",
+            "rngState": 590594
+          },
+          "effects": {
+            "cursor": 0,
+            "events": []
+          },
+          "receivedAt": 8603.699999809265
+        },
+        "diagnostics": {
+          "version": 1,
+          "sampleLimit": 240,
+          "frame": {
+            "fps": 4.743270484999408,
+            "gapMs": {
+              "samples": 20,
+              "mean": 210.825,
+              "p95": 600,
+              "max": 3016.5
+            },
+            "cpuMs": {
+              "samples": 21,
+              "mean": 0.557142802647182,
+              "p95": 1.5,
+              "max": 4.600000381469727
+            },
+            "longTaskMs": {
+              "samples": 4,
+              "mean": 638.75,
+              "p95": 599,
+              "max": 1819
+            }
+          },
+          "network": {
+            "snapshotGapMs": {
+              "samples": 48,
+              "mean": 32.77916665871938,
+              "p95": 40.40000057220459,
+              "max": 67
+            },
+            "snapshotBytes": {
+              "samples": 49,
+              "mean": 1917.8367346938776,
+              "p95": 1939,
+              "max": 1942
+            },
+            "rttMs": {
+              "samples": 4,
+              "mean": 1,
+              "p95": 1,
+              "max": 1
+            }
+          },
+          "predictionSamples": {
+            "correction": {
+              "samples": 49,
+              "mean": 0.6131962410756787,
+              "p95": 4.333333333333314,
+              "max": 10.992737501540613
+            },
+            "ackAgeMs": {
+              "samples": 49,
+              "mean": 0.1795918406272421,
+              "p95": 0.7000007629394531,
+              "max": 3.6999998092651367
+            }
+          },
+          "input": {
+            "accepted": 14,
+            "rejected": 0,
+            "rateHz": 44.157608752869535,
+            "gapMs": {
+              "samples": 13,
+              "mean": 22.64615381681002,
+              "p95": 42.60000038146973,
+              "max": 59.59999942779541
+            }
+          },
+          "renderer": {
+            "backend": "webgl",
+            "ready": true,
+            "contextAvailable": true,
+            "maxTextureSize": 8192,
+            "batchTextureLimit": 1,
+            "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+            "frames": 7,
+            "staticFramesSkipped": 15,
+            "preparations": 1,
+            "contextLosses": 0,
+            "contextRestores": 0,
+            "contextRestoreFailures": 0,
+            "atlas": {
+              "tier": "sd",
+              "pages": 4,
+              "uploadedPages": 4,
+              "rgbaBytesEstimate": 20618240,
+              "rgbaLimit": 100663296,
+              "uploads": 4,
+              "decodes": 4,
+              "groups": [
+                "body-joe",
+                "common",
+                "court",
+                "swing-adult"
+              ]
+            },
+            "confetti": {
+              "particles": 0,
+              "draws": 0
+            },
+            "pooledSprites": 12
+          },
+          "interpolation": {
+            "renderTick": 15.868310693370415,
+            "latestTick": 96,
+            "snapshots": 32,
+            "delayMs": 54.25736237481072,
+            "availableMs": 1335.5281551104931,
+            "starved": false,
+            "underruns": 0,
+            "ignored": 0,
+            "resets": 1,
+            "rewinds": 0,
+            "recoveries": 0,
+            "lastRecoveryPauseMs": 0,
+            "lastRecoveryAdvanceTicks": 0
+          },
+          "prediction": {
+            "correction": 0,
+            "snapped": false,
+            "pendingInputs": 0,
+            "ackAgeMs": 0,
+            "steps": 63,
+            "fixedSteps": 88,
+            "aligned": 6,
+            "fallbacks": {
+              "null": 2,
+              "missing": 2,
+              "overlap": 1
+            },
+            "suspended": false,
+            "expirations": 0,
+            "stalls": 0,
+            "ackTick": null,
+            "confirmedHeldTicks": 0
+          },
+          "scheduler": {
+            "active": false,
+            "ticks": 14,
+            "skipped": 4,
+            "expedited": 0,
+            "latenessMs": 1.0666662851963338
+          },
+          "quality": {
+            "stage": 0,
+            "limited": false,
+            "worldDensityCap": 0,
+            "nativeDpr": 1,
+            "effectiveDpr": 1,
+            "worldScale": 1.9859154929577465,
+            "worldDensity": 1.9859154929577465,
+            "reductions": 0,
+            "eligible": false,
+            "samples": 0,
+            "slowSamples": 0,
+            "lastWindowSlowFraction": 0,
+            "lastWindowMeanGap": 0,
+            "graceRemainingMs": 1000,
+            "cooldownRemainingMs": 0
+          }
+        }
+      },
+      "returned": {
+        "at": 8781.099999427795,
+        "hidden": false,
+        "focused": true,
+        "wireCount": 62,
+        "sentCount": 36,
+        "events": [
+          {
+            "type": "pageshow",
+            "at": 125.09999942779541,
+            "hidden": false,
+            "trusted": true,
+            "persisted": false,
+            "frames": 0,
+            "sentCount": 0
+          },
+          {
+            "type": "visibilitychange",
+            "at": 3487.199999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 2
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6484.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 2,
+            "sentCount": 6
+          },
+          {
+            "type": "visibilitychange",
+            "at": 6726.699999809265,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 9
+          },
+          {
+            "type": "visibilitychange",
+            "at": 7164.699999809265,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 3,
+            "sentCount": 11
+          },
+          {
+            "type": "visibilitychange",
+            "at": 7498.099999427795,
+            "hidden": true,
+            "trusted": true,
+            "persisted": null,
+            "frames": 7,
+            "sentCount": 25
+          },
+          {
+            "type": "visibilitychange",
+            "at": 8640.099999427795,
+            "hidden": false,
+            "trusted": true,
+            "persisted": null,
+            "frames": 7,
+            "sentCount": 28
+          }
+        ],
+        "latest": {
+          "type": "snapshot",
+          "room": "184285a1-b992-4859-83a6-df0671b5023a",
+          "tick": 106,
+          "ack": 21,
+          "ackTick": 106,
+          "status": "playing",
+          "reconnectRemainingMs": 0,
+          "state": {
+            "version": "flash-90302-v3",
+            "shuttleSpeed": 1,
+            "phase": "playing",
+            "players": {
+              "left": {
+                "side": "left",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 165,
+                "y": 400,
+                "vx": 0,
+                "vy": 0,
+                "grounded": true,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "normal",
+                "bodyFrameIndex": 1,
+                "swingKind": "serve",
+                "swingFrame": 1,
+                "animationClock": 0.016666666666666666,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0.016666666666666666,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": true,
+                "hitLatched": false,
+                "jumpReady": true
+              },
+              "right": {
+                "side": "right",
+                "characterId": "joe",
+                "bob": 0,
+                "bobStep": 0.2,
+                "bobBaseline": 400,
+                "x": 500,
+                "y": 400,
+                "vx": 0,
+                "vy": 0,
+                "grounded": true,
+                "moveMultiplier": 1,
+                "jumpMultiplier": 1,
+                "powerMultiplier": 1,
+                "bodyFrame": "normal",
+                "bodyFrameIndex": 1,
+                "swingKind": "overhead",
+                "swingFrame": 1,
+                "animationClock": 0,
+                "animationPlaying": false,
+                "swingClips": {
+                  "serve": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "underhand": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  },
+                  "overhead": {
+                    "frame": 1,
+                    "clock": 0,
+                    "playing": false
+                  }
+                },
+                "swinging": false,
+                "contactEnabled": false,
+                "serving": false,
+                "hitLatched": false,
+                "jumpReady": true
+              }
+            },
+            "shuttle": {
+              "x": 193.45,
+              "y": 377.75,
+              "vx": 0,
+              "vy": 0,
+              "speed": 0,
+              "dir": 0,
+              "rotation": 0,
+              "state": "attached",
+              "lastTouchedBy": null,
+              "predictedLandingX": 0
+            },
+            "net": {
+              "frame": 1,
+              "clock": 0,
+              "playing": false
+            },
+            "score": {
+              "left": 0,
+              "right": 0
+            },
+            "server": "left",
+            "winner": null,
+            "rallyHits": 0,
+            "pointActive": true,
+            "pointTimer": 0,
+            "elapsed": 1.7666666666666653,
+            "lastPointSide": null,
+            "lastPointReason": "",
+            "lastShotLabel": "",
+            "lastShotSide": null,
+            "statusText": "轮到左侧发球",
+            "rngState": 590594
+          },
+          "effects": {
+            "cursor": 0,
+            "events": []
+          },
+          "receivedAt": 8771.699999809265
+        },
+        "diagnostics": {
+          "version": 1,
+          "sampleLimit": 240,
+          "frame": {
+            "fps": 4.083009355417088,
+            "gapMs": {
+              "samples": 23,
+              "mean": 244.91739130434783,
+              "p95": 600,
+              "max": 3016.5
+            },
+            "cpuMs": {
+              "samples": 24,
+              "mean": 0.7124999761581421,
+              "p95": 1.5,
+              "max": 4.600000381469727
+            },
+            "longTaskMs": {
+              "samples": 4,
+              "mean": 638.75,
+              "p95": 599,
+              "max": 1819
+            }
+          },
+          "network": {
+            "snapshotGapMs": {
+              "samples": 53,
+              "mean": 32.85471698473085,
+              "p95": 40.40000057220459,
+              "max": 67
+            },
+            "snapshotBytes": {
+              "samples": 54,
+              "mean": 1917.2777777777778,
+              "p95": 1939,
+              "max": 1942
+            },
+            "rttMs": {
+              "samples": 4,
+              "mean": 1,
+              "p95": 1,
+              "max": 1
+            }
+          },
+          "predictionSamples": {
+            "correction": {
+              "samples": 54,
+              "mean": 0.6709922321798929,
+              "p95": 4.333333333333314,
+              "max": 10.992737501540613
+            },
+            "ackAgeMs": {
+              "samples": 54,
+              "mean": 0.16296296649509007,
+              "p95": 0.7000007629394531,
+              "max": 3.6999998092651367
+            }
+          },
+          "input": {
+            "accepted": 22,
+            "rejected": 0,
+            "rateHz": 13.191783406641287,
+            "gapMs": {
+              "samples": 21,
+              "mean": 75.80476188659668,
+              "p95": 59.59999942779541,
+              "max": 1180.6999998092651
+            }
+          },
+          "renderer": {
+            "backend": "webgl",
+            "ready": true,
+            "contextAvailable": true,
+            "maxTextureSize": 8192,
+            "batchTextureLimit": 1,
+            "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+            "frames": 10,
+            "staticFramesSkipped": 15,
+            "preparations": 1,
+            "contextLosses": 0,
+            "contextRestores": 0,
+            "contextRestoreFailures": 0,
+            "atlas": {
+              "tier": "sd",
+              "pages": 4,
+              "uploadedPages": 4,
+              "rgbaBytesEstimate": 20618240,
+              "rgbaLimit": 100663296,
+              "uploads": 4,
+              "decodes": 4,
+              "groups": [
+                "body-joe",
+                "common",
+                "court",
+                "swing-adult"
+              ]
+            },
+            "confetti": {
+              "particles": 0,
+              "draws": 0
+            },
+            "pooledSprites": 12
+          },
+          "interpolation": {
+            "renderTick": 100.15235111069269,
+            "latestTick": 106,
+            "snapshots": 32,
+            "delayMs": 52.80655994641701,
+            "availableMs": 97.46081482178847,
+            "starved": false,
+            "underruns": 0,
+            "ignored": 0,
+            "resets": 1,
+            "rewinds": 0,
+            "recoveries": 1,
+            "lastRecoveryPauseMs": 1333.300000000001,
+            "lastRecoveryAdvanceTicks": 78.89438360770315
+          },
+          "prediction": {
+            "correction": 0.7167250883618408,
+            "snapped": false,
+            "pendingInputs": 1,
+            "ackAgeMs": 6.600000381469727,
+            "steps": 0,
+            "fixedSteps": 97,
+            "aligned": 8,
+            "fallbacks": {
+              "null": 2,
+              "missing": 4,
+              "overlap": 1
+            },
+            "suspended": false,
+            "expirations": 0,
+            "stalls": 0,
+            "ackTick": 106,
+            "confirmedHeldTicks": 0
+          },
+          "scheduler": {
+            "active": true,
+            "ticks": 22,
+            "skipped": 4,
+            "expedited": 0,
+            "latenessMs": 0.6666666666715173
+          },
+          "quality": {
+            "stage": 0,
+            "limited": false,
+            "worldDensityCap": 0,
+            "nativeDpr": 1,
+            "effectiveDpr": 1,
+            "worldScale": 1.9859154929577465,
+            "worldDensity": 1.9859154929577465,
+            "reductions": 0,
+            "eligible": true,
+            "samples": 0,
+            "slowSamples": 0,
+            "lastWindowSlowFraction": 0,
+            "lastWindowMeanGap": 0,
+            "graceRemainingMs": 933.3999999999996,
+            "cooldownRemainingMs": 0
+          }
+        }
+      },
+      "rearmed": true
+    }
+  ],
+  "checks": {
+    "genuineHiddenReleaseNoDrawsAuthorityContinuityReturnAndNeutralRearm": {
+      "strategy": "tab",
+      "room": "184285a1-b992-4859-83a6-df0671b5023a",
+      "hiddenMs": 817
+    }
+  },
+  "errors": [],
+  "limits": [
+    "Xvfb headed Chromium establishes genuine browser visibility events on a virtual display, not physical-device lifecycle or latency.",
+    "Internal main.ts elapsed delta is not exported. This tool measures paused/resumed drawing, scheduler release/rearm, quality grace and authority continuity; exact elapsed-reset arithmetic remains source/test evidence.",
+    "Optional BFCache navigation was not requested."
+  ],
+  "gl": {
+    "available": true,
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "maxTextureSize": 8192,
+    "vendor": "WebKit",
+    "renderer": "WebKit WebGL",
+    "unmaskedVendor": "Google Inc. (Google)",
+    "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "complete": true
+}

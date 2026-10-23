@@ -1,0 +1,13 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/frontend/event-lifecycle.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/spec/deployment/source-archive.md", "reason": "Preserve rendering, lifecycle, authority, source and verification contracts"}
+{"file": ".trellis/tasks/10-22-pixi-renderer/research/atlas-pipeline.md", "reason": "Source-backed atlas/color study and shared implementation contract"}
+{"file": ".trellis/tasks/10-22-pixi-renderer/research/integration-contract.md", "reason": "Source-backed atlas/color study and shared implementation contract"}
+{"file": ".trellis/tasks/10-22-pixi-renderer/research/pixi-renderer.md", "reason": "Verified Pixi8.22 official API and scene/lifecycle contracts"}

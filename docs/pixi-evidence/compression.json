@@ -1,0 +1,223 @@
+{
+  "sourceManifestSha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+  "manifestSha256": "c565a4153d32c4f12911a53bf21c3424914d6544880ad62cf79309fa671ef6eb",
+  "images": 34,
+  "allPixelsIdentical": true,
+  "allRegistrationAndGroupsIdentical": true,
+  "noPngGrowth": true,
+  "encoding": {
+    "strategy3Bytes": 15693203,
+    "strategy0Bytes": 13507106,
+    "selectedBytes": 13506815,
+    "strategy3Images": 3,
+    "strategy0Images": 31
+  },
+  "beforeBytes": 15693203,
+  "afterBytes": 13506815,
+  "checks": [
+    {
+      "key": "hd/body-harry-0",
+      "beforeBytes": 179534,
+      "afterBytes": 139447,
+      "rgbaSha256": "eb66b75b45284abb25287f350fbe82a1e00e48e86653b0f58af3ad07bfb15189"
+    },
+    {
+      "key": "hd/body-joe-0",
+      "beforeBytes": 178368,
+      "afterBytes": 133926,
+      "rgbaSha256": "98e17e1de2e6245219f1a004cfbed58ba1a179b2247811b3e2a9780b42fe10f5"
+    },
+    {
+      "key": "hd/body-nadia-0",
+      "beforeBytes": 212086,
+      "afterBytes": 160458,
+      "rgbaSha256": "15d1ea525f97f95e25ecad1b5cd9faf8fe62ec8eccfda9809b3983de5b94072d"
+    },
+    {
+      "key": "hd/body-pirate-0",
+      "beforeBytes": 234277,
+      "afterBytes": 182868,
+      "rgbaSha256": "a8e99a6d5cc1905f786b01c5df3ecc167f788703c2f7e72b7e6facd01951c3bb"
+    },
+    {
+      "key": "hd/body-red-0",
+      "beforeBytes": 200028,
+      "afterBytes": 153476,
+      "rgbaSha256": "a557d3dafd2eabe0dca194a60aa786c49d9dca8213ebb8951848cbc2ff5dd0ff"
+    },
+    {
+      "key": "hd/body-toaster-0",
+      "beforeBytes": 15511,
+      "afterBytes": 12668,
+      "rgbaSha256": "3bb592f4ed273077088fe889ff52f53ecfc9af2a62125d1609036db4be6bca09"
+    },
+    {
+      "key": "hd/body-top-hat-0",
+      "beforeBytes": 224036,
+      "afterBytes": 163408,
+      "rgbaSha256": "19b09554f8c55e1a0f5d15788c6f2078418ea3aa102c6fb42ab411a983e10cc5"
+    },
+    {
+      "key": "hd/common-0",
+      "beforeBytes": 969836,
+      "afterBytes": 783318,
+      "rgbaSha256": "1882ee1141b11a54a7720200d387a1f104f34cefb9e7e4e153f99acf6a14c833"
+    },
+    {
+      "key": "hd/common-1",
+      "beforeBytes": 2878,
+      "afterBytes": 2750,
+      "rgbaSha256": "5411d27a2d7147486b3394d21eaf70092ce66af5bb16988abefefcaec7f2f9b2"
+    },
+    {
+      "key": "hd/court-0",
+      "beforeBytes": 4281431,
+      "afterBytes": 3793907,
+      "rgbaSha256": "7041d43af7efc7b2d74132a3d4066df44528d94d23495e9d9e9c2b39110d090b"
+    },
+    {
+      "key": "hd/court-1",
+      "beforeBytes": 2831887,
+      "afterBytes": 2618505,
+      "rgbaSha256": "cace8f56abbc415e0a8a668f234d686a18cf7c86f74f498beabd85d7a22d5f97"
+    },
+    {
+      "key": "hd/court-2",
+      "beforeBytes": 276534,
+      "afterBytes": 158305,
+      "rgbaSha256": "b2348f5c1a1c24ce801aed29d3a2f7535101d27951320acbc29e3eaf9de0b641"
+    },
+    {
+      "key": "hd/swing-adult-0",
+      "beforeBytes": 1209404,
+      "afterBytes": 970991,
+      "rgbaSha256": "168950a8027e8d1985ad13ba7b4c67ecf6040fba72c04c7717c73b1b79b1d256"
+    },
+    {
+      "key": "hd/swing-toaster-0",
+      "beforeBytes": 592561,
+      "afterBytes": 454144,
+      "rgbaSha256": "8737874355b2f30373f45fbf092f504290c2eec220e29f164a1a57256a5edd11"
+    },
+    {
+      "key": "sd/body-harry-0",
+      "beforeBytes": 77692,
+      "afterBytes": 63533,
+      "rgbaSha256": "e7137a89205f5329b35b5b5e0466dbf87a820246b8c887be062d35f6debc9578"
+    },
+    {
+      "key": "sd/body-joe-0",
+      "beforeBytes": 76846,
+      "afterBytes": 60872,
+      "rgbaSha256": "b7fa264437db036d096ca0a7ce52b47ff11a0d62919a6748115f835924c8683e"
+    },
+    {
+      "key": "sd/body-nadia-0",
+      "beforeBytes": 89725,
+      "afterBytes": 72406,
+      "rgbaSha256": "f780cc585bc5c095c92d6eb608ca1e085a898faf5a1c70cf2fdea66459cc459d"
+    },
+    {
+      "key": "sd/body-pirate-0",
+      "beforeBytes": 98516,
+      "afterBytes": 82981,
+      "rgbaSha256": "0c8c44124c81bf594191e31dfa178bcf5ae1c59cda1b0ccf607c740ca1b43d77"
+    },
+    {
+      "key": "sd/body-red-0",
+      "beforeBytes": 86129,
+      "afterBytes": 69910,
+      "rgbaSha256": "b8545f128a94a3e5be17398e41ba09a019e2def0a15e950f961513a7f2a9b51a"
+    },
+    {
+      "key": "sd/body-toaster-0",
+      "beforeBytes": 5316,
+      "afterBytes": 4671,
+      "rgbaSha256": "8acfdc313f7913b94c378284f9bf913aa8f8d66e9cb7b8bbba9b35d43e52e225"
+    },
+    {
+      "key": "sd/body-top-hat-0",
+      "beforeBytes": 96952,
+      "afterBytes": 75872,
+      "rgbaSha256": "7a852e34199c37d234913fb4adcfa8c1b1150fac43d79ffabae0da42516c5ede"
+    },
+    {
+      "key": "sd/common-0",
+      "beforeBytes": 439267,
+      "afterBytes": 318308,
+      "rgbaSha256": "422f01a503c9b75276dc2eda6f7c8a8f9c316d4142092062e79595d0cc3aa327"
+    },
+    {
+      "key": "sd/court-0",
+      "beforeBytes": 2617977,
+      "afterBytes": 2437289,
+      "rgbaSha256": "29668645fc768312b29718b4ece410835f320e692e9b7b503a48ede0012cbb22"
+    },
+    {
+      "key": "sd/swing-adult-0",
+      "beforeBytes": 438041,
+      "afterBytes": 374279,
+      "rgbaSha256": "8d3d18c912ac338648e6de1ba28a7a92f7f3c1181c732cfab067cb223f75dbe3"
+    },
+    {
+      "key": "sd/swing-toaster-0",
+      "beforeBytes": 222493,
+      "afterBytes": 183127,
+      "rgbaSha256": "7e67684c1a6642ad48c6b7d8942e242d8fbc3e593c9083346733b9160ff534fb"
+    },
+    {
+      "key": "dom/preview/joe/preview-01.svg",
+      "beforeBytes": 4193,
+      "afterBytes": 4165,
+      "rgbaSha256": "ba0edefb9ebbb977fecbd8a809afacd68741a5db639be953bdd7cf8026e7d867"
+    },
+    {
+      "key": "dom/preview/nadia/preview-01.svg",
+      "beforeBytes": 4347,
+      "afterBytes": 4296,
+      "rgbaSha256": "d86c633b30927d2e653d22c4cec096babe674df3768cfa24160ac97411ce811f"
+    },
+    {
+      "key": "dom/preview/harry/preview-01.svg",
+      "beforeBytes": 4269,
+      "afterBytes": 4225,
+      "rgbaSha256": "f0d113503bbc63aa481249f7096cb8338380e9de69fa4833317ab7260f1b4542"
+    },
+    {
+      "key": "dom/preview/toaster/preview-01.svg",
+      "beforeBytes": 4339,
+      "afterBytes": 4008,
+      "rgbaSha256": "8b96dd2b98a00503d2f2b014cc604a7eadaf9feecf426c92d5bec063e1c346d9"
+    },
+    {
+      "key": "dom/preview/pirate/preview-01.svg",
+      "beforeBytes": 4662,
+      "afterBytes": 4662,
+      "rgbaSha256": "a25a611c1e348b00f0417bd9d7e22516deeac2d341e2a19d952995c49577d1fd"
+    },
+    {
+      "key": "dom/preview/top-hat/preview-01.svg",
+      "beforeBytes": 4644,
+      "afterBytes": 4636,
+      "rgbaSha256": "2b94b09ee36e84181d4ae8bd0c6da44594b638f32f3a78290ace0045f2f8f479"
+    },
+    {
+      "key": "dom/preview/red/preview-01.svg",
+      "beforeBytes": 4325,
+      "afterBytes": 4305,
+      "rgbaSha256": "3c5d47f46a8d213910b52cbfdbcdd126f7550336eb2d22bf99c356c441eaba84"
+    },
+    {
+      "key": "dom/ui/rematchUp-01.svg",
+      "beforeBytes": 2309,
+      "afterBytes": 2309,
+      "rgbaSha256": "5d38956029eb1a5633fee569921eb4be0c12fd8d2bc14a4787ff7a06710a5224"
+    },
+    {
+      "key": "dom/ui/rematchOver-01.svg",
+      "beforeBytes": 2790,
+      "afterBytes": 2790,
+      "rgbaSha256": "eefe0b7e15ebe578f5af384e31f0230c3f2ec29c415e0fa5f2ff7cebe4ccd75c"
+    }
+  ]
+}
