@@ -44,7 +44,7 @@ Original Canvas `fb87796` / `pre-pixijs-20261022`; ignored baseline build and so
 - [x] Final four-tier natural matches:2608 equal same-tick authority snapshots; keyboard/touch/synthetic-pad/settings/mirror/reconnect/rematch/compact layouts/context restoration pass.
 - [x] Real PNG failure/retry/exit,30s result reclaim/new-role ownership and loss-during-preparation lifecycle scenarios pass. Genuine headed tab hidden817ms/resume/input-neutral rearm pass.
 - [x] README/design/build/validation/report/evidence and seven-section rendering spec updated; physical devices/WebGL1/weak-network/BFCache and combined delayed-role/reclaim limits explicit.
-- [x] Phase3.4 concrete two-commit plan approved by the user with “继续” on 2026-10-23; implementation commit `5573394` complete. Documentation commit and then finish-work archive/journal follow under the same authorization.
+- [x] Phase3.4 concrete two-commit plan approved by the user with “继续” on 2026-10-23; implementation `5573394` and documentation `7c723f5` committed with exactly the approved paths. Finish-work archive/journal use the same authorization and are recorded as separate bookkeeping commits.
 - [ ] Pre-migration remote backup push awaits missing repository URL; no remote configured. Local commit/tag/full bundle available.
 
 No production deployment. Primary handoff: docs/pixi-migration.md; commands and tools/render-validation/README.md are reproducible from the workspace.

@@ -1,6 +1,6 @@
 # Proposed migration work commits
 
-Implementation, assets, browser verification and final quality gates are complete. The user approved this concrete Phase3.4 plan with “继续” on 2026-10-23, authorizing both work commits and the subsequent task archive/journal. Implementation commit `5573394dabe264632f08c048bbd0f854bb25a45e` is complete; the documentation batch follows below. Original Canvas rollback tag/commit/bundle remain available. No remote exists and no production deployment occurred.
+Implementation, assets, browser verification and final quality gates are complete. The user approved this concrete Phase3.4 plan with “继续” on 2026-10-23, authorizing both work commits and the subsequent task archive/journal. Both work commits are complete: implementation `5573394dabe264632f08c048bbd0f854bb25a45e` and documentation `7c723f5b068b2d35bb36de0200ce0e1d5622a485`. Original Canvas rollback tag/commit/bundle remain available. No remote exists and no production deployment occurred.
 
 ## 1. feat: migrate classic rendering to PixiJS WebGL
 
@@ -142,4 +142,4 @@ None. All dirty paths belong to this migration; generated assets and evidence ar
 - Final75s cold/warm report complete;202+26 visual cases, final four-tier natural matches and genuine hidden/resume passed. Remaining performance/device limits are explicit in docs/pixi-migration.md.
 - 23 changed Markdown files/133 relative links checked; frozen sources/shared/server unchanged; git diff whitespace check passes.
 
-Execute the approved work commits in order, then archive this current task and record the session using the standard Trellis bookkeeping commits. Do not amend or deploy. Backup push still needs the missing repository URL.
+The two approved work commits were created in order with exactly the planned paths and a clean working tree. Task archive and session journal follow as standard Trellis bookkeeping commits. No amend or deployment was performed. Backup push still needs the missing repository URL.
