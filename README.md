@@ -1,6 +1,6 @@
 # 火柴人羽毛球 H5 在线对战
 
-独立项目目录 `/home/ubuntu/stickman-badminton-h5-online/`，公网入口 https://www.firesoul.cn/badminton-h5-online/ 。本地开发版采用 PixiJS 8.22.0 WebGL 绘制，Node.js 服务器权威模拟，通过同源 WebSocket 联机；本次渲染改造尚未发布生产。
+独立项目目录 `/home/ubuntu/stickman-badminton-h5-online/`，公网入口 https://www.firesoul.cn/badminton-h5-online/ 。当前公网版采用 PixiJS 8.22.0 WebGL 绘制，Node.js 服务器权威模拟，通过同源 WebSocket 联机；2026-10-23 已发布，版本与回退记录见[验证文档](docs/validation.md#2026-10-23-pixijs-公网发布)。
 
 在游戏内选择角色、球速场次并点击开始匹配，两名同档游客进入同一房间，无需账号、密码或昵称。球速可选 **1x / 1.25x / 1.5x / 2x**，只加快羽毛球，人物移动、跳跃、挥拍和回合等待保持原节奏；不同档位独立匹配。排队和比赛期间锁定，取消或结算后可换档再次匹配。先到 7 分获胜。匹配、选角、取消、结束、静音和设置控件位于游戏区域内，也提供触屏操作。
 

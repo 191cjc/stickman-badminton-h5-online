@@ -1,0 +1,828 @@
+{
+  "schema": 1,
+  "description": "Observed 2026-10-23 publication checks; public cold-start time is not a local A/B or physical-device performance comparison.",
+  "release": {
+    "release_id": "20261023T031945Z-pixijs-webgl",
+    "release": "/opt/stickman-badminton-h5-online/releases/20261023T031945Z-pixijs-webgl",
+    "sourceHeadAtBuild": "df636faba963382d78971cfb267800f33dd1bc66",
+    "sourcePatchSha256": "6ab2ad255daad5d1aea7ad6079b5133ab9d562ad7374e020c96e27cff6f9cc94",
+    "implementation": "5573394dabe264632f08c048bbd0f854bb25a45e",
+    "documentation": "7c723f5b068b2d35bb36de0200ce0e1d5622a485",
+    "fixCommit": "9f054f92c7bbf99d5f97d0ef28889f97246396dc",
+    "finalLocalChecks": {
+      "tests": "24 files / 458 passed",
+      "typecheck": true,
+      "lint": true,
+      "build": true,
+      "slow18sStartup": true,
+      "combined51sNaturalResultReclaim": true
+    }
+  },
+  "deploymentResult": {
+    "release": "20261023T031945Z-pixijs-webgl",
+    "startedAt": "2026-10-23T03:23:18.841204+00:00",
+    "complete": true,
+    "rolledBack": false,
+    "loopbackHealth": {
+      "ok": true,
+      "protocol": 5,
+      "simulationHz": 60,
+      "snapshotHz": 30,
+      "rooms": 0,
+      "queued": 0
+    },
+    "httpAttempts": 1,
+    "finishedAt": "2026-10-23T03:25:04.599416+00:00"
+  },
+  "finalBuildHashes": {
+    "dist/client/assets/index-BCuZumBe.js": {
+      "sha256": "b2709ad77006977827821d389c0c4f9b3646e3d00cc42e19168daefd36de1af1",
+      "bytes": 473743
+    },
+    "public/classic-atlas/manifest.json": {
+      "sha256": "c565a4153d32c4f12911a53bf21c3424914d6544880ad62cf79309fa671ef6eb",
+      "bytes": 608940
+    },
+    "dist/client/classic-atlas/manifest.json": {
+      "sha256": "c565a4153d32c4f12911a53bf21c3424914d6544880ad62cf79309fa671ef6eb",
+      "bytes": 608940
+    },
+    "dist/server/index.js": {
+      "sha256": "f1b05a2d28fafeaa60ebf847ed4d66b0f398ee9a5d05c1f79534947d95f8f469",
+      "bytes": 164490
+    }
+  },
+  "httpAndProtocol": {
+    "origin": "https://www.firesoul.cn",
+    "page": 200,
+    "assets": 2,
+    "health": true,
+    "classicArt": "source record, 640x426, 60 fps, 24 net frames and 4 SVG hashes checked",
+    "cookie": "HttpOnly/SameSite checked",
+    "websocket": "hello protocol=5; legacy v4 mismatch/1008",
+    "existing": [
+      {
+        "path": "/badminton/",
+        "status": 200
+      },
+      {
+        "path": "/badminton-original/",
+        "status": 200
+      },
+      {
+        "path": "/badminton-cloud/",
+        "status": 200
+      }
+    ]
+  },
+  "publicResourceVerification": {
+    "origin": "https://www.firesoul.cn",
+    "release": "20261023T031945Z-pixijs-webgl",
+    "files": [
+      {
+        "route": "/badminton-h5-online/assets/browserAll-xjF5N6Kg.js",
+        "bytes": 43448,
+        "sha256": "76c973dac00df868c3662a177c059bfb03052d53a946b4066003cd2066d1b965",
+        "contentType": "application/javascript",
+        "cacheControl": "public, max-age=31536000, immutable",
+        "durationMs": 76.754846
+      },
+      {
+        "route": "/badminton-h5-online/assets/index-BCuZumBe.js",
+        "bytes": 473743,
+        "sha256": "b2709ad77006977827821d389c0c4f9b3646e3d00cc42e19168daefd36de1af1",
+        "contentType": "application/javascript",
+        "cacheControl": "public, max-age=31536000, immutable",
+        "durationMs": 842.165655
+      },
+      {
+        "route": "/badminton-h5-online/assets/index-DyGQGYN-.css",
+        "bytes": 9546,
+        "sha256": "670f121c03e9dbb4e182b72bdf394adde440aa59193fb24d376b68bab631c019",
+        "contentType": "text/css",
+        "cacheControl": "public, max-age=31536000, immutable",
+        "durationMs": 2090.943391
+      },
+      {
+        "route": "/badminton-h5-online/assets/init-B-ZlQu8o.js",
+        "bytes": 20746,
+        "sha256": "58cc31232cc2d708a1cc679ef1888751d6b9ffebc8656cf6465faae1868198f7",
+        "contentType": "application/javascript",
+        "cacheControl": "public, max-age=31536000, immutable",
+        "durationMs": 5.493268999999941
+      },
+      {
+        "route": "/badminton-h5-online/assets/webworkerAll-C7qG2K4U.js",
+        "bytes": 55,
+        "sha256": "19afe5fa45bc07205159acdeeeae82ac7706c20fbef3f4735ebd05c3678577b2",
+        "contentType": "application/javascript",
+        "cacheControl": "public, max-age=31536000, immutable",
+        "durationMs": 6.531904000000054
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-21e6cb92905a01fad27f40878752d9f5b69548c9ddbc314379d0bd1188f6c8f6.png",
+        "bytes": 4636,
+        "sha256": "21e6cb92905a01fad27f40878752d9f5b69548c9ddbc314379d0bd1188f6c8f6",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 5.903120000000399
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-2608d8204526816d7ba42a5b9884a6f96a938164c463c00f063418451b116c9b.png",
+        "bytes": 4296,
+        "sha256": "2608d8204526816d7ba42a5b9884a6f96a938164c463c00f063418451b116c9b",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 4.679981000000225
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-6ae6726572ce243da71b0fac99b0dee387d7219aa4030fcd3161ef5986b5404b.png",
+        "bytes": 2790,
+        "sha256": "6ae6726572ce243da71b0fac99b0dee387d7219aa4030fcd3161ef5986b5404b",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 5.985384999999951
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-783e06447ae13329cfffc11eb8087f25e86bb21ab961e6759c5ed8427cf191e0.png",
+        "bytes": 4225,
+        "sha256": "783e06447ae13329cfffc11eb8087f25e86bb21ab961e6759c5ed8427cf191e0",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 3.9125670000003083
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-79da8aabb0db08a861189e46c7ecb5e094d60badf0ec0f5f8aabca57dc48562c.png",
+        "bytes": 2309,
+        "sha256": "79da8aabb0db08a861189e46c7ecb5e094d60badf0ec0f5f8aabca57dc48562c",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 5.085642999999891
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-a5dc771400fbdbad1bc52e5394155f659fde2a901d05858e0288d7a086873cec.png",
+        "bytes": 4662,
+        "sha256": "a5dc771400fbdbad1bc52e5394155f659fde2a901d05858e0288d7a086873cec",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 5.680311999999958
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-b0d63a82b641caa38e12300ee4bc6e240be9020f36fa64e653651733e6b17a7b.png",
+        "bytes": 4305,
+        "sha256": "b0d63a82b641caa38e12300ee4bc6e240be9020f36fa64e653651733e6b17a7b",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 4.899382999999943
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-bb6246f89300ce41f6584171341935854592a850b390cb93e1155ec1421ea121.png",
+        "bytes": 4008,
+        "sha256": "bb6246f89300ce41f6584171341935854592a850b390cb93e1155ec1421ea121",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 4.152337999999872
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/dom/image-bd4017072d785f26f1a5e2164ead9ebeca655b0334a834b2bb5a329f41580360.png",
+        "bytes": 4165,
+        "sha256": "bd4017072d785f26f1a5e2164ead9ebeca655b0334a834b2bb5a329f41580360",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 4.839249999999993
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/body-harry-1254f13de3e6dc68d02d309369457a47d4ac2fb56453236b67342a3d57557bbc.png",
+        "bytes": 139447,
+        "sha256": "1254f13de3e6dc68d02d309369457a47d4ac2fb56453236b67342a3d57557bbc",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 718.0970359999997
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/body-joe-de95e6f61e6ae29393559e69caecadaa6ee3ccdee5e9563f2ca626e0dc0ae9dc.png",
+        "bytes": 133926,
+        "sha256": "de95e6f61e6ae29393559e69caecadaa6ee3ccdee5e9563f2ca626e0dc0ae9dc",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 734.471317
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/body-nadia-1cdbf8da460c321436d2e8d51120b5d359fa0aa85bfc8191ce19ccec9b2a0fa1.png",
+        "bytes": 160458,
+        "sha256": "1cdbf8da460c321436d2e8d51120b5d359fa0aa85bfc8191ce19ccec9b2a0fa1",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 1178.6947289999998
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/body-pirate-feca4c76f2474d6c6f39925b45b3586c01c888b2a3285d31ae749548efa5e0d1.png",
+        "bytes": 182868,
+        "sha256": "feca4c76f2474d6c6f39925b45b3586c01c888b2a3285d31ae749548efa5e0d1",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 738.060015
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/body-red-a29781c1cb5d4b9dfc1c0ba3bf6b2a6afd3c0b65e7fdc1dce653239202684766.png",
+        "bytes": 153476,
+        "sha256": "a29781c1cb5d4b9dfc1c0ba3bf6b2a6afd3c0b65e7fdc1dce653239202684766",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 1297.3738220000005
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/body-toaster-809bff6820e8c9a0795b101dd1c5b00de0780aa203745e7020bd98a58e759910.png",
+        "bytes": 12668,
+        "sha256": "809bff6820e8c9a0795b101dd1c5b00de0780aa203745e7020bd98a58e759910",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 9.351274000000103
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/body-top-hat-c3562589d263770432b7e497545f7d9c3774ac678847fc29379ec686bd9d1ae8.png",
+        "bytes": 163408,
+        "sha256": "c3562589d263770432b7e497545f7d9c3774ac678847fc29379ec686bd9d1ae8",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 1182.2672869999997
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/common-179056302d3376fadbf3546fcbeec33f24095aec2ca3432aa3cb6331a0a1c65a.png",
+        "bytes": 783318,
+        "sha256": "179056302d3376fadbf3546fcbeec33f24095aec2ca3432aa3cb6331a0a1c65a",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 5078.739667000001
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/common-e5f867980578979c59599496ef12e115c370f6ff56109fb0537b9dac3a85dab2.png",
+        "bytes": 2750,
+        "sha256": "e5f867980578979c59599496ef12e115c370f6ff56109fb0537b9dac3a85dab2",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 5.424409000000196
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/court-9444a5f2aad3a99efd58a58a06a8b9a1145e417083981fff398277996dcfa792.png",
+        "bytes": 158305,
+        "sha256": "9444a5f2aad3a99efd58a58a06a8b9a1145e417083981fff398277996dcfa792",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 505.46235200000046
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/court-e701e804f9e9d79210b12e2fe49a903dedbe32d0fa9c148c332fd32a74e42f07.png",
+        "bytes": 2618505,
+        "sha256": "e701e804f9e9d79210b12e2fe49a903dedbe32d0fa9c148c332fd32a74e42f07",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 25706.177467
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/court-fc0e7133bcba6775e9d00394e50a1ad3f9741e4ff1d458957159e78461096357.png",
+        "bytes": 3793907,
+        "sha256": "fc0e7133bcba6775e9d00394e50a1ad3f9741e4ff1d458957159e78461096357",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 20496.109371
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/swing-adult-a1c3699a513651a63868d89851530fe7a2c207b7e36163d12dd1929448da67ae.png",
+        "bytes": 970991,
+        "sha256": "a1c3699a513651a63868d89851530fe7a2c207b7e36163d12dd1929448da67ae",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 6076.149652999997
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/hd/swing-toaster-893ea0ae453fdc7617e549982f37475e89b45ca4c7a02fddfc11516e8bf78d79.png",
+        "bytes": 454144,
+        "sha256": "893ea0ae453fdc7617e549982f37475e89b45ca4c7a02fddfc11516e8bf78d79",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 2072.873019999999
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/manifest.json",
+        "bytes": 608940,
+        "sha256": "c565a4153d32c4f12911a53bf21c3424914d6544880ad62cf79309fa671ef6eb",
+        "contentType": "application/json",
+        "cacheControl": "no-cache",
+        "durationMs": 6754.357797000004
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/report.json",
+        "bytes": 35640,
+        "sha256": "fc005b19fc68e413c561dcbd905f590f8fd659a2174dd9c186f41c4c2596ab6d",
+        "contentType": "application/json",
+        "cacheControl": "no-cache",
+        "durationMs": 930.0120759999991
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/body-harry-5e3c63369e684e8eb958aaccdca9f7b711488e776948e71967dc3598b5c3cea7.png",
+        "bytes": 63533,
+        "sha256": "5e3c63369e684e8eb958aaccdca9f7b711488e776948e71967dc3598b5c3cea7",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 25.17226700000174
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/body-joe-5d9e7ec375848a1c007692be7d7a39fb5f3180d57fede7883b5a22b9727b737c.png",
+        "bytes": 60872,
+        "sha256": "5d9e7ec375848a1c007692be7d7a39fb5f3180d57fede7883b5a22b9727b737c",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 1209.8500440000062
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/body-nadia-069fa1cfb90c3faa990c30fda0e652f3f1dc05f03875795373164aafdcb9e344.png",
+        "bytes": 72406,
+        "sha256": "069fa1cfb90c3faa990c30fda0e652f3f1dc05f03875795373164aafdcb9e344",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 746.3089469999977
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/body-pirate-841268216c933d243dc099528f7b92053813400d06f9949f734c85abf20eb62e.png",
+        "bytes": 82981,
+        "sha256": "841268216c933d243dc099528f7b92053813400d06f9949f734c85abf20eb62e",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 1225.3498529999997
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/body-red-eda62798400ad448c2e7679abb4fc1f85e2929ba84e316f42870919ae53a66e7.png",
+        "bytes": 69910,
+        "sha256": "eda62798400ad448c2e7679abb4fc1f85e2929ba84e316f42870919ae53a66e7",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 485.3257450000019
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/body-toaster-a6defd116548c7f055948ff0283fee02847268b22be70e423dfdb4980753d5bb.png",
+        "bytes": 4671,
+        "sha256": "a6defd116548c7f055948ff0283fee02847268b22be70e423dfdb4980753d5bb",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 4.930161000003864
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/body-top-hat-5a23ce02d5eadc1ddb57babc601d0f841c1a2098466387b2e8fada6ec9cfa8b6.png",
+        "bytes": 75872,
+        "sha256": "5a23ce02d5eadc1ddb57babc601d0f841c1a2098466387b2e8fada6ec9cfa8b6",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 536.8924540000007
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/common-f71eb86a4d9e745c228201bfb9680959c944e3d5d60db2277264071610c9ea86.png",
+        "bytes": 318308,
+        "sha256": "f71eb86a4d9e745c228201bfb9680959c944e3d5d60db2277264071610c9ea86",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 3470.6397090000028
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/court-da3b6e9c382642beb36de541a94480f665e8630e90d12f76ff58414dbe35dc66.png",
+        "bytes": 2437289,
+        "sha256": "da3b6e9c382642beb36de541a94480f665e8630e90d12f76ff58414dbe35dc66",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 11552.339634000004
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/swing-adult-9c11812462a1dffeb8a5fb7a4ed9063343d049c88def32cfcaf541cf3b308689.png",
+        "bytes": 374279,
+        "sha256": "9c11812462a1dffeb8a5fb7a4ed9063343d049c88def32cfcaf541cf3b308689",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 3101.101090999997
+      },
+      {
+        "route": "/badminton-h5-online/classic-atlas/sd/swing-toaster-6e2d93397e72aa0c6a05fa1e3f4d559b1980ab2e129e3605758828d7fb16cbdd.png",
+        "bytes": 183127,
+        "sha256": "6e2d93397e72aa0c6a05fa1e3f4d559b1980ab2e129e3605758828d7fb16cbdd",
+        "contentType": "image/png",
+        "cacheControl": "no-cache",
+        "durationMs": 3611.237952000003
+      },
+      {
+        "route": "/badminton-h5-online/classic/manifest.json",
+        "bytes": 159533,
+        "sha256": "b23addc58b37608bd5f135a80d98c1602b8487ce1412722192015ca467773e51",
+        "contentType": "application/json",
+        "cacheControl": "no-cache",
+        "durationMs": 1183.127354
+      },
+      {
+        "route": "/badminton-h5-online/index.html",
+        "bytes": 7842,
+        "sha256": "8257bf720ef42f73a9624f462c9d38e0ef27ba347969746198e32b29d85eb60c",
+        "contentType": "text/html",
+        "cacheControl": "no-cache",
+        "durationMs": 54.69220700000005
+      }
+    ],
+    "failures": [],
+    "complete": true,
+    "durationMs": 52819.860035000005
+  },
+  "publicBrowserColdStartup": {
+    "url": "https://www.firesoul.cn/badminton-h5-online/",
+    "errors": [],
+    "knownFaviconErrors": [
+      {
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "location": {
+          "url": "https://www.firesoul.cn/favicon.ico",
+          "line": 0,
+          "column": 0,
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      }
+    ],
+    "failedRequests": [],
+    "complete": true,
+    "matchmakingStarted": false,
+    "status": 200,
+    "loading": {
+      "hidden": true,
+      "stage": "prewarm",
+      "detail": "正在准备球场画面。"
+    },
+    "readyMs": 43780.134262,
+    "atlasResources": [
+      {
+        "path": "/badminton-h5-online/classic-atlas/manifest.json",
+        "durationMs": 2751,
+        "encodedBodySize": 608940
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-bd4017072d785f26f1a5e2164ead9ebeca655b0334a834b2bb5a329f41580360.png",
+        "durationMs": 54.30000019073486,
+        "encodedBodySize": 4165
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-2608d8204526816d7ba42a5b9884a6f96a938164c463c00f063418451b116c9b.png",
+        "durationMs": 7,
+        "encodedBodySize": 4296
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-bb6246f89300ce41f6584171341935854592a850b390cb93e1155ec1421ea121.png",
+        "durationMs": 25.399999618530273,
+        "encodedBodySize": 4008
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-a5dc771400fbdbad1bc52e5394155f659fde2a901d05858e0288d7a086873cec.png",
+        "durationMs": 31.199999809265137,
+        "encodedBodySize": 4662
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-783e06447ae13329cfffc11eb8087f25e86bb21ab961e6759c5ed8427cf191e0.png",
+        "durationMs": 52.5,
+        "encodedBodySize": 4225
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-21e6cb92905a01fad27f40878752d9f5b69548c9ddbc314379d0bd1188f6c8f6.png",
+        "durationMs": 31.600000381469727,
+        "encodedBodySize": 4636
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-b0d63a82b641caa38e12300ee4bc6e240be9020f36fa64e653651733e6b17a7b.png",
+        "durationMs": 20.800000190734863,
+        "encodedBodySize": 4305
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-79da8aabb0db08a861189e46c7ecb5e094d60badf0ec0f5f8aabca57dc48562c.png",
+        "durationMs": 8.90000057220459,
+        "encodedBodySize": 2309
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-6ae6726572ce243da71b0fac99b0dee387d7219aa4030fcd3161ef5986b5404b.png",
+        "durationMs": 5.5,
+        "encodedBodySize": 2790
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/body-joe-de95e6f61e6ae29393559e69caecadaa6ee3ccdee5e9563f2ca626e0dc0ae9dc.png",
+        "durationMs": 29022.89999961853,
+        "encodedBodySize": 133926
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/common-e5f867980578979c59599496ef12e115c370f6ff56109fb0537b9dac3a85dab2.png",
+        "durationMs": 496.5,
+        "encodedBodySize": 2750
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/common-179056302d3376fadbf3546fcbeec33f24095aec2ca3432aa3cb6331a0a1c65a.png",
+        "durationMs": 25549.900000572205,
+        "encodedBodySize": 783318
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/court-9444a5f2aad3a99efd58a58a06a8b9a1145e417083981fff398277996dcfa792.png",
+        "durationMs": 11691.599999427795,
+        "encodedBodySize": 158305
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/court-fc0e7133bcba6775e9d00394e50a1ad3f9741e4ff1d458957159e78461096357.png",
+        "durationMs": 24385.599999427795,
+        "encodedBodySize": 3793907
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/court-e701e804f9e9d79210b12e2fe49a903dedbe32d0fa9c148c332fd32a74e42f07.png",
+        "durationMs": 35882.39999961853,
+        "encodedBodySize": 2618505
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/swing-adult-a1c3699a513651a63868d89851530fe7a2c207b7e36163d12dd1929448da67ae.png",
+        "durationMs": 27753.5,
+        "encodedBodySize": 970991
+      }
+    ],
+    "renderer": {
+      "type": "WebGL2RenderingContext",
+      "lost": false,
+      "width": 2544,
+      "height": 1692,
+      "vendor": "Google Inc. (Google)",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "diagnosticsPresent": false,
+      "roleCount": 7
+    }
+  },
+  "localSlow18sStartup": {
+    "url": "http://127.0.0.1:18926/badminton-h5-online/",
+    "errors": [],
+    "knownFaviconErrors": [],
+    "failedRequests": [],
+    "complete": true,
+    "matchmakingStarted": false,
+    "delayedRequests": [
+      "http://127.0.0.1:18926/badminton-h5-online/classic-atlas/hd/court-fc0e7133bcba6775e9d00394e50a1ad3f9741e4ff1d458957159e78461096357.png?v=fc0e7133bcba6775e9d00394e50a1ad3f9741e4ff1d458957159e78461096357"
+    ],
+    "status": 200,
+    "loading": {
+      "hidden": true,
+      "stage": "prewarm",
+      "detail": "正在准备球场画面。"
+    },
+    "readyMs": 19435.403398000002,
+    "atlasResources": [
+      {
+        "path": "/badminton-h5-online/classic-atlas/manifest.json",
+        "durationMs": 24.800000190734863,
+        "encodedBodySize": 608940
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-bd4017072d785f26f1a5e2164ead9ebeca655b0334a834b2bb5a329f41580360.png",
+        "durationMs": 32.80000019073486,
+        "encodedBodySize": 4165
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-2608d8204526816d7ba42a5b9884a6f96a938164c463c00f063418451b116c9b.png",
+        "durationMs": 33.40000057220459,
+        "encodedBodySize": 4296
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-783e06447ae13329cfffc11eb8087f25e86bb21ab961e6759c5ed8427cf191e0.png",
+        "durationMs": 33.60000038146973,
+        "encodedBodySize": 4225
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-a5dc771400fbdbad1bc52e5394155f659fde2a901d05858e0288d7a086873cec.png",
+        "durationMs": 33.69999980926514,
+        "encodedBodySize": 4662
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-bb6246f89300ce41f6584171341935854592a850b390cb93e1155ec1421ea121.png",
+        "durationMs": 33.60000038146973,
+        "encodedBodySize": 4008
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-21e6cb92905a01fad27f40878752d9f5b69548c9ddbc314379d0bd1188f6c8f6.png",
+        "durationMs": 33.69999980926514,
+        "encodedBodySize": 4636
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-b0d63a82b641caa38e12300ee4bc6e240be9020f36fa64e653651733e6b17a7b.png",
+        "durationMs": 14.300000190734863,
+        "encodedBodySize": 4305
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-79da8aabb0db08a861189e46c7ecb5e094d60badf0ec0f5f8aabca57dc48562c.png",
+        "durationMs": 19.199999809265137,
+        "encodedBodySize": 2309
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/dom/image-6ae6726572ce243da71b0fac99b0dee387d7219aa4030fcd3161ef5986b5404b.png",
+        "durationMs": 20.100000381469727,
+        "encodedBodySize": 2790
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/body-joe-de95e6f61e6ae29393559e69caecadaa6ee3ccdee5e9563f2ca626e0dc0ae9dc.png",
+        "durationMs": 45.10000038146973,
+        "encodedBodySize": 133926
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/common-e5f867980578979c59599496ef12e115c370f6ff56109fb0537b9dac3a85dab2.png",
+        "durationMs": 42.69999980926514,
+        "encodedBodySize": 2750
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/common-179056302d3376fadbf3546fcbeec33f24095aec2ca3432aa3cb6331a0a1c65a.png",
+        "durationMs": 62.5,
+        "encodedBodySize": 783318
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/court-fc0e7133bcba6775e9d00394e50a1ad3f9741e4ff1d458957159e78461096357.png",
+        "durationMs": 18066.599999427795,
+        "encodedBodySize": 3793907
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/court-9444a5f2aad3a99efd58a58a06a8b9a1145e417083981fff398277996dcfa792.png",
+        "durationMs": 59.40000057220459,
+        "encodedBodySize": 158305
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/court-e701e804f9e9d79210b12e2fe49a903dedbe32d0fa9c148c332fd32a74e42f07.png",
+        "durationMs": 79.5,
+        "encodedBodySize": 2618505
+      },
+      {
+        "path": "/badminton-h5-online/classic-atlas/hd/swing-adult-a1c3699a513651a63868d89851530fe7a2c207b7e36163d12dd1929448da67ae.png",
+        "durationMs": 19,
+        "encodedBodySize": 970991
+      }
+    ],
+    "renderer": {
+      "type": "WebGL2RenderingContext",
+      "lost": false,
+      "width": 2544,
+      "height": 1692,
+      "vendor": "Google Inc. (Google)",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "diagnosticsPresent": false,
+      "roleCount": 7
+    }
+  },
+  "localCombinedNaturalResultAndReclaim": {
+    "complete": true,
+    "startedAt": "2026-10-23T03:20:11.814Z",
+    "url": "http://127.0.0.1:18926/badminton-h5-online/?debug=1",
+    "browser": "151.0.7922.34",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "dpr": 1,
+    "checks": {
+      "nativeRightInputGated": {
+        "sent": [],
+        "scheduler": {
+          "active": false,
+          "ticks": 0,
+          "skipped": 0,
+          "expedited": 0,
+          "latenessMs": 0
+        },
+        "covered": true,
+        "tabIndex": -1,
+        "controlsInert": true
+      },
+      "naturalResult": [
+        {
+          "at": 17990,
+          "wall": 1792725630298,
+          "covered": false,
+          "message": {
+            "type": "result",
+            "winner": "left",
+            "reason": "score",
+            "score": {
+              "left": 7,
+              "right": 0
+            }
+          }
+        },
+        {
+          "at": 17132.70000076294,
+          "wall": 1792725630291,
+          "covered": true,
+          "message": {
+            "type": "result",
+            "winner": "left",
+            "reason": "score",
+            "score": {
+              "left": 7,
+              "right": 0
+            }
+          }
+        }
+      ],
+      "real30sFinishedIdle": [
+        {
+          "guest": "left",
+          "idle": {
+            "at": 48109,
+            "wall": 1792725660417,
+            "covered": false,
+            "message": {
+              "type": "idle",
+              "reason": "finished"
+            }
+          },
+          "retentionMs": 30119
+        },
+        {
+          "guest": "right",
+          "idle": {
+            "at": 47219.900000572205,
+            "wall": 1792725660378,
+            "covered": true,
+            "message": {
+              "type": "idle",
+              "reason": "finished"
+            }
+          },
+          "retentionMs": 30087
+        }
+      ],
+      "coveredAuthorityContinues": {
+        "snapshots": 1359,
+        "firstTick": 38,
+        "lastTick": 948,
+        "noGameplayInput": true,
+        "coverEvents": []
+      },
+      "revealedFinalAuthorityGroupsAndRematchPreserved": true
+    },
+    "errors": [],
+    "failedRequests": [],
+    "limits": [
+      "Headless local Chromium; this validates the combined real lifecycle, not physical-device, WAN or GPU-driver behavior.",
+      "Only the right guest's new body-toaster PNG is delayed. A single native right D/J challenge checks gating; only the left guest drives actual gameplay."
+    ],
+    "holdStartedAt": 1792725614556,
+    "releasedAt": 1792725665938,
+    "heldMs": 51382,
+    "finishedAt": "2026-10-23T03:21:22.970Z"
+  },
+  "localCombinedCounts": {
+    "nativeServes": 7,
+    "samples": 8
+  },
+  "audit": {
+    "at": "2026-10-23T03:25:04.173582+00:00",
+    "current": "/opt/stickman-badminton-h5-online/releases/20261023T031945Z-pixijs-webgl",
+    "previous": "/opt/stickman-badminton-h5-online/releases/20261022T072020Z-speed-manual-controls",
+    "unchangedFilesSha256": {
+      "/etc/nginx/sites-available/flash-global-data": "6bc7a64eaf875b35084d6481380c6e3beef6325e0e66d2c103f0b9399c4c219d",
+      "/etc/nginx/snippets/badminton-cloud.conf": "3016736c409b6b1d47c51b8b5eeee0ac419b62cf9cb32411d16124e357c964af",
+      "/etc/nginx/snippets/badminton-h5-online.conf": "a800544b0cd67095eee932177e9c63444dcebec83dd0c3af4ac511bcdeb7088c",
+      "/etc/nginx/snippets/badminton-original.conf": "abdaaf96d1f3a10be4cc10189b9f3e7c8410bd96557133db030e6ca6f81189bc",
+      "/etc/nginx/snippets/badminton.conf": "cdedf4eda752c3ec5ebc07a9e338c6e77432b9d55d19797f3dbea7b5ed3a2584",
+      "/etc/systemd/system/badminton-h5-online.service": "016a070c89ba9cf9421f01d794f37cc8c09f9b6242decc87aeea1ec8394075ca",
+      "/home/ubuntu/stickman-badminton-online/demo/src/game/badminton-game.ts": "9842287ab55bc0e9544a742a095acee83a2fa83b674252c4db9bfe65182902d7"
+    },
+    "environmentFingerprintUnchanged": true,
+    "environmentMode": "0o600",
+    "services": {
+      "badminton-cloud.service": {
+        "MainPID": "1311812",
+        "ExecMainStartTimestamp": "Sat 2026-10-10 15:31:12 CST",
+        "ActiveState": "active"
+      },
+      "flash-global-data.service": {
+        "MainPID": "1591920",
+        "ExecMainStartTimestamp": "Sat 2026-09-05 14:28:32 CST",
+        "ActiveState": "active"
+      },
+      "nginx.service": {
+        "MainPID": "1274855",
+        "ExecMainStartTimestamp": "Sat 2026-10-10 14:06:12 CST",
+        "ActiveState": "active"
+      },
+      "badminton-h5-online.service": {
+        "MainPID": "1608036",
+        "ExecMainStartTimestamp": "Fri 2026-10-23 11:23:19 CST",
+        "ActiveState": "active"
+      }
+    },
+    "otherServicePidsAndStartTimesUnchanged": true,
+    "installedFilesVerified": 556
+  },
+  "screenshot": {
+    "file": "public-menu-20261023.png",
+    "originalLocalPath": "artifacts/pixi-migration/deployment/public-pixi-menu.png",
+    "sha256": "2de4c4e1846a505538efefe81fea687c90cc1b30623f2c719427f87133a091f8",
+    "transformation": "None; copied byte-for-byte from the inspected public browser screenshot."
+  },
+  "fullLocalEvidenceDirectory": "artifacts/pixi-migration/deployment",
+  "limitations": [
+    "Public matchmaking not started.",
+    "No public warm-cache/frame-interval/long-task comparison.",
+    "No physical GPU/mobile/touch/controller/two-computer acceptance.",
+    "Root /favicon.ico 404 is separately recorded as an existing site issue."
+  ]
+}

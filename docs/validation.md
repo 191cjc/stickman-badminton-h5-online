@@ -246,7 +246,7 @@ node scripts/public-match-check.mjs https://www.firesoul.cn
 - 前后审计确认其他游戏snippets、共享HTTPS配置、旧社区源文件哈希、云游戏／flash-global-data服务PID和启动时间、生产env指纹及0600权限不变。隔离18815／18816服务已停止。
 - previous为`20261019T083234Z-controls-gamepad`，可执行`bash scripts/rollback.sh 20261019T083234Z-controls-gamepad`整体回退并刷新页面；目标协议4，使用目标版本HTTP检查器。v1按键设置未删除，新v2不会影响旧版本；本次没有生产回滚演练。当前页面需刷新以加载协议5前端。
 
-## 2026-10-22 PixiJS 本地迁移验收（未部署）
+## 2026-10-22 PixiJS 本地迁移验收（当日未部署）
 
 - 当前源码采用固定PixiJS8.22.0 WebGL，沿用main唯一呈现RAF和共享动画/Effects时钟；战斗、输入/预测/插值、音频与协议5保持既有职责。`src/shared`、`src/server`、`public/classic`、冻结reference/upstream与迁移前标签无差异。仅使用隔离18925/18926及视觉fixture18927，没有发布或进入公网匹配。
 - `typecheck`、`lint`、24文件455项测试及生产构建通过；最终画质69/70/102.5ms边界也有回归检查。主包473.73kB/gzip139.56kB（Canvas主包133.23kB）。完整素材重建44.865秒，独立重烘焙45.167秒，36文件逐字节一致；34张PNG解码像素及所有注册点/分片/分组不变，双策略无损压缩使PNG共15,693,203→13,506,815字节。普通构建只校验已生成素材，不需要浏览器。
@@ -256,6 +256,18 @@ node scripts/public-match-check.mjs https://www.firesoul.cn
 - 同主机/Chromium151/1440×1000/DPR2/Toaster-Pirate/50ms逻辑按键，cold与warm各75秒：观察就绪Canvas冷3040.7/3574.5ms→1077.9/1008.0ms，暖9247.6/16351.5ms→1359.7/1081.9ms；帧间隔p95冷33.4/49.9→33.4/33.4ms、暖50/50→33.4/33.4ms。最终最长间隔冷133.3/133.4ms、暖300/250ms。软件SwiftShader不能代表实体GPU；实际内部画质不同，Canvas冷末密度1.4/2，Pixi1.4/1.4，其余暖态末密度均1.4，不是同内部像素微基准。
 - 暖态长任务次数18/11→22/25仍回退，虽然p95/最长耗时下降；JS堆部分增加、PNG下载增加、HD活动9页85.47MiB为估算而非总GPU内存。动作及同角色rematch采样decode/upload保持10/10，无运行时SVG滤镜。初版严重WebGL回退已定位/修复scissor、sampler与画质窗口；后续重复轮102.5ms落在105ms分界下的问题改为70ms持续过载跳级并重测。曾测得650ms尖峰，最终未重现且缺少该次原生栈，仍不能保证消失；未删除较差轮。详细逐端加载/p95/长任务/资源/内存、原始JSON、截图和方法限制见[完整迁移报告](pixi-migration.md)。
 - 原Canvas回退提交`fb87796`/标签`pre-pixijs-20261022`和已验证完整Git bundle均在本地；仓库没有remote，因此请求的备份推送尚未完成。真实Android/iOS、Safari/Firefox、实体GPU/低端设备、WebGL1、物理触屏/手柄/双机和弱网仍待外部验收；无生产发布。
+
+## 2026-10-23 PixiJS 公网发布
+
+- 已发布 `20261023T031945Z-pixijs-webgl` 至 https://www.firesoul.cn/badminton-h5-online/ ，北京时间11:25:04完成全部发布校验。`current` 为新release，`previous` 为 `20261022T072020Z-speed-manual-controls`。仅本项目服务于11:23:19重启，PID1608036，active/running；loopback与公网健康为协议5/60Hz/30Hz，检查时rooms0/queued0。未reload Nginx，未重写unit/snippet/env。
+- 发布前最终typecheck、lint、24文件458项测试和构建通过；安装556项已核验构建/来源文件与生产依赖，安装后的逐项哈希审计通过。正式公网HTTP检查通过页面、构建JS/CSS、原清单/四SVG、Cookie、v5 hello、v4 mismatch/1008及三个旧入口200。另核对43项公网新资源，共14,866,308字节，包含全部34张PNG，长度/SHA256/MIME与已验收构建一致。Vite哈希JS/CSS为immutable，index、两个manifest及图集PNG当前no-cache，未变更缓存配置。
+- 主包为 `index-BCuZumBe.js`，SHA256 `b2709ad77006977827821d389c0c4f9b3646e3d00cc42e19168daefd36de1af1`；图集manifest为 `c565a4153d32c4f12911a53bf21c3424914d6544880ad62cf79309fa671ef6eb`。服务器包与原验收构建相同，SHA256 `f1b05a2d28fafeaa60ebf847ed4d66b0f398ee9a5d05c1f79534947d95f8f469`；模拟、协议、素材未随本次加载修复变化。
+- 初次部署中，15秒资源检查超时、浏览器探测器缺少headless-shell路径，以及真实公网图集超过应用15秒截止时间，均触发自动回退到旧完整release；失败报告保留，未冒充发布成功。探测器改用已安装Chromium；应用修复提交 `9f054f9` 只将图集PNG下载+decode截止时间调整为60秒，元数据/DOM图片与上下文恢复仍15秒，立即取消/释放/输入门禁保持。新增默认截止、慢下载和超时清理回归通过。
+- 本地最大HD PNG刻意延迟18秒仍成功启动，观察就绪19,435.4ms。另以两个本地游客Pirate/Toaster、2x，真实延迟新角色PNG 51,382ms：7次原生J发球自然7:0，服务端分别30,119/30,087ms后回收结果；右侧一直遮盖且接收1359条权威快照，D/J原生输入挑战无游戏输入发出。揭幕后正确终局、角色、胜利图案、彩屑与再次匹配保留，6/6活动页上传完成，RGBA估算23,029,504字节。无页面错误或失败请求，补齐了10-22尚未覆盖的自然结果→回收组合边界。
+- 真实公网Chromium151/WebGL2/SwiftShader冷启动成功，加载层隐藏，七角色、四球速、设置和默认无诊断接口通过；检查未启动公网匹配。截图人工查看：球场/网、人物、比分、场地标识和菜单可读，没有缺图或黑画面。导航后观察就绪43,780.1ms，3.79MB/2.62MB PNG资源时长约24.4/35.9秒；大图网络下载仍慢，修复解决截止过短导致失败，没有证明下载提速。仅根站既有 `/favicon.ico` 404单列记录，应用无页面错误或失败请求。
+- 前后审计确认共享HTTPS配置、各游戏snippet、本站unit和旧社区源文件哈希不变；云游戏、flash-global-data及Nginx的PID/启动时间不变，生产env指纹与0600权限不变，Cookie密钥保留。未做公网匹配，也未进行实体GPU/手机/手柄/触屏/物理双机验收。10-22本地75秒A/B报告保留原口径；此次只修下载截止，没有重跑或声明公网帧率/暖缓存收益。
+- 回退命令：`bash scripts/rollback.sh 20261022T072020Z-speed-manual-controls`，整体恢复协议5 Canvas版，刷新双方页面，内存比赛会清空。早期失败检查确已自动回退并重启旧release；最终发布后未额外执行回滚演练。
+- [发布与补验数据](pixi-evidence/deployment-20261023.json)保留可审查的资源/浏览器/审计摘要，[公网菜单截图](pixi-evidence/public-menu-20261023.png)为原始截图副本；完整日志、前后快照、失败轮、截图与WS轨迹在忽略目录 `artifacts/pixi-migration/deployment/`。详细本地性能、画面对照与设备限制见[迁移报告](pixi-migration.md)。
 
 ## 已实现与效果边界
 

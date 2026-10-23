@@ -47,17 +47,17 @@ sudo nginx -t
 
 ```bash
 bash scripts/rollback.sh
-# 或 bash scripts/rollback.sh 20261015T065916Z-hit-timing
+# 或 bash scripts/rollback.sh 20261022T072020Z-speed-manual-controls
 curl -fsS https://www.firesoul.cn/badminton-h5-online/api/health
 ```
 
-回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。本轮球速／手动挥拍升级的回滚目标为 `20261019T083234Z-controls-gamepad`（协议4），双方刷新页面；回滚后应使用目标版本的检查脚本，当前协议5检查器不适用。旧v1按键偏好保留供该版本读取。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
+回滚只切换本项目 current 并重启本服务，前后端同步回退，不改变 Cookie 密钥，内存房间重置。当前Pixi版的 `previous` 为 `20261022T072020Z-speed-manual-controls`，仍为协议5，保留原Canvas绘制和球速／手动挥拍功能；回滚后双方刷新页面，并运行公网HTTP检查。更早的球速／手动挥拍升级曾以 `20261019T083234Z-controls-gamepad`（协议4）为回滚目标，跨协议时须使用目标版本检查器，旧v1按键偏好仍保留。首次发布没有 previous；如需撤下入口，停止本服务、从 HTTPS server 中删除本项目新增 include，`nginx -t` 后 reload Nginx。本项目目录保留供恢复；不要移除已有游戏 snippets。
 
 ## 玩法版本与来源
 
-当前七角色双人内核使用协议 v5（`badminton-v5`、`flash-90302-v3`，快照含 `ackTick` 和本场 `shuttleSpeed`）。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1/v2/v3/v4 页面会在绑定席位前被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。球速／手动挥拍版本的准确release及检查结果见验证记录；版本切换后须刷新以使用对应前端。
+当前七角色双人内核使用协议 v5（`badminton-v5`、`flash-90302-v3`，快照含 `ackTick` 和本场 `shuttleSpeed`）。发布时前后端和 `GAME_SOURCE.json`、历史 `UPSTREAM.json` 一起保存到 release；冻结 SWF、恢复脚本和研究工具不进入公网目录。旧 v1/v2/v3/v4 页面会在绑定席位前被拒绝并要求刷新；回滚至旧社区版本后也应刷新，两种状态不能混用。准确release及检查结果见验证记录；版本切换后须刷新以使用对应前端。
 
-本项目 CSP 使用 `img-src 'self' blob:`，用于本地生成带原滤镜的彩屑着色 SVG。发布只安装本项目 snippet，不更改其他游戏的策略。
+本项目 CSP 保留 `img-src 'self' blob:` 和 `script-src 'self'`；当前Pixi版彩屑使用构建阶段烘焙的双纹理及shader着色，不再运行时生成着色SVG。发布不放宽CSP，不更改其他游戏的策略。
 
 常规发布/HTTP 脚本不自动运行浏览器。用户已授权的本地浏览器验证使用隔离后端和独立 Cookie，不与线上等待游客匹配。
 
@@ -84,10 +84,10 @@ window.badmintonDiagnostics.snapshot();
 
 帧间隔/长任务需一起判断；RAF中的CPU时长不包含所有浏览器延迟栅格工作。RTT和插值delayMs均不等于按键到画面延迟。计时器独立于RAF但仍运行在主线程；真实弱网停顿无法靠客户端虚构球路消除。每次实际发布的版本和回滚目标见[验证记录](validation.md)，前后端一起切回并刷新页面。
 
-## Pixi 构建与本地验收（尚未部署）
+## Pixi 构建与发布
 
-当前源码渲染已改为PixiJS WebGL；本次没有执行生产发布。部署前运行 `npm ci`、`npm run assets:verify` 和通常的质量/构建命令，完整复制 `dist/client/classic-atlas`（PNG MIME应为image/png）及源清单/音频。构建校验不自动烘焙；重新生成素材先按 [素材说明](../tools/flash-assets/README.md) 安装固定Chromium并执行 `npm run assets:atlas`。不要部署 tools/render-validation 或 artifacts。
+2026-10-23 已发布 `20261023T031945Z-pixijs-webgl`，当前渲染为PixiJS WebGL。使用通过typecheck、lint、24文件458项测试及构建的产物，按上述保留基础设施路径安装；只重启本站服务，未reload Nginx。发布记录及回退目标见[验证文档](validation.md#2026-10-23-pixijs-公网发布)。后续部署前运行 `npm ci`、`npm run assets:verify` 和通常的质量/构建命令，完整复制 `dist/client/classic-atlas`（PNG MIME应为image/png）及源清单/音频。构建校验不自动烘焙；重新生成素材先按 [素材说明](../tools/flash-assets/README.md) 安装固定Chromium并执行 `npm run assets:atlas`。不要部署 tools/render-validation 或 artifacts。
 
-继续使用原CSP；Pixi的官方免eval适配已包含在包内。内容哈希PNG可长期缓存，但源/图集manifest和index须能更新，两个清单必须同一发布；保留旧哈希文件直至旧页面退出。当前本地A/B服务器刻意无Cache-Control以匹配基线，不能当作生产缓存策略验证。版本不配套会显示可重试资源不兼容，不允许部分画面继续比赛。
+继续使用原CSP；Pixi的官方免eval适配已包含在包内。公网实测JS/CSS等Vite哈希资源为immutable，源/图集manifest、index及图集PNG当前为no-cache；内容哈希PNG具备长期缓存条件，但本次未更改Nginx缓存配置，不能声称PNG已使用immutable。两个清单必须同一发布；旧页面换版后须刷新，新release不承诺提供旧版全部资源。当前本地A/B服务器刻意无Cache-Control以匹配基线，不能当作生产缓存策略验证。版本不配套会显示可重试资源不兼容，不允许部分画面继续比赛。
 
-本地验收使用独立127.0.0.1端口18925/18926和fixture18927，见 [验证工具](../tools/render-validation/README.md)。基线回退点为 `pre-pixijs-20261022`（fb87796），完整历史bundle在本地 artifacts/pixi-migration/backups。仓库未配置remote，迁移前推送尚未完成。真实生产版本与回滚仍需按既有发布流程另行授权。
+本地验收使用独立127.0.0.1端口18925/18926和fixture18927，见 [验证工具](../tools/render-validation/README.md)。源码基线回退点为 `pre-pixijs-20261022`（fb87796），完整历史bundle在本地 artifacts/pixi-migration/backups；生产回退使用上述完整旧release。仓库未配置remote，迁移前推送尚未完成。公网浏览器已检查冷启动、选角、速度选择与设置，未开启公网匹配；实体设备和物理双机仍待外部验收。
